@@ -113,10 +113,7 @@ zettelkasten/
 3. **查技术方案状态**：需求确认后、开发前必须看 [[08-technical-designs/README]]，确认已有 approved 技术方案；没有则先创建 pending 技术方案
 4. **查 review 状态**：如果上一轮阶段性交接还未关闭，先看 [[07-review/README]]，处理 pending/in-review 文档，不进入下一轮开发
 5. **查相关 note**：根据上表确定去哪查
-6. **确认代码位置**：
-<!-- UMBRELLA-ONLY: keep this block only if {{REPO_TYPE}} == umbrella -->
-   - 各子项目代码定位 → 参考各子项目自身的 CLAUDE.md
-<!-- /UMBRELLA-ONLY -->
+6. **确认代码位置**：参考仓库根目录的 `CLAUDE.md`（伞形项目额外参考各子项目自身的 CLAUDE.md）
 7. **实施**
 8. **更新相关 note**：如果架构、流程、踩坑内容有变化，同步更新 zettelkasten，尤其是 [[02-architecture/...]]
 9. **阶段性 review**：阶段性工作完成后，在 [[07-review/README]] 下输出或更新 review 文档，等待 review 关闭后再继续下一轮开发
