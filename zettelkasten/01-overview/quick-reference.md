@@ -91,8 +91,8 @@ npm run lint
 
 <!-- 示例：
 
-- vector233/example-backend
-- vector233/example-portal
+- example-owner/foo-backend
+- example-owner/foo-portal
 -->
 
 ---
