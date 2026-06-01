@@ -21,6 +21,8 @@ The default template is intentionally plain: no specialized process jargon, no h
 
 The template is English-first. Keeping the canonical version in one language reduces drift and makes the project easier to reuse globally. Translations can be added later as guides under `docs/zh-CN/` without duplicating the full template.
 
+Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
+
 ## Structure
 
 ```text
