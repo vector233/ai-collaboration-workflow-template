@@ -2,12 +2,12 @@
 title: Review 文档标题
 status: pending
 project: {{PROJECT_NAME}}
-review_id: REVIEW-YYYYMMDDHHMM-short-name
+review_id: REVIEW-YYYYMMDDHHMMSS-short-name
 created: YYYY-MM-DD
 reviewer:
 target:
-  - "[[06-requirements/in-progress/REQ-YYYYMMDDHHMM-short-name]]"
-  - "[[08-technical-designs/approved/TD-YYYYMMDDHHMM-short-name]]"
+  - "[[06-requirements/in-progress/REQ-YYYYMMDDHHMMSS-short-name]]"
+  - "[[08-technical-designs/approved/TECH-YYYYMMDDHHMMSS-short-name]]"
 related:
   - "[[07-review/README]]"
 ---

@@ -49,15 +49,25 @@
 <!-- 项目级别的关键约束（架构红线、合规要求等）。示例：
 
 - **零持久化**：服务端不持久化用户业务数据
-- **多租户隔离**：所有 SQL 必须按 tenant_id 过滤
+- **工作区隔离**：所有数据访问必须按 workspace_id 或等价边界过滤
 - **审计可追溯**：所有写操作必须有审计日志
 -->
 
 ---
 
+## AI 协作约束
+
+- 非极小任务先经过 [[06-requirements/README]] 和 [[08-technical-designs/README]] 的 gate，再进入实现。
+- 阶段性实现必须通过 [[07-review/README]] 交接，review 反馈按证据处理。
+- 发现新的架构事实、验证流程或踩坑时，回写到对应 note，而不是只留在聊天记录里。
+- 多 agent 并行时，按 [[00-governance/harness-engineer-roles]] 声明 owned paths 和 handoff。
+
+---
+
 ## 参见
 
+- [[00-governance/agent-harness]] — AI agent 工作流和 gate
 - [[01-overview/product-vision]] — 核心问题、目标市场
-- [[02-architecture/request-flow]] — 端到端请求流程
+- [[02-architecture/current-architecture-flow]] — 当前架构流程
 - [[00-governance/glossary]] — 术语表
 - [[00-governance/decisions]] — 关键架构决策

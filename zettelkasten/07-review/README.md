@@ -23,6 +23,8 @@
 
 ## 使用方式
 
+Review 是 [[00-governance/agent-harness]] 的反馈传感器和真实性检查层。reviewer 的意见必须先被证据化和独立验证，不能直接替代开发判断。
+
 1. 阶段性工作完成后，开发方从 [[00-governance/templates/review]] 复制模板，在 `pending/` 新建 review 文档
 2. reviewer 从 `pending/` 读取待 review 文档
 3. reviewer 的每条关键反馈必须附带关联文档、代码位置、提交或验证证据
@@ -45,11 +47,11 @@
 
 文件名使用：
 
-- `REVIEW-YYYYMMDDHHMM-short-name.md`
+- `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 
 例如：
 
-- `REVIEW-202604281530-tenant-onboarding-flow.md`
+- `REVIEW-20260428153045-team-invitation-links.md`
 
 ## Review 文档至少要包含什么
 
@@ -66,6 +68,10 @@
 - 开发方判断和处理结论
 - 不成立反馈的反证和打回结论
 - 本轮 review 关闭条件
+
+## 准入条件
+
+如果一个 slice 依赖真实浏览器、数据库、第三方服务、设备、安装器、后台任务、队列、部署环境或外部网络，进入 `pending/` 前必须满足 [[00-governance/e2e-discipline]]：开发方已运行最接近真实环境的 smoke test，或者在 handoff 中明确记录无法运行的 blocker 和残余风险。
 
 ## 状态迁移规则
 
@@ -96,4 +102,6 @@
 
 - [[06-requirements/README]]
 - [[08-technical-designs/README]]
+- [[00-governance/agent-harness]]
+- [[00-governance/e2e-discipline]]
 - [[00-governance/templates/review]]

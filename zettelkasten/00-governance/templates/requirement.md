@@ -10,7 +10,7 @@ affected_projects:
 related:
   - "[[00-governance/project-overview]]"
   - "[[01-overview/quick-reference]]"
-  - "[[02-architecture/request-flow]]"
+  - "[[02-architecture/current-architecture-flow]]"
   - "[[05-reference/e2e-test]]"
   - "[[08-technical-designs/README]]"
   - "[[07-review/README]]"
@@ -86,7 +86,7 @@ related:
 
 需求确认后、进入开发前，必须创建或确认对应技术方案文档。技术方案统一放在 [[08-technical-designs/README]] 下，命名为：
 
-- `TD-YYYYMMDDHHMM-short-name.md`
+- `TECH-YYYYMMDDHHMMSS-short-name.md`
 
 本需求对应技术方案：
 
@@ -115,7 +115,7 @@ related:
 
 阶段性工作完成后，如需要交给另一个 AI 或人工 reviewer 做阶段性 review，必须输出一个 review 交接文档。文档统一放在 [[07-review/README]] 下，初始放入 `pending/`，命名为：
 
-- `REVIEW-YYYYMMDDHHMM-short-name.md`
+- `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 
 交接文档至少包含：
 

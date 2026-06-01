@@ -2,11 +2,11 @@
 title: 技术方案标题
 status: pending
 project: {{PROJECT_NAME}}
-technical_design_id: TD-YYYYMMDDHHMM-short-name
+technical_design_id: TECH-YYYYMMDDHHMMSS-short-name
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 related_requirement:
-  - "[[06-requirements/in-progress/REQ-YYYYMMDDHHMM-short-name]]"
+  - "[[06-requirements/in-progress/REQ-YYYYMMDDHHMMSS-short-name]]"
 related:
   - "[[02-architecture/current-architecture-flow]]"
   - "[[08-technical-designs/README]]"

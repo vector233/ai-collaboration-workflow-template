@@ -100,5 +100,5 @@ npm run lint
 ## 参见
 
 - [[01-overview/product-vision]] — 产品定位、市场分析
-- [[02-architecture/request-flow]] — 请求流程
+- [[02-architecture/current-architecture-flow]] — 当前架构流程
 - [[00-governance/glossary]] — 术语表

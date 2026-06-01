@@ -5,6 +5,7 @@ project: {{PROJECT_NAME}}
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 related:
+  - "[[00-governance/agent-harness]]"
   - "[[06-requirements/README]]"
   - "[[02-architecture/current-architecture-flow]]"
   - "[[00-governance/templates/technical-design]]"
@@ -33,8 +34,10 @@ related:
 
 ## 使用方式
 
+技术方案阶段是 [[00-governance/agent-harness]] 的主要开发门控：需求可以处于 `in-progress/` 做澄清、设计或联调，但业务代码开发必须等 TECH 进入 `approved/`，除非在需求或 review 文档中明确记录 tiny-fix waiver。
+
 1. 需求进入 `in-progress/` 后，先检查是否已有对应技术方案
-2. 如果没有，从 [[00-governance/templates/technical-design]] 新建 `TD-YYYYMMDDHHMM-short-name.md` 到 `pending/`
+2. 如果没有，从 [[00-governance/templates/technical-design]] 新建 `TECH-YYYYMMDDHHMMSS-short-name.md` 到 `pending/`
 3. 技术方案只写架构流程、关键决策、影响边界、风险和验证口径，**不展开到逐行实现**
 4. 产品/技术关键问题确认后，将技术方案移动到 `approved/`
 5. 代码开发必须以 approved 技术方案为输入；发现方案假设不成立时，**先回改方案再继续**。需求处于 `in-progress` 但技术方案仍为 `pending` 时，只能继续分析、方案修订和 review 处理
@@ -45,7 +48,7 @@ related:
 
 新技术方案文件使用：
 
-- `TD-YYYYMMDDHHMM-short-name.md`
+- `TECH-YYYYMMDDHHMMSS-short-name.md`
 
 ## 技术方案至少要包含什么
 
@@ -67,7 +70,7 @@ related:
 
 | 状态 | 技术方案 | 对应需求 | 下一步 |
 |---|---|---|---|
-| approved | [[08-technical-designs/approved/TD-YYYYMMDDHHMM-example]] | [[06-requirements/in-progress/REQ-YYYYMMDDHHMM-example]] | 一句话下一步 |
+| approved | [[08-technical-designs/approved/TECH-YYYYMMDDHHMMSS-example]] | [[06-requirements/in-progress/REQ-YYYYMMDDHHMMSS-example]] | 一句话下一步 |
 
 随着技术方案新增/迁移状态，及时更新本表格。 -->
 
@@ -90,6 +93,7 @@ related:
 
 ## 参见
 
+- [[00-governance/agent-harness]] — TECH gate 和实现状态机
 - [[06-requirements/README]] — 需求工作流
 - [[07-review/README]] — Review 工作流
 - [[00-governance/templates/technical-design]] — 技术方案模板

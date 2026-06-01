@@ -24,9 +24,9 @@
 
 | 占位符 | 含义 | 示例 |
 |---|---|---|
-| `{{PROJECT_NAME}}` | 项目名（用于标题、文件名） | `AcctBridge` |
-| `{{PROJECT_DESCRIPTION}}` | 一句话项目描述 | `SaaS API gateway for on-prem accounting software` |
-| `{{TECH_STACK}}` | 技术栈摘要 | `Go · Gin · MySQL · Next.js · .NET 8` |
+| `{{PROJECT_NAME}}` | 项目名（用于标题、文件名） | `ExampleSaaS` |
+| `{{PROJECT_DESCRIPTION}}` | 一句话项目描述 | `Team workspace for collaborative project planning` |
+| `{{TECH_STACK}}` | 技术栈摘要 | `TypeScript · Next.js · PostgreSQL · Redis` |
 | `{{REPO_TYPE}}` | `umbrella` 或 `single` | `umbrella` |
 | `{{SUB_PROJECTS}}` | 仅 umbrella：子项目表格（Markdown 多行） | 见下方示例 |
 | `{{DOMAINS}}` | 域名 / 端口表（Markdown 多行） | 见下方示例 |
@@ -65,7 +65,7 @@
 
 按顺序询问下列问题。**每个问题问一次，等用户回答后再问下一个**。如果用户已经在触发口令中提供了部分答案，跳过对应问题。
 
-1. **项目叫什么名字？** 用于 `{{PROJECT_NAME}}`，建议 PascalCase 或品牌名（例：`AcctBridge`、`FooBridge`）
+1. **项目叫什么名字？** 用于 `{{PROJECT_NAME}}`，建议 PascalCase 或品牌名（例：`ExampleSaaS`、`FooBridge`）
 2. **一句话描述这个项目是什么？** 用于 `{{PROJECT_DESCRIPTION}}`
 3. **项目的主要技术栈是什么？** 列出 3-6 项即可（用于 `{{TECH_STACK}}`）
 4. **这是伞形项目还是单项目仓库？** umbrella = 一个仓库托管多个子项目的规划/文档；single = 单一代码仓库
@@ -118,6 +118,8 @@ find zettelkasten -type f -name '*.md' -exec \
 find zettelkasten -name '*.bak' -delete
 ```
 
+如果 `AGENTS.md` 中也使用了占位符，用 Edit/Write 工具或等价安全方式替换。
+
 多行占位符（`{{DOMAINS}}` / `{{REPOS}}` / `{{SUB_PROJECTS}}`）必须用 Edit/Write 工具逐文件处理，**不要用 sed 处理多行**。
 
 ### 3.3 处理伞形/单仓分支
@@ -167,9 +169,17 @@ find zettelkasten -name '*.bak' -delete
 
 基于 `{{PROJECT_DESCRIPTION}}` 写 1 段"当前定位"，其他节保留 placeholder 由用户日后补充。
 
-### 4.4 其他文件
+### 4.4 `zettelkasten/02-architecture/current-architecture-flow.md`
 
-`glossary.md` / `decisions.md` / `gotchas.md` / 各工作流 README / 模板 / `03-roadmap/phases.md` / `02-architecture/README.md` / `05-reference/README.md` — **保持当前内容不变**，由用户日后按需填充。
+基于用户答案写第一版"当前架构事实"。如果项目尚未实现，明确标注为 planned / unknown，不要把假设写成事实。
+
+### 4.5 `zettelkasten/05-reference/e2e-test.md`
+
+填入用户提供的最高频验证命令；没有真实环境验证流程时，保留 `Known Gaps` 并写清风险。
+
+### 4.6 其他文件
+
+`glossary.md` / `decisions.md` / `gotchas.md` / `agent-harness.md` / `harness-engineer-roles.md` / `harness-assignment-cards.md` / 各工作流 README / 模板 / `03-roadmap/phases.md` / `02-architecture/README.md` / `05-reference/README.md` — **保持通用规则不变**，只替换占位符，由用户日后按需填充。
 
 ---
 
@@ -179,7 +189,11 @@ find zettelkasten -name '*.bak' -delete
 cd <repo-root>
 
 # 1. 不应有占位符残留
-grep -rE '\{\{[A-Z_]+\}\}' zettelkasten/ && echo "FAIL: 仍有占位符" || echo "OK: 无占位符"
+if grep -rE '\{\{[A-Z_]+\}\}' AGENTS.md zettelkasten/ 2>/dev/null; then
+  echo "FAIL: 仍有占位符"
+else
+  echo "OK: 无占位符"
+fi
 
 # 2. 不应有 UMBRELLA-ONLY 标记残留
 grep -r 'UMBRELLA-ONLY' zettelkasten/ && echo "FAIL: 仍有 UMBRELLA-ONLY 标记" || echo "OK"

@@ -26,11 +26,13 @@
 
 | 优先级 | 状态 | 需求 | 下一步 |
 |---|---|---|---|
-| P0 | in-progress | [[06-requirements/in-progress/REQ-YYYYMMDDHHMM-example]] | 一句话下一步 |
+| P0 | in-progress | [[06-requirements/in-progress/REQ-YYYYMMDDHHMMSS-example]] | 一句话下一步 |
 
 随着需求新增/完成，及时更新本表格。 -->
 
 ## 使用方式
+
+需求推进默认遵循 [[00-governance/agent-harness]]：先收敛最小上下文包，再确认需求、TECH、验证和 review gate。
 
 推荐每个需求按下面的流程推进：
 
@@ -52,11 +54,11 @@
 
 文件名使用：
 
-- `REQ-YYYYMMDDHHMM-short-name.md`
+- `REQ-YYYYMMDDHHMMSS-short-name.md`
 
 例如：
 
-- `REQ-202604281530-clinic-device-sync.md`
+- `REQ-20260428153045-clinic-device-sync.md`
 
 好处：
 
@@ -104,7 +106,7 @@
 
 每个进入开发的需求必须满足：
 
-- 关联一个 `TD-YYYYMMDDHHMM-short-name.md`
+- 关联一个 `TECH-YYYYMMDDHHMMSS-short-name.md`
 - 技术方案已从 `pending/` 移到 `approved/`，或者在 review 文档中明确说明为什么本次是极小修复可免除
 - 技术方案已链接相关 `02-architecture/`、`04-cross-cutting/`、`05-reference/` 文档
 - 如果改变现有架构流程，已更新或计划更新 [[02-architecture/current-architecture-flow]]
@@ -127,6 +129,7 @@
 
 ## 参见
 
+- [[00-governance/agent-harness]] — AI agent 工作流、gate、验证、review 和记忆回写
 - [[07-review/README]] — Review 工作流
 - [[08-technical-designs/README]] — 技术方案工作流
 - [[CLAUDE]] — 知识库使用规则
