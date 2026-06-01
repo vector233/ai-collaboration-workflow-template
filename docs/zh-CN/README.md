@@ -33,7 +33,8 @@
 | 路径 | 作用 |
 |---|---|
 | `AGENTS.md` | AI agent 的仓库级工作规则 |
-| `zettelkasten/CLAUDE.md` | 当前知识库入口，说明如何导航项目上下文 |
+| `CLAUDE.md` | Claude Code 适配层，指向 `AGENTS.md` 和知识库入口 |
+| `zettelkasten/AI.md` | 当前知识库入口，说明如何导航项目上下文 |
 | `zettelkasten/00-governance/ai-workflow.md` | AI 协作流程：上下文、需求、设计、验证、review、回写 |
 | `zettelkasten/06-requirements/` | 需求状态机：`backlog -> in-progress -> done` |
 | `zettelkasten/08-technical-designs/` | 技术方案状态机：`pending -> approved -> implemented` |
