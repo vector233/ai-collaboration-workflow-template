@@ -42,6 +42,12 @@ AI coding agents are strong at local implementation but weak at long-lived proje
 
 The default template is intentionally plain: no specialized process jargon, no heavy role system, and no requirement to run multiple agents.
 
+## Zettelkasten Inspiration
+
+This template is inspired by the Zettelkasten note-taking method: small notes, explicit links, and knowledge that grows through connections instead of one large document. In this project, that idea is adapted for AI coding agents: requirements, technical designs, review handoffs, architecture notes, validation runbooks, and gotchas are separate notes that link to each other.
+
+The goal is practical retrieval. A future agent should be able to start from a task, follow links to the minimum context, do the work, and write back what changed.
+
 ## Language
 
 The template is English-first. Keeping the canonical version in one language reduces drift and makes the project easier to reuse globally. Translations can be added later as guides under `docs/zh-CN/` without duplicating the full template.
