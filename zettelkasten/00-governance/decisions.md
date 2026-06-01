@@ -18,7 +18,7 @@ Append new decisions to this file. Do not delete historical decisions. If a deci
 
 - Notes should be small and focused.
 - New notes must link to at least one existing note.
-- The navigation entry point is [[CLAUDE]].
+- The navigation entry point is [[AI]].
 
 ## AD-002: Non-Trivial Implementation Requires Requirement And Technical Design State
 

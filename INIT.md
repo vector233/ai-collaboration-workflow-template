@@ -196,4 +196,4 @@ git add -A
 git commit -m "chore: initialize knowledge base for <PROJECT_NAME>"
 ```
 
-After that, use `AGENTS.md` and `zettelkasten/CLAUDE.md` as the daily entry points.
+After that, use `AGENTS.md` and `zettelkasten/AI.md` as the daily entry points.

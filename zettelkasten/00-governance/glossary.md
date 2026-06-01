@@ -6,7 +6,7 @@ Record project-specific business terms, technical terms, abbreviations, and alia
 
 | Term | Meaning |
 |---|---|
-| Wiki link | Double-bracket note link used by this knowledge base, described in [[CLAUDE]] |
+| Wiki link | Double-bracket note link used by this knowledge base, described in [[AI]] |
 | Note | Atomic knowledge unit in the zettelkasten |
 | `<example term>` | Replace with a project-specific term |
 

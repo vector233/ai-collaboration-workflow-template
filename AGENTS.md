@@ -6,7 +6,7 @@ This repository is a template for AI-assisted project documentation. The knowled
 
 Before changing code or project documents, read the smallest relevant context pack:
 
-- `zettelkasten/CLAUDE.md`
+- `zettelkasten/AI.md`
 - `zettelkasten/00-governance/ai-workflow.md`
 - `zettelkasten/06-requirements/README.md`
 - `zettelkasten/08-technical-designs/README.md`

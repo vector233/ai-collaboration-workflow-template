@@ -26,9 +26,10 @@ The template is English-first. Keeping the canonical version in one language red
 ```text
 .
 ├── AGENTS.md                  # Generic agent rules for an initialized project
+├── CLAUDE.md                  # Claude Code adapter that points back to AGENTS.md
 ├── INIT.md                    # AI-run initialization checklist
 └── zettelkasten/
-    ├── CLAUDE.md              # AI-facing knowledge base entry point
+    ├── AI.md                  # Vendor-neutral AI-facing knowledge base entry point
     ├── {{PROJECT_NAME}}.md    # Project index, renamed during init
     ├── 00-governance/         # AI workflow, validation, decisions, gotchas, templates
     ├── 01-overview/           # Quick reference and product vision
@@ -43,7 +44,7 @@ The template is English-first. Keeping the canonical version in one language red
 
 ## Use As A Template
 
-1. Create a new repository from this template, or copy `AGENTS.md` and `zettelkasten/` into an existing project.
+1. Create a new repository from this template, or copy `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/` into an existing project.
 2. In your AI coding tool, say:
 
    ```text
@@ -57,7 +58,7 @@ The template is English-first. Keeping the canonical version in one language red
 
 For non-trivial work, agents should follow this loop:
 
-1. Read `AGENTS.md`, `zettelkasten/CLAUDE.md`, and `zettelkasten/00-governance/ai-workflow.md`.
+1. Read `AGENTS.md`, `zettelkasten/AI.md`, and `zettelkasten/00-governance/ai-workflow.md`.
 2. Find or create the relevant requirement under `zettelkasten/06-requirements/`.
 3. Confirm the linked technical design is approved under `zettelkasten/08-technical-designs/`.
 4. Implement only the current slice and run the smallest meaningful validation.

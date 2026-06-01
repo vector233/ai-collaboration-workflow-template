@@ -25,5 +25,5 @@ Store summaries and quick indexes for external or long-form source documents. Do
 
 ## See Also
 
-- [[CLAUDE]] — knowledge base entry point
+- [[AI]] — knowledge base entry point
 - [[00-governance/validation-discipline]] — validation readiness policy

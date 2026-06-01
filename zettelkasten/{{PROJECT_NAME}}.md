@@ -2,7 +2,7 @@
 
 > {{PROJECT_DESCRIPTION}}
 
-This note is the human-readable project index. The AI-facing entry point is [[CLAUDE]].
+This note is the human-readable project index. The AI-facing entry point is [[AI]].
 
 ## Quick Positioning
 
@@ -28,7 +28,7 @@ Each subproject should keep implementation-specific details in its own `AGENTS.m
 
 | Note | Purpose |
 |---|---|
-| [[CLAUDE]] | AI entry point: method, routing, standard task flow |
+| [[AI]] | AI entry point: method, routing, standard task flow |
 | [[00-governance/project-overview]] | Project purpose, stack, and constraints |
 | [[00-governance/ai-workflow]] | AI workflow, implementation gate, review, validation, memory writeback |
 | [[00-governance/validation-discipline]] | Realistic validation readiness policy |

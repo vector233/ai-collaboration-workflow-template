@@ -23,4 +23,4 @@ Create these as needed:
 
 - [[00-governance/decisions]] — architecture decision records
 - [[00-governance/ai-workflow]] — memory writeback rules
-- [[CLAUDE]] — knowledge base entry point
+- [[AI]] — knowledge base entry point

@@ -17,7 +17,7 @@ If this is a single-project repository, `INIT.md` removes this directory.
 
 ## See Also
 
-- [[CLAUDE]] — knowledge base entry point
+- [[AI]] — knowledge base entry point
 - [[02-architecture/current-architecture-flow]] — current architecture flow
 
 <!-- /UMBRELLA-ONLY -->

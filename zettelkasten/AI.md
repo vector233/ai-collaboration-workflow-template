@@ -19,7 +19,7 @@ It is not a linear documentation site. The useful object is the network of notes
 
 ```text
 zettelkasten/
-  CLAUDE.md                         <- AI-facing entry point
+  AI.md                             <- AI-facing entry point
   {{PROJECT_NAME}}.md                <- human-readable project index
   00-governance/
     project-overview.md              <- project purpose, stack, constraints

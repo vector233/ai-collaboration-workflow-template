@@ -5,7 +5,7 @@ project: {{PROJECT_NAME}}
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 related:
-  - "[[CLAUDE]]"
+  - "[[AI]]"
   - "[[06-requirements/README]]"
   - "[[08-technical-designs/README]]"
   - "[[07-review/README]]"
