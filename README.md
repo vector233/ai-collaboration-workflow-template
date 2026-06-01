@@ -13,21 +13,26 @@ This repository packages a practical AI collaboration workflow. It gives agents 
    Initialize this knowledge base by following INIT.md.
    ```
 
-3. Start non-trivial work with the loop: `REQ -> TECH -> implementation -> validation -> REVIEW -> writeback`.
+3. Start non-trivial work with the workflow below.
 
-```mermaid
-flowchart LR
-    Task["Task"] --> REQ["Requirement<br/>REQ"]
-    REQ --> TECH["Technical Design<br/>TECH"]
-    TECH --> Impl["Implementation Slice"]
-    Impl --> Validation["Validation"]
-    Validation --> Review["Review Handoff"]
-    Review --> Feedback{"Feedback<br/>verified?"}
-    Feedback -->|Confirmed| Impl
-    Feedback -->|Rejected with evidence| Close["Close Review"]
-    Close --> Writeback["Memory Writeback"]
-    Writeback --> Done["Done"]
+```text
+Task
+  -> REQ       define scope, non-goals, and acceptance criteria
+  -> TECH      confirm the implementation approach
+  -> Slice     implement one bounded change
+  -> Validate  run the smallest meaningful checks
+  -> REVIEW    hand off evidence, feedback, and risk
+  -> Writeback update architecture, gotchas, or runbooks
 ```
+
+| Stage | Artifact | Purpose |
+|---|---|---|
+| Requirement | `REQ-*` | Define what changes and how it will be accepted |
+| Technical design | `TECH-*` | Make the implementation approach explicit |
+| Implementation | Code/docs slice | Keep the change small and reviewable |
+| Validation | Test/build/smoke notes | Record what was actually verified |
+| Review | `REVIEW-*` | Preserve feedback, evidence, and risk |
+| Writeback | Architecture/gotchas/runbooks | Keep future agents from rediscovering context |
 
 ## What It Solves
 
