@@ -1,13 +1,13 @@
 # Repository Guidelines
 
-This repository uses an AI-agent-oriented documentation workflow. The knowledge base lives in `zettelkasten/` and should guide every non-trivial change.
+This repository is a template for AI-assisted project documentation. The knowledge base lives in `zettelkasten/` and should guide every non-trivial change.
 
 ## First Files To Read
 
 Before changing code or project documents, read the smallest relevant context pack:
 
 - `zettelkasten/CLAUDE.md`
-- `zettelkasten/00-governance/agent-harness.md`
+- `zettelkasten/00-governance/ai-workflow.md`
 - `zettelkasten/06-requirements/README.md`
 - `zettelkasten/08-technical-designs/README.md`
 - `zettelkasten/07-review/README.md`
@@ -17,7 +17,7 @@ If this is an umbrella repository, also read the relevant subproject's own `AGEN
 
 ## Project Structure
 
-- `zettelkasten/00-governance/`: AI workflow, roles, decisions, gotchas, templates.
+- `zettelkasten/00-governance/`: AI workflow, validation policy, decisions, glossary, gotchas, templates.
 - `zettelkasten/01-overview/`: quick reference, product vision, high-frequency commands and URLs.
 - `zettelkasten/02-architecture/`: current architecture facts and system flows.
 - `zettelkasten/03-roadmap/`: phase and release planning.
@@ -34,7 +34,7 @@ For any non-trivial feature, fix, integration, or architecture change:
 1. Confirm or create a requirement under `zettelkasten/06-requirements/`.
 2. Confirm the requirement has a linked technical design under `zettelkasten/08-technical-designs/`.
 3. Do not edit business code until the technical design is in `approved/`, unless the requirement or review document records a tiny-fix waiver.
-4. Keep the implementation slice small and within the owned paths for the task.
+4. Keep the implementation slice small and within the paths declared for the task.
 5. Run focused validation for the changed boundary.
 6. Create or update a review handoff under `zettelkasten/07-review/pending/`.
 7. Record verification, known risks, commit hash, and worktree status in the handoff.
@@ -61,7 +61,7 @@ Review feedback is not automatically true. Treat each important review point as 
 - When architecture, workflow, validation, or gotchas change, update the durable note that future agents should read.
 - Never commit secrets, tokens, real credentials, private customer data, or unredacted production logs.
 
-## Verification
+## Validation
 
 Use project-specific commands from `zettelkasten/01-overview/quick-reference.md` and `zettelkasten/05-reference/e2e-test.md`.
 

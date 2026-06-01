@@ -5,8 +5,8 @@ project: {{PROJECT_NAME}}
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 related:
-  - "[[00-governance/agent-harness]]"
-  - "[[00-governance/e2e-discipline]]"
+  - "[[00-governance/ai-workflow]]"
+  - "[[00-governance/validation-discipline]]"
   - "[[07-review/README]]"
 ---
 
@@ -14,7 +14,7 @@ related:
 
 ## What This Answers
 
-This note records the project-specific commands and evidence rules for realistic validation. [[00-governance/e2e-discipline]] defines when realistic validation is required; this runbook defines how to perform it for this project.
+This note records the project-specific commands and evidence rules for realistic validation. [[00-governance/validation-discipline]] defines when realistic validation is required; this runbook defines how to perform it for this project.
 
 ## Local Checks
 

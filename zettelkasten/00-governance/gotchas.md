@@ -1,43 +1,38 @@
-# Gotchas — 历史踩坑记录
+# Gotchas
 
-每条记录回答：**问题是什么 / 根因 / 修复 / 教训**。新增踩坑时往本文件追加新条目，按主题分组（组件名 / 通用 等）。
+Each entry answers: **what happened, root cause, fix, and lesson**.
 
-> AI agent 排查 bug 或设计新功能前，应在此 grep 关键词，避免重复踩坑。
+AI agents should search this file before debugging or designing related changes.
 
----
+## General
 
-## 通用
+### Example: Initialization Left Template Placeholders
 
-### 示例：占位符未替换导致初始化产物含 `{{...}}`
+**Problem**: after initializing the template, some Markdown files still contained `{{...}}` placeholders.
 
-**问题**：使用 skeleton 初始化新项目时，部分 `.md` 文件仍残留 `{{...}}` 等占位符（例如 PROJECT_NAME、TECH_STACK）。
+**Root cause**: the replacement step missed a subdirectory or tried to replace multiline Markdown tables with a single-line command.
 
-**根因**：AI 在批量替换时漏 grep 某些子目录；或对包含特殊字符的占位符值（如多行 Markdown 表格）替换失败。
+**Fix**: run the placeholder scan in `INIT.md` and fix every remaining match before committing the initialized project.
 
-**修复**：INIT.md §5 自检步骤强制运行 `grep -rE '\{\{[A-Z_]+\}\}' zettelkasten/`，任一残留必须修复。
+**Lesson**: bulk text replacement needs a final grep-style gate. Do not trust a successful command exit code alone.
 
-**教训**：批量文本替换必须有最终 grep gate，不能信任 sed 的成功退出码。
+## Entry Template
 
----
+```md
+### <Short problem title>
 
-<!-- 示例条目模板：
+**Problem**: <symptom, error, or failed behavior>
 
-### <问题简短描述>
+**Root cause**: <why it happened>
 
-**问题**：<现象、报错信息>
+**Fix**: <code/docs/config change, commit, or file reference>
 
-**根因**：<为什么会出现>
+**Lesson**: <what future agents should remember>
 
-**修复**：<具体改动 + 引用 commit 或文件路径>
+**See also**: [[02-architecture/current-architecture-flow]] or `<path>`
+```
 
-**教训**：<未来类似情况怎么避免>
+## See Also
 
-**参见**：[[02-architecture/...]] 或 `<src-path>`
-
----
-
--->
-
-## 参见
-
-- [[00-governance/decisions]] — 架构决策（踩坑的反向产物）
+- [[00-governance/decisions]] — architecture decisions
+- [[00-governance/ai-workflow]] — memory writeback rules

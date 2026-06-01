@@ -1,5 +1,5 @@
 ---
-title: 技术方案标题
+title: Technical Design Title
 status: pending
 project: {{PROJECT_NAME}}
 technical_design_id: TECH-YYYYMMDDHHMMSS-short-name
@@ -12,77 +12,78 @@ related:
   - "[[08-technical-designs/README]]"
 ---
 
-# 技术方案标题
+# Technical Design Title
 
-## 这份技术方案回答什么问题
+## What This Design Answers
 
-这份文档回答：需求落到系统后，端到端技术流程是什么，关键架构决策是什么，哪些边界和风险需要在开发前先确认。
+This document explains how a confirmed requirement should flow through the system, which architectural decisions are already made, and which boundaries or risks must be clear before implementation.
 
-## 关联需求
+## Related Requirement
 
-- 需求文档：
-- 需求状态：
-- 产品验收摘要：
+- Requirement:
+- Requirement status:
+- Acceptance summary:
 
-## 当前架构事实
+## Current Architecture Facts
 
-- 现有流程：
-- 现有数据 / API / job / 配置：
-- 已确认限制：
+- Existing flow:
+- Existing data / API / jobs / config:
+- Confirmed constraints:
 
-## 目标技术流程
+## Target Technical Flow
 
-用 5-10 条描述目标系统流转，不写具体代码实现细节。
+Describe the target flow in 5-10 steps. Avoid line-by-line implementation detail.
 
 1.
 2.
 3.
 
-## 架构决策
+## Decisions
 
-| 决策 | 结论 | 理由 | 影响 |
+| Decision | Outcome | Reason | Impact |
 |---|---|---|---|
 |  |  |  |  |
 
-## 影响边界
+## Impact Boundaries
 
-- 子项目：
-- API：
-- 数据模型：
-- 后台任务 / 队列：
-- 配置 / secrets：
-- 第三方服务：
-- 安全与隐私：
-- 可观测性：
+- Projects / modules:
+- APIs:
+- Data model:
+- Background jobs / queues:
+- Config / secrets:
+- Third-party services:
+- Security and privacy:
+- Observability:
 
-## 不做什么
+## Non-Goals
 
-- 本技术方案不覆盖：
+- This design does not cover:
 
-## 待决策问题
+## Open Decisions
 
-| 问题 | 需要谁决策 | 默认建议 | 截止点 |
+| Question | Decision owner | Default recommendation | Deadline / blocking point |
 |---|---|---|---|
 |  |  |  |  |
 
-## 验证口径
+## Validation Plan
 
-- 单元 / contract：
-- 集成：
-- Playwright / E2E：
-- 运维 / 配置验证：
+- Unit / contract:
+- Integration:
+- Browser / E2E:
+- Operations / config:
+- Realistic environment smoke:
 
-## 架构回写清单
+## Architecture Writeback Checklist
 
-开发完成后至少检查并更新：
+After implementation, check and update:
 
 - [[02-architecture/current-architecture-flow]]
-- 其他 `02-architecture/` 文档：
-- 相关 `04-cross-cutting/` 文档：
-- 相关 `05-reference/` 文档：
+- Other `02-architecture/` notes:
+- Related `04-cross-cutting/` notes:
+- Related `05-reference/` notes:
 
-## 状态迁移记录
+## State History
 
-| 时间 | 状态 | 说明 | 提交 |
+| Date | State | Notes | Commit |
 |---|---|---|---|
-|  | pending | 初稿 |  |
+| YYYY-MM-DD | pending | Initial draft |  |

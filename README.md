@@ -2,20 +2,24 @@
 
 A reusable documentation template for long-running software projects built with AI coding agents.
 
-This repository packages a practical AI collaboration workflow, not just a folder tree. It gives agents a durable project memory, explicit implementation gates, evidence-based review handoffs, and a place to write back lessons after each slice of work.
+This repository packages a practical AI collaboration workflow. It gives agents a durable project memory, explicit requirement and design gates, evidence-based review handoffs, and a place to write back lessons after each slice of work.
 
 ## What It Solves
 
-AI coding agents are strong at local implementation but weak at long-lived project continuity unless the project gives them structure. This template turns project documentation into an operating system for agents:
+AI coding agents are strong at local implementation but weak at long-lived project continuity unless the project gives them structure. This template turns project documentation into a lightweight operating workflow:
 
-- **Context harness**: agents read the smallest necessary context instead of re-discovering the whole repo.
-- **Requirement gate**: every non-trivial change has scope, acceptance criteria, and a context pack.
+- **Context pack**: agents read the smallest necessary context instead of re-discovering the whole repo.
+- **Requirement workflow**: every non-trivial change has scope, acceptance criteria, and known non-goals.
 - **Technical design gate**: code work waits for an approved design unless the task is explicitly a tiny low-risk fix.
-- **Review harness**: review feedback is treated as a hypothesis that needs evidence and independent verification.
+- **Review handoff**: review feedback is treated as a hypothesis that needs evidence and independent verification.
+- **Validation discipline**: build, test, browser, integration, and realistic-environment checks are recorded where future agents can find them.
 - **Memory writeback**: architecture changes, test procedures, and gotchas are written back into the knowledge base.
-- **Role boundaries**: parallel agents get clear owned paths, read-only paths, validation, and handoff rules.
 
-The result is a lightweight project governance template that works with Claude Code, Codex, Cursor, or any capable AI coding assistant.
+The default template is intentionally plain: no specialized process jargon, no heavy role system, and no requirement to run multiple agents.
+
+## Language
+
+The template is English-first. Keeping the canonical version in one language reduces drift and makes the project easier to reuse globally. Translations can be added later as guides under `docs/zh-CN/` without duplicating the full template.
 
 ## Structure
 
@@ -26,7 +30,7 @@ The result is a lightweight project governance template that works with Claude C
 └── zettelkasten/
     ├── CLAUDE.md              # AI-facing knowledge base entry point
     ├── {{PROJECT_NAME}}.md    # Project index, renamed during init
-    ├── 00-governance/         # Agent harness, roles, decisions, gotchas, templates
+    ├── 00-governance/         # AI workflow, validation, decisions, gotchas, templates
     ├── 01-overview/           # Quick reference and product vision
     ├── 02-architecture/       # Current architecture notes
     ├── 03-roadmap/            # Phases and release planning
@@ -53,10 +57,10 @@ The result is a lightweight project governance template that works with Claude C
 
 For non-trivial work, agents should follow this loop:
 
-1. Read `AGENTS.md`, `zettelkasten/CLAUDE.md`, and `zettelkasten/00-governance/agent-harness.md`.
+1. Read `AGENTS.md`, `zettelkasten/CLAUDE.md`, and `zettelkasten/00-governance/ai-workflow.md`.
 2. Find or create the relevant requirement under `zettelkasten/06-requirements/`.
 3. Confirm the linked technical design is approved under `zettelkasten/08-technical-designs/`.
-4. Implement only the current slice and run the smallest meaningful verification.
+4. Implement only the current slice and run the smallest meaningful validation.
 5. Create or update a review handoff under `zettelkasten/07-review/`.
 6. Handle reviewer feedback with evidence, then write durable lessons back to `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
 
@@ -76,7 +80,7 @@ Start with these files after initialization:
 - `zettelkasten/00-governance/project-overview.md`: project purpose, stack, constraints.
 - `zettelkasten/01-overview/quick-reference.md`: commands, URLs, ports, test accounts, runbooks.
 - `zettelkasten/02-architecture/current-architecture-flow.md`: current system flow.
-- `zettelkasten/05-reference/e2e-test.md`: project-specific verification commands.
+- `zettelkasten/05-reference/e2e-test.md`: project-specific validation commands.
 
 ## License
 

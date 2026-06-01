@@ -6,7 +6,7 @@ last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 related:
   - "[[00-governance/project-overview]]"
-  - "[[00-governance/agent-harness]]"
+  - "[[00-governance/ai-workflow]]"
   - "[[08-technical-designs/README]]"
 ---
 

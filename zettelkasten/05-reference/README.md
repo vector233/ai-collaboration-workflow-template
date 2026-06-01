@@ -1,26 +1,29 @@
 # 05-reference
 
-存放对外部权威文档的**摘要 / 速查索引**，而不是文档本身。
+Store summaries and quick indexes for external or long-form source documents. Do not copy entire source documents here.
 
-## 用途
+## Purpose
 
-- 给项目根目录下的长文档（如 `PROJECT_PRD.md`、`ARCHITECTURE.md`、`task.md`）做精简摘要，避免每次都全文 grep
-- 把第三方文档的关键章节抽到这里
-- 维护任务进度索引
+- Summarize long project documents such as `PROJECT_PRD.md`, `ARCHITECTURE.md`, or task trackers.
+- Extract important sections from third-party documentation.
+- Keep validation runbooks and operational references easy to find.
 
-## 规则
+## Rules
 
-- 这里的 note **不是原创内容**，而是其他文档的精简映射
-- 当原文档大改时，同步更新这里
-- 用 wiki-link 指回原文档：`原文：[[../../PROJECT_PRD]]` 或外部 URL
+- Notes in this directory summarize or index other sources.
+- When the source document changes materially, update the summary.
+- Link back to the source document or URL.
+- Do not paste copyrighted long-form text or private material that should not live in the repo.
 
-## 建议 note
+## Suggested Notes
 
-- `prd.md` — 产品 PRD 摘要
-- `architecture.md` — 完整架构文档摘要
-- `e2e-test.md` — 联调流程速查
-- `competitor-api-landscape.md` — 竞品 / 市场参考资料
+- `prd.md` — product requirements summary
+- `architecture.md` — long-form architecture summary
+- `e2e-test.md` — validation runbook
+- `competitor-landscape.md` — market or competitor reference
+- `external-api-notes.md` — third-party API reference summary
 
-## 参见
+## See Also
 
-- [[CLAUDE]] — 知识库使用规则
+- [[CLAUDE]] — knowledge base entry point
+- [[00-governance/validation-discipline]] — validation readiness policy

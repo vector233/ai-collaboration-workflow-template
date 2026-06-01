@@ -2,18 +2,22 @@
 
 # 04-cross-cutting
 
-**仅伞形项目使用**。存放跨多个子项目的横切关注点：多品牌路由、统一鉴权、跨服务的数据一致性策略、共享安全模型等。
+Use this directory only for umbrella repositories or systems with multiple subprojects.
 
-如果你的项目是单仓库（single-repo），INIT.md 会在初始化时**删除整个 `04-cross-cutting/` 目录**。
+Store cross-module concerns here: shared authentication, routing, consistency rules, privacy model, shared release process, common schemas, or platform-wide policies.
 
-## 典型 note 示例
+If this is a single-project repository, `INIT.md` removes this directory.
 
-- `multi-brand-routing.md` — 多品牌 / 多租户的路由设计
-- `shared-auth.md` — 跨子项目的统一鉴权
-- `zero-persistence.md` — 跨链路的数据隐私模型
+## Typical Notes
 
-## 参见
+- `shared-auth.md` — authentication across subprojects
+- `routing.md` — shared routing or tenancy boundaries
+- `privacy-model.md` — cross-system privacy and data retention rules
+- `release-coordination.md` — release ordering across subprojects
 
-- [[CLAUDE]] — 知识库使用规则
+## See Also
+
+- [[CLAUDE]] — knowledge base entry point
+- [[02-architecture/current-architecture-flow]] — current architecture flow
 
 <!-- /UMBRELLA-ONLY -->

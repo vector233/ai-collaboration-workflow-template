@@ -1,47 +1,39 @@
-# Phases — Phase 进度追踪
+# Phases
 
-按阶段记录项目里程碑和当前状态。状态符号约定：
+Track major project milestones and current status.
 
-- ✅ 已完成
-- 🟡 进行中
-- 🔵 已搁置 / 推迟
-- ⚪ 未启动
+Suggested status markers:
 
----
+- Done
+- In progress
+- Deferred
+- Not started
 
-## Phase 1: <阶段名，例如 Product & Architecture Planning>
+## Phase 1: <Phase Name>
 
-<!-- 描述本阶段目标和核心交付物 -->
+<!-- Describe the goal and main deliverables. -->
 
-- [ ] 关键里程碑 1
-- [ ] 关键里程碑 2
+- [ ] Milestone 1
+- [ ] Milestone 2
 
----
+## Phase 2: <Phase Name>
 
-## Phase 2: <阶段名，例如 Foundation>
+- [ ] Milestone 1
+- [ ] Milestone 2
 
-- [ ] 关键里程碑 1
-- [ ] 关键里程碑 2
+## Phase 3: <Phase Name>
 
----
+- [ ] Milestone 1
 
-## Phase 3: <阶段名，例如 Beta>
+## Overview
 
-- [ ] 关键里程碑 1
+| Phase | Status | Notes |
+|---|---|---|
+| Phase 1: <name> | Not started | <one-sentence status> |
+| Phase 2: <name> | Not started | <one-sentence status> |
+| Phase 3: <name> | Not started | <one-sentence status> |
 
----
+## See Also
 
-## 进度总览
-
-| Phase | 进度 | 状态 |
-|-------|------|------|
-| Phase 1: <name> | ⚪ | <一句话状态> |
-| Phase 2: <name> | ⚪ | <一句话状态> |
-| Phase 3: <name> | ⚪ | <一句话状态> |
-
----
-
-## 参见
-
-- [[00-governance/project-overview]] — 项目目标
-- [[06-requirements/README]] — 需求入口（具体迭代任务）
+- [[00-governance/project-overview]] — project goals
+- [[06-requirements/README]] — requirement workflow

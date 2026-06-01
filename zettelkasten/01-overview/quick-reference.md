@@ -1,12 +1,10 @@
-# Quick Reference — 高频速查
+# Quick Reference
 
-> 本 note 是最高频查阅的入口。所有 AI agent 在执行命令、查找域名 / 端口 / 凭证 / 接口前，先在这里查。
+This is the highest-frequency lookup note. Agents should check here before running commands, looking for domains, ports, credentials, or key endpoints.
 
----
+## Common Commands
 
-## 常用命令
-
-<!-- 列出各子项目的常用开发命令。示例结构（替换为项目实际命令）：
+<!-- Replace with project-specific commands. Example:
 
 ### Backend
 
@@ -25,80 +23,64 @@ npm run lint
 ```
 -->
 
----
-
-## 域名
+## Domains And Ports
 
 {{DOMAINS}}
 
-<!-- 示例 Markdown 表格格式（INIT.md 会用真实表格替换上面的占位符）：
+<!-- Example:
 
-| 环境 | 域名 |
+| Environment | Domain / port |
 |---|---|
 | Production | example.com |
-| Staging    | staging.example.com |
-| Local API  | localhost:8080 |
+| Staging | staging.example.com |
+| Local API | localhost:8080 |
 -->
 
----
+## API Endpoints
 
-## API 端点
+<!-- Example:
 
-<!-- 列出对外暴露的关键 HTTP 端点。示例：
-
-| 端点 | 描述 |
+| Endpoint | Description |
 |---|---|
-| `GET /health`          | 健康检查（无认证） |
-| `POST /api/v1/auth/login` | 登录 |
-| `GET /api/v1/users/me` | 当前用户信息 |
+| `GET /health` | Health check |
+| `POST /api/v1/auth/login` | Login |
+| `GET /api/v1/users/me` | Current user |
 -->
 
----
+## Database Tables
 
-## 数据库表
+<!-- List important tables and one-line responsibilities. -->
 
-<!-- 列出关键表 + 一句话说明，方便排查问题时定位。 -->
+## Cache / Queue Keys
 
----
+<!-- Example:
 
-## 缓存 / 队列 Key 命名
-
-<!-- 例如 Redis key pattern：
-
-| Pattern | 用途 |
+| Pattern | Purpose |
 |---|---|
-| `user:{id}` | 用户缓存 |
-| `ratelimit:{ip}:{bucket}` | 限流 |
+| `user:{id}` | User cache |
+| `ratelimit:{ip}:{bucket}` | Rate limit bucket |
 -->
 
----
+## Environment Variables / Config
 
-## 环境变量 / 配置
+<!-- List important config files and required environment variables. -->
 
-<!-- 列出关键配置文件路径和必须设置的环境变量。 -->
+## Test Accounts
 
----
+<!-- Local-only test accounts. Never commit production credentials. -->
 
-## 测试凭证
-
-<!-- 列出本地开发用的测试账号。**警告：永远不要在此提交生产凭证**。 -->
-
----
-
-## Git 仓库
+## Git Repositories
 
 {{REPOS}}
 
-<!-- 示例：
+<!-- Example:
 
 - example-owner/foo-backend
 - example-owner/foo-portal
 -->
 
----
+## See Also
 
-## 参见
-
-- [[01-overview/product-vision]] — 产品定位、市场分析
-- [[02-architecture/current-architecture-flow]] — 当前架构流程
-- [[00-governance/glossary]] — 术语表
+- [[01-overview/product-vision]] — product positioning and audience
+- [[02-architecture/current-architecture-flow]] — current architecture flow
+- [[00-governance/glossary]] — terminology

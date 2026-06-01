@@ -1,81 +1,65 @@
-# Product Vision — 产品愿景
+# Product Vision
 
-## 当前定位
+## Current Positioning
 
 {{PROJECT_DESCRIPTION}}
 
-<!-- 详细描述：
-- 这个产品是什么 / 给谁用
-- 第一期聚焦哪里、不做什么
-- 把产品边界写清楚，避免后续叙事漂移
+<!-- Describe:
+- what the product is and who uses it;
+- what the first version focuses on;
+- what is out of scope, so future narratives do not drift.
 -->
 
----
+## Core Problem
 
-## 核心问题
-
-<!-- 客户当前的真实痛点。避免陈词滥调（"市场上没有 X"），写实际场景：
-- 客户做什么事的时候卡住
-- 当前替代方案的缺点
-- 为什么这个问题值得解决
+<!-- Describe the real customer pain:
+- what task gets blocked;
+- why current alternatives are insufficient;
+- why the problem is worth solving.
 -->
 
----
+## Target Users
 
-## 目标客户画像
+<!-- Example:
 
-<!-- 列出 2-4 个主要画像。示例：
-
-| 画像 | 核心需求 | 典型场景 |
+| User type | Core need | Typical situation |
 |---|---|---|
-| <画像 1> | <他们最关心什么> | <他们一天典型的工作场景> |
+| <persona> | <what they care about> | <workday scenario> |
 -->
 
----
+## Target Market
 
-## 目标市场
+<!-- Geography, industry, company size, team type, or other market boundaries. -->
 
-<!-- 地理 / 行业 / 规模等市场维度。 -->
+## Core Experience
 
----
-
-## 核心体验
-
-<!-- 用 1-2 段 + 一个流程示意，描述用户从首次接触到完成核心任务的体验。建议用 text diagram：
+<!-- Describe the user journey from first contact to the core successful action. Example:
 
 ```text
-注册 → 配置 → 第一次成功调用 → 进入日常使用
+Sign up -> Configure workspace -> Invite teammate -> Complete first project
 ```
 -->
 
----
+## Pricing / Packaging
 
-## 定价口径
+<!-- Public pricing or packaging model. Example:
 
-<!-- 公开定价表 + 各档位的定位。示例：
-
-| 方案 | 价格 | 包含 | 适合谁 |
+| Plan | Price | Includes | Best for |
 |---|---|---|---|
-| Free      | 免费   | <额度> | <人群> |
-| Pro       | <价格> | <额度> | <人群> |
-| Enterprise| 定制   | 自定义 | <人群> |
+| Free | Free | <limits> | <audience> |
+| Pro | <price> | <limits> | <audience> |
+| Enterprise | Custom | Custom | <audience> |
 -->
 
----
+## Competitive Positioning
 
-## 竞品差异化
+<!-- List alternatives, when they are a reasonable choice, and how this project is different. Avoid pretending competitors are only bad. -->
 
-<!-- 列出主要替代方案 + 它们的适用场景 + 你的差异。**不要把竞品写成"全是缺点"，先承认它们何时是合理选择**，再说你的差异。 -->
+## Technical Advantages
 
----
+<!-- List 3-5 capabilities that are hard to recreate quickly. -->
 
-## 技术壁垒
+## See Also
 
-<!-- 复制门槛 = 项目的技术资产。列出 3-5 条难以快速重建的能力。 -->
-
----
-
-## 参见
-
-- [[00-governance/project-overview]] — 项目总览
-- [[01-overview/quick-reference]] — 常用命令、域名、端点
+- [[00-governance/project-overview]] — project overview
+- [[01-overview/quick-reference]] — commands, domains, endpoints

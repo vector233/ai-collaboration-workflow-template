@@ -1,23 +1,26 @@
 # 02-architecture
 
-存放系统架构相关的 note：请求流程、鉴权模型、关键组件交互、数据模型等。
+Store architecture notes here: system flows, authentication model, component interactions, data model, integrations, and operational boundaries.
 
-## 建议初始化 note
+## Suggested Initial Notes
 
-启动新项目时，按需创建以下 note：
+Create these as needed:
 
-- `request-flow.md` — 端到端请求路径
-- `auth-model.md` — 鉴权机制
-- `data-model.md` — 核心数据模型
-- `current-architecture-flow.md` — 当前架构总览（应作为最重要的"现状"文档，跨多个其他 note 引用）
+- `current-architecture-flow.md` — current system flow and source of truth for architecture facts
+- `request-flow.md` — end-to-end request path
+- `auth-model.md` — authentication and authorization model
+- `data-model.md` — core data model
+- `deployment-flow.md` — deploy and runtime topology
 
-## 规则
+## Rules
 
-- 每个 note 应原子化，描述一个清晰的架构主题
-- 所有外部依赖（云服务、第三方 API、消息队列等）应在 [[00-governance/decisions]] 有对应决策记录
-- 架构变更后，及时回写本目录下的相关 note
+- Each note should describe one clear architecture topic.
+- Important external dependencies should have a related entry in [[00-governance/decisions]].
+- Architecture changes should be written back to this directory after implementation.
+- If a note describes planned behavior, label it as planned. Do not present assumptions as current facts.
 
-## 参见
+## See Also
 
-- [[00-governance/decisions]] — 架构决策 ADR
-- [[CLAUDE]] — 知识库使用规则
+- [[00-governance/decisions]] — architecture decision records
+- [[00-governance/ai-workflow]] — memory writeback rules
+- [[CLAUDE]] — knowledge base entry point

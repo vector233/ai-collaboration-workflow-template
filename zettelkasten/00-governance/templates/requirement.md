@@ -1,12 +1,12 @@
 ---
-title: 需求标题
+title: Requirement Title
 status: backlog
 project: {{PROJECT_NAME}}
 requirement_id: REQ-YYYYMMDDHHMMSS-short-name
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 affected_projects:
-  - <子项目名>
+  - <project-or-module>
 related:
   - "[[00-governance/project-overview]]"
   - "[[01-overview/quick-reference]]"
@@ -16,169 +16,162 @@ related:
   - "[[07-review/README]]"
 ---
 
-# 需求标题
+# Requirement Title
 
-## 这份需求回答什么问题
+## What This Requirement Answers
 
-这份需求文档回答：这次迭代要改什么、为什么改、影响哪里、怎么验收，以及开始实现前最少需要看哪些上下文。
+This document explains what should change, why it matters, what is out of scope, where the implementation context lives, and how the work will be accepted.
 
-## 背景
+## Background
 
-- 业务背景：
-- 触发原因：
-- 当前痛点：
+- Business context:
+- Trigger:
+- Current pain:
 
-## 目标
+## Goals
 
-- 目标 1：
-- 目标 2：
+- Goal 1:
+- Goal 2:
 
-## 不做什么
+## Non-Goals
 
-- 本次不调整：
-- 本次不覆盖：
+- Not included:
+- Not changed:
 
-## 最小上下文包
+## Context Pack
 
-开始实现前，优先阅读这些现状文档；如果这些文档仍不足以支撑实现，再补最小必要新文档。
+Read these first before implementation. If they are not enough, add the smallest missing note.
 
-- 现状文档：
-- 跨模块流程文档：
-- 关键代码入口：
-- 子项目协作说明：
+- Current architecture notes:
+- Cross-module flow notes:
+- Key code entry points:
+- Subproject instructions:
 
-## 当前已确认事实
+## Confirmed Facts
 
-- 已确认事实 1：
-- 已确认事实 2：
+- Fact 1:
+- Fact 2:
 
-## 待确认问题
+## Open Questions
 
-- 待确认问题 1：
-- 待确认问题 2：
+- Question 1:
+- Question 2:
 
-## 影响范围
+## Impact
 
-### 子项目
+### Projects / Modules
 
-- 影响子项目：
-  - <子项目 1>
-  - <子项目 2>
+- Affected projects or modules:
+  - <project-or-module-1>
+  - <project-or-module-2>
 
-### 模块
+### Interfaces / Data / Jobs / Config
 
-- 影响模块：
+- APIs:
+- Data tables / views:
+- Queues / scheduled jobs / third parties:
+- Config / environment:
 
-### 接口 / 数据 / 消息 / 配置
+## Proposed Change
 
-- 接口：
-- 数据表 / 视图：
-- MQ / 定时任务 / 第三方：
-- 配置 / 环境：
+- Summary:
+- Key changes:
+- Compatibility risks:
 
-## 变更方案
+## Technical Design
 
-- 方案概述：
-- 关键改动点：
-- 不兼容风险：
-
-## 技术方案 / 架构决策
-
-需求确认后、进入开发前，必须创建或确认对应技术方案文档。技术方案统一放在 [[08-technical-designs/README]] 下，命名为：
+Before implementation, create or confirm the linked technical design under [[08-technical-designs/README]]:
 
 - `TECH-YYYYMMDDHHMMSS-short-name.md`
 
-本需求对应技术方案：
+This requirement's technical design:
 
-- 技术方案文档：
-- 当前状态：pending / approved / implemented / waived
-- 如果免除技术方案，原因：
+- Technical design:
+- Current state: pending / approved / implemented / waived
+- If waived, reason:
 
-## 实施切片
+## Implementation Slices
 
-- 切片 1：
-- 切片 2：
+- Slice 1:
+- Slice 2:
 
-## 验收标准
+## Acceptance Criteria
 
-- 验收项 1：
-- 验收项 2：
+- Criterion 1:
+- Criterion 2:
 
-## 验证记录
+## Validation Record
 
-- 编译验证：
-- 启动验证：
-- HTTP / MQ / DB / 第三方联调验证：
-- 本次新增或暴露的既有阻塞：
+- Build:
+- Unit / integration tests:
+- API / DB / queue / third-party smoke:
+- Browser / E2E / realistic environment:
+- New or existing blockers:
 
-## 阶段性交接 / Review 文档
+## Review Handoff
 
-阶段性工作完成后，如需要交给另一个 AI 或人工 reviewer 做阶段性 review，必须输出一个 review 交接文档。文档统一放在 [[07-review/README]] 下，初始放入 `pending/`，命名为：
+When a slice is ready for review, create a handoff under [[07-review/README]]:
 
 - `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 
-交接文档至少包含：
+The handoff should include:
 
-- 当前任务目标和范围：
-- 已完成改动：
-- 最新提交：
-- 验证结果：
-- 当前工作区未提交状态：
-- 已知风险 / 阻塞：
-- 后续计划：
-- 建议 review 重点：
+- Task goal and scope:
+- Completed changes:
+- Latest commit:
+- Validation results:
+- Current worktree status:
+- Known risks / blockers:
+- Next steps:
+- Suggested review focus:
 
-本需求对应交接文档：
+This requirement's review handoff:
 
-- Review 文档：
+- Review document:
 
-## Review 反馈处理记录
+## Review Feedback Handling
 
-其他 AI 或人工 reviewer 给出 review 回复时，必须为每条关键意见附上关联文档、代码位置、提交或验证证据。开发方必须先独立验证反馈，不允许默认同意 reviewer 意见。待 review 文档和 review 结果统一到 [[07-review/README]] 查询。
+Reviewers must attach evidence to important feedback. The implementation owner must independently verify each claim before fixing or rejecting it.
 
-如果反馈成立或部分成立，开发方再修改、验证并提交；如果反馈不成立，开发方必须贴出反证（相关代码、文档、测试输出或提交证据），并把该意见打回给 reviewer。
-
-本轮 review 未关闭前，不进入下一轮开发工作。
-
-| Review 轮次 | 反馈来源 | 关联文档 / 证据 | 反馈摘要 | 判断结论 | 处理状态 | 处理提交 / 反证 |
+| Round | Source | Evidence | Feedback summary | Judgment | Status | Fix commit / counter-evidence |
 |---|---|---|---|---|---|---|
-| Round 1 |  |  |  | 待判断 / 成立 / 部分成立 / 不成立 | 待处理 / 已处理 / 已打回 / 无需处理 |  |
+| Round 1 |  |  |  | pending / confirmed / partial / rejected | pending / fixed / rejected / no action |  |
 
-本轮 review 关闭条件：
+Review closes when:
 
-- reviewer 的关键意见都已附带关联文档或证据
-- 开发方已逐条验证并给出判断结论
-- 成立或部分成立的问题已完成修改、验证和提交
-- 不成立的问题已贴出反证并打回
-- 双方确认本轮 review 修改工作结束
+- important feedback has evidence;
+- the implementation owner has verified each item;
+- confirmed or partial issues are fixed, validated, and committed;
+- rejected issues have counter-evidence;
+- both sides agree this review round is done.
 
-## 联调流程
+## Integration Flow
 
-如已有可复用联调流程，优先参考 [[05-reference/e2e-test]]，这里只补本次需求特有的顺序和前提。
+If a reusable flow exists, link to [[05-reference/e2e-test]]. Add requirement-specific steps here.
 
-- 前置条件：
-- 编译顺序：
-- 启动顺序：
-- 鉴权准备：
-- 实际验证顺序：
+- Preconditions:
+- Build order:
+- Startup order:
+- Auth setup:
+- Validation sequence:
 
-## 已知问题与排障结论
+## Known Issues And Troubleshooting
 
-- 本次遇到的问题：
-- 已确认结论：
-- 下次继续时的起点：
+- Issue:
+- Confirmed conclusion:
+- Resume point for next session:
 
-## 文档回写清单
+## Documentation Writeback Checklist
 
-开发完成后，至少检查并更新：
+After implementation, check and update:
 
-- 对应现状文档：
-- 对应跨模块流程文档：
-- 对应模块 / 接口 / 数据文档：
-- [[03-roadmap/phases]] 或 task 跟踪文件：
+- Current architecture notes:
+- Cross-module flow notes:
+- Module / API / data docs:
+- [[03-roadmap/phases]] or task tracker:
 
-## 证据清单
+## Evidence Checklist
 
-- 代码证据：
-- 配置证据：
-- SQL / 接口 / 交接材料：
+- Code evidence:
+- Config evidence:
+- API / SQL / handoff artifacts:

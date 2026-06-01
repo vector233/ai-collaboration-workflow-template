@@ -1,5 +1,5 @@
 ---
-title: Review 文档标题
+title: Review Handoff Title
 status: pending
 project: {{PROJECT_NAME}}
 review_id: REVIEW-YYYYMMDDHHMMSS-short-name
@@ -12,64 +12,65 @@ related:
   - "[[07-review/README]]"
 ---
 
-# Review 文档标题
+# Review Handoff Title
 
-## 这份 Review 回答什么问题
+## What This Review Answers
 
-阶段性工作完成后，给下一个 AI 或人工 reviewer 看的交接文档：当前做了什么、做到哪一步、哪些点最需要关注、还有哪些已知风险。
+This handoff tells the next AI agent or human reviewer what changed, what was validated, what remains risky, and which points deserve review attention.
 
-## 当前任务目标和范围
+## Task Goal And Scope
 
-- 任务目标：
-- 本轮范围：
-- 本轮不覆盖：
+- Goal:
+- This slice covers:
+- This slice does not cover:
 
-## 已完成改动
+## Completed Changes
 
-- 改动 1：
-- 改动 2：
+- Change 1:
+- Change 2:
 
-## 最新提交
+## Latest Commit
 
-- Commit SHA / 分支：
-- PR / MR：
+- Commit SHA / branch:
+- PR / MR:
 
-## 验证结果
+## Validation Results
 
-- 编译 / 构建：
-- 单元 / 集成测试：
-- 手动验证：
-- E2E / 联调：
+- Build:
+- Unit / integration tests:
+- Manual validation:
+- Browser / E2E:
+- Realistic environment smoke:
 
-## 当前工作区未提交状态
+## Current Worktree Status
 
-<!-- 列出 git status，避免 reviewer 误判 -->
+<!-- Paste or summarize `git status --short` so reviewers know whether there are uncommitted changes. -->
 
-## 已知风险 / 阻塞
+## Known Risks / Blockers
 
-- 风险 1：
-- 阻塞 1：
+- Risk:
+- Blocker:
 
-## 后续计划
+## Next Steps
 
-- 下一步：
-- 待 review 通过后再启动的工作：
+- Next:
+- Work that should wait until review closes:
 
-## 建议 review 重点
+## Suggested Review Focus
 
-- 重点 1：
-- 重点 2：
+- Focus 1:
+- Focus 2:
 
-## Reviewer 反馈
+## Reviewer Feedback
 
-| 轮次 | 反馈摘要 | 关联代码 / 证据 | 判断结论 | 处理状态 |
+| Round | Feedback summary | Evidence | Judgment | Status |
 |---|---|---|---|---|
-| Round 1 |  |  | 待判断 |  待处理 |
+| Round 1 |  |  | pending | pending |
 
-## 关闭条件
+## Close Conditions
 
-- 关键意见已附带关联文档或证据
-- 开发方已逐条验证并给出判断结论
-- 成立或部分成立的问题已完成修改、验证和提交
-- 不成立的问题已贴出反证并打回
-- 双方确认本轮 review 工作结束
+- Important feedback has evidence.
+- The implementation owner has verified each item.
+- Confirmed or partial issues are fixed, validated, and committed.
+- Rejected issues have counter-evidence.
+- This review round is explicitly closed.

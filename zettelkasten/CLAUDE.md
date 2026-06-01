@@ -1,15 +1,15 @@
-# {{PROJECT_NAME}} — AI Task Knowledge Base
+# {{PROJECT_NAME}} — AI Project Knowledge Base
 
 ## Purpose
 
-This knowledge base is written for AI agents. Its job is to turn a new task into the smallest useful context, a clear implementation gate, focused verification, review handoff, and durable memory writeback.
+This knowledge base is written for AI coding agents. Its job is to turn a new task into the smallest useful context, a clear requirement, an implementation-ready technical design, focused validation, a review handoff, and durable memory writeback.
 
-It is not a general wiki for people to browse linearly. The valuable object is the link graph between notes.
+It is not a linear documentation site. The useful object is the network of notes and links.
 
 ## Core Wiki-Link Rules
 
 1. **Atomic notes**: one concept or workflow per note.
-2. **Wiki-style links**: use `[[01-overview/quick-reference]]` and `[[00-governance/agent-harness]]` to connect related notes.
+2. **Wiki-style links**: use `[[01-overview/quick-reference]]` and `[[00-governance/ai-workflow]]` to connect related notes.
 3. **No orphan notes**: a new note must link to at least one existing note.
 4. **Inbound links prove relevance**: notes with no inbound links are candidates for deletion, merge, or better indexing.
 5. **Update in place**: when a linked note changes, update that note instead of changing all incoming links.
@@ -23,19 +23,17 @@ zettelkasten/
   {{PROJECT_NAME}}.md                <- human-readable project index
   00-governance/
     project-overview.md              <- project purpose, stack, constraints
-    agent-harness.md                 <- AI task workflow, gates, verification, memory writeback
-    harness-engineer-roles.md        <- role boundaries for single-agent or multi-agent work
-    harness-assignment-cards.md      <- copyable assignment cards for agent sessions
-    e2e-discipline.md                <- real-environment validation policy
+    ai-workflow.md                   <- AI task workflow, gates, validation, writeback
+    validation-discipline.md         <- realistic validation policy
     glossary.md                      <- project terms
     decisions.md                     <- architecture decisions and rationale
     gotchas.md                       <- bugs, root causes, and lessons
-    templates/                       <- requirement, TECH, review, assignment templates
+    templates/                       <- requirement, technical design, review templates
   01-overview/
     quick-reference.md               <- commands, URLs, ports, accounts, endpoints
     product-vision.md                <- positioning and audience
   02-architecture/
-    current-architecture-flow.md     <- current system flow, created during init or first design
+    current-architecture-flow.md     <- current system flow
     README.md                        <- architecture note rules
   03-roadmap/
     phases.md                        <- roadmap and phase status
@@ -43,7 +41,7 @@ zettelkasten/
     README.md                        <- umbrella/cross-module concerns
   05-reference/
     README.md                        <- summarized long docs and runbooks
-    e2e-test.md                      <- recommended project-specific validation runbook
+    e2e-test.md                      <- project-specific validation runbook
   06-requirements/
     README.md                        <- requirement workflow and board
     backlog/                         <- identified but not active
@@ -55,7 +53,7 @@ zettelkasten/
     in-review/                       <- feedback being evaluated or fixed
     done/                            <- closed review
   08-technical-designs/
-    README.md                        <- design workflow and gate
+    README.md                        <- design workflow and implementation gate
     pending/                         <- proposed, not yet implementation input
     approved/                        <- approved implementation input
     implemented/                     <- implemented and written back
@@ -67,9 +65,7 @@ Directories are physical organization. Double-bracket wiki links are the retriev
 
 | Task type | Start here |
 |---|---|
-| AI workflow, gates, review, memory writeback | [[00-governance/agent-harness]] |
-| Multi-agent or role-based work | [[00-governance/harness-engineer-roles]] |
-| Copyable role prompts | [[00-governance/harness-assignment-cards]] |
+| AI workflow, gates, review, memory writeback | [[00-governance/ai-workflow]] |
 | Commands, URLs, ports, accounts | [[01-overview/quick-reference]] |
 | Product scope and audience | [[01-overview/product-vision]] |
 | Current architecture | [[02-architecture/current-architecture-flow]] |
@@ -78,32 +74,32 @@ Directories are physical organization. Double-bracket wiki links are the retriev
 | Requirement workflow | [[06-requirements/README]] |
 | Technical design workflow | [[08-technical-designs/README]] |
 | Review workflow | [[07-review/README]] |
-| Real-environment validation policy | [[00-governance/e2e-discipline]] |
+| Validation policy | [[00-governance/validation-discipline]] |
 
 ## Standard Task Flow
 
 1. **Classify**: feature, bugfix, review feedback, architecture change, documentation, validation, release, or research.
-2. **Load context pack**: read this file, [[00-governance/agent-harness]], and the minimum linked notes for the task.
-3. **Check requirement gate**: find or create the related requirement under [[06-requirements/README]].
-4. **Check TECH gate**: before business-code work, confirm the related technical design is in `approved/`, or record a tiny-fix waiver.
-5. **Check review state**: if an earlier handoff is open under [[07-review/README]], handle it before starting the next slice.
-6. **Implement the slice**: keep edits inside the task's owned paths.
-7. **Verify**: run the smallest validation with signal for the changed boundary.
+2. **Load context**: read this file, [[00-governance/ai-workflow]], and the minimum linked notes for the task.
+3. **Check requirement state**: find or create the related requirement under [[06-requirements/README]].
+4. **Check technical design state**: before business-code work, confirm the related technical design is in `approved/`, or record a tiny-fix waiver.
+5. **Check review state**: if an earlier handoff is open under [[07-review/README]], handle it before starting the next implementation slice.
+6. **Implement the slice**: keep edits inside the task's declared paths.
+7. **Validate**: run the smallest validation with signal for the changed boundary.
 8. **Create review handoff**: record scope, commit, validation, worktree status, risks, and review focus.
 9. **Handle feedback with evidence**: verify reviewer claims before fixing or rejecting.
 10. **Write memory back**: update architecture, gotchas, runbooks, boards, or reference notes when durable facts change.
 
-`in-progress` means a requirement is active. It does not automatically mean code implementation is allowed. The TECH gate decides that.
+`in-progress` means a requirement is active. It does not automatically mean implementation is allowed. The technical design gate decides that.
 
 ## When To Update The Knowledge Base
 
 Update notes when any of these change:
 
 - Architecture, data flow, API contract, permission model, deployment, or persistence behavior.
-- Build, lint, test, E2E, browser, or real-environment verification procedure.
+- Build, lint, test, E2E, browser, or realistic-environment validation procedure.
 - Product scope, target audience, pricing, launch plan, or roadmap.
 - A bug root cause, false assumption, or reviewer lesson worth remembering.
-- Subproject ownership, module boundaries, or agent assignment rules.
+- Subproject ownership, module boundaries, or task handoff rules.
 
 ## Relationship To Project Code
 

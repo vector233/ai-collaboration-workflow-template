@@ -1,73 +1,61 @@
 # Project Overview — {{PROJECT_NAME}}
 
-## 产品定位
+## Product Positioning
 
-**{{PROJECT_NAME}} 是 {{PROJECT_DESCRIPTION}}。**
+**{{PROJECT_NAME}} is {{PROJECT_DESCRIPTION}}.**
 
-<!-- 进一步描述项目要解决的核心问题、目标用户、核心价值，建议 2-4 句话 -->
+<!-- Add 2-4 sentences describing the problem, target users, and core value. -->
 
----
+## Naming Rules
 
-## 命名规则
+<!-- If the project has multiple names, brand migrations, product slugs, or legacy repo names, define them here.
 
-<!-- 如果项目有品牌迁移历史或多个对外名称，在此明确：
-- 对外用户可见的统一品牌名
-- 文件名 / 域名 / 机器可读 slug 使用哪种格式
-- 历史品牌名允许保留在哪些范围
-没有迁移历史可以删除本节。
+- Public product name:
+- Machine-readable slug:
+- Legacy names that may remain in old files:
 -->
 
----
-
-## 技术栈
+## Tech Stack
 
 {{TECH_STACK}}
 
-<!-- 更详细的技术栈表格示例（删除示例行，填实际项目）：
+<!-- Optional detailed stack table:
 
-| 组件 | 技术 |
+| Component | Technology |
 |---|---|
-| **Backend** | Go · Gin · GORM · MySQL · Redis |
-| **Frontend** | Next.js 15 · React 19 · TypeScript · Tailwind CSS |
-| **Auth** | Ed25519 JWT · SHA-256 API Key |
+| Backend | TypeScript · Node.js · PostgreSQL |
+| Frontend | Next.js · React · Tailwind CSS |
+| Auth | Session cookies · OAuth |
 -->
-
----
 
 <!-- UMBRELLA-ONLY: keep this section only if {{REPO_TYPE}} == umbrella -->
 
-## 子项目
+## Subprojects
 
 {{SUB_PROJECTS}}
 
 <!-- /UMBRELLA-ONLY -->
 
----
+## Project Constraints
 
-## 核心约束
+<!-- Capture project-level non-negotiables. Examples:
 
-<!-- 项目级别的关键约束（架构红线、合规要求等）。示例：
-
-- **零持久化**：服务端不持久化用户业务数据
-- **工作区隔离**：所有数据访问必须按 workspace_id 或等价边界过滤
-- **审计可追溯**：所有写操作必须有审计日志
+- Workspace isolation: every data access path must enforce a workspace boundary.
+- Auditability: write operations must leave an audit trail.
+- Privacy: logs must not include sensitive payloads.
 -->
 
----
+## AI Collaboration Rules
 
-## AI 协作约束
+- Non-trivial work goes through [[06-requirements/README]] and [[08-technical-designs/README]] before implementation.
+- Review handoffs live under [[07-review/README]], and review feedback must be evidence-backed.
+- New architecture facts, validation procedures, and gotchas must be written back to durable notes.
+- Parallel AI work must declare non-overlapping file ownership in the requirement or review handoff.
 
-- 非极小任务先经过 [[06-requirements/README]] 和 [[08-technical-designs/README]] 的 gate，再进入实现。
-- 阶段性实现必须通过 [[07-review/README]] 交接，review 反馈按证据处理。
-- 发现新的架构事实、验证流程或踩坑时，回写到对应 note，而不是只留在聊天记录里。
-- 多 agent 并行时，按 [[00-governance/harness-engineer-roles]] 声明 owned paths 和 handoff。
+## See Also
 
----
-
-## 参见
-
-- [[00-governance/agent-harness]] — AI agent 工作流和 gate
-- [[01-overview/product-vision]] — 核心问题、目标市场
-- [[02-architecture/current-architecture-flow]] — 当前架构流程
-- [[00-governance/glossary]] — 术语表
-- [[00-governance/decisions]] — 关键架构决策
+- [[00-governance/ai-workflow]] — AI collaboration workflow
+- [[01-overview/product-vision]] — product direction and audience
+- [[02-architecture/current-architecture-flow]] — current architecture flow
+- [[00-governance/glossary]] — terminology
+- [[00-governance/decisions]] — architecture decisions

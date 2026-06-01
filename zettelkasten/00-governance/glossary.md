@@ -1,41 +1,33 @@
-# Glossary — 术语表
+# Glossary
 
-记录项目特有的业务术语、技术术语、缩写。AI agent 遇到不熟悉的术语先来这里查。
+Record project-specific business terms, technical terms, abbreviations, and aliases. AI agents should check this file when a term is unfamiliar or overloaded.
 
----
+## Product Terms
 
-## 产品/业务术语
-
-| 术语 | 含义 |
+| Term | Meaning |
 |---|---|
-| **Wiki-Link** | 本知识库使用的双向链接语法，详见 [[CLAUDE]] §核心原则 |
-| **Note** | Zettelkasten 中的原子知识单元，一个想法一个 note |
-| **\<示例术语\>** | <!-- 替换为项目实际术语 --> |
+| Wiki link | Double-bracket note link used by this knowledge base, described in [[CLAUDE]] |
+| Note | Atomic knowledge unit in the zettelkasten |
+| `<example term>` | Replace with a project-specific term |
 
----
+## Technical Terms
 
-## 技术术语
-
-| 术语 | 含义 |
+| Term | Meaning |
 |---|---|
-| **\<示例缩写\>** | <!-- 例如：`STA Thread` = Single-Threaded Apartment，COM 调用模型 --> |
+| `<example acronym>` | Replace with a project-specific acronym |
 
----
+## Domains And Ports
 
-## 域名 / 端口
+<!-- If the project has multiple environments, list them here or link to [[01-overview/quick-reference]].
 
-<!-- 当项目涉及多环境域名/端口时，列出对照表；如不适用可删除本节。
-
-| 环境 | 域名 |
+| Environment | Domain / port |
 |---|---|
 | Production | example.com |
-| Staging    | staging.example.com |
-| Local API  | localhost:8080 |
+| Staging | staging.example.com |
+| Local API | localhost:8080 |
 -->
 
----
+## See Also
 
-## 参见
-
-- [[00-governance/project-overview]] — 项目总览
-- [[01-overview/quick-reference]] — 常用命令和端点
+- [[00-governance/project-overview]] — project overview
+- [[01-overview/quick-reference]] — commands and endpoints
