@@ -4,6 +4,31 @@ A reusable documentation template for long-running software projects built with 
 
 This repository packages a practical AI collaboration workflow. It gives agents a durable project memory, explicit requirement and design gates, evidence-based review handoffs, and a place to write back lessons after each slice of work.
 
+## Quick Start
+
+1. Click **Use this template** on GitHub, or copy `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/` into an existing repository.
+2. Ask your AI coding assistant:
+
+   ```text
+   Initialize this knowledge base by following INIT.md.
+   ```
+
+3. Start non-trivial work with the loop: `REQ -> TECH -> implementation -> validation -> REVIEW -> writeback`.
+
+```mermaid
+flowchart LR
+    Task["Task"] --> REQ["Requirement<br/>REQ"]
+    REQ --> TECH["Technical Design<br/>TECH"]
+    TECH --> Impl["Implementation Slice"]
+    Impl --> Validation["Validation"]
+    Validation --> Review["Review Handoff"]
+    Review --> Feedback{"Feedback<br/>verified?"}
+    Feedback -->|Confirmed| Impl
+    Feedback -->|Rejected with evidence| Close["Close Review"]
+    Close --> Writeback["Memory Writeback"]
+    Writeback --> Done["Done"]
+```
+
 ## What It Solves
 
 AI coding agents are strong at local implementation but weak at long-lived project continuity unless the project gives them structure. This template turns project documentation into a lightweight operating workflow:
