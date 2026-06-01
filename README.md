@@ -1,4 +1,4 @@
-# AI Knowledge Base Skeleton
+# AI Collaboration Workflow Template
 
 A reusable documentation template for long-running software projects built with AI coding agents.
 
