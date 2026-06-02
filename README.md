@@ -118,6 +118,16 @@ For non-trivial work, agents should follow this loop:
 
 See `examples/example-saas/` for a fictional end-to-end walkthrough.
 
+## Companion Skill
+
+This repository includes an optional Codex-compatible skill:
+
+```text
+skills/ai-collaboration-workflow/
+```
+
+Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/REVIEW documents, check implementation readiness, record validation, handle evidence-based review feedback, and write lessons back to the knowledge base.
+
 ## Naming Rules
 
 - Requirements: `REQ-YYYYMMDDHHMMSS-short-name.md`

@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Collaboration Workflow"
+  short_description: "Use the AI collaboration docs workflow"
+  default_prompt: "Use $ai-collaboration-workflow to create a requirement, technical design, or review handoff."
