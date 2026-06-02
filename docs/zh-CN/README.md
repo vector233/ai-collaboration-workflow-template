@@ -57,6 +57,54 @@
 4. AI 会替换占位符、初始化第一批 note、删除 `INIT.md` 并提交。
 5. 后续每个非极小任务按 `REQ -> TECH -> implementation -> validation -> REVIEW -> writeback` 推进。
 
+## Skill 安装
+
+仓库内提供一个可选 skill：
+
+```text
+skills/ai-collaboration-workflow/
+```
+
+它用于帮助 AI 正确使用这套模板：初始化项目、创建 REQ/TECH/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈，以及回写 gotchas / architecture / runbook。
+
+### Claude Code
+
+个人级安装，所有项目都可用：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R skills/ai-collaboration-workflow ~/.claude/skills/
+```
+
+项目级安装，只对当前仓库生效，并可提交到 Git：
+
+```bash
+mkdir -p .claude/skills
+cp -R skills/ai-collaboration-workflow .claude/skills/
+git add .claude/skills/ai-collaboration-workflow
+```
+
+使用时可以在 Claude Code 中输入：
+
+```text
+/ai-collaboration-workflow create a requirement for <task>
+```
+
+Claude 也可能根据 skill 描述自动加载它。
+
+### Codex
+
+```bash
+mkdir -p ~/.codex/skills
+cp -R skills/ai-collaboration-workflow ~/.codex/skills/
+```
+
+使用时输入：
+
+```text
+Use $ai-collaboration-workflow to create a requirement, technical design, or review handoff.
+```
+
 ## E2E 的定位
 
 E2E 或真实环境验证不是所有项目、所有任务都必须强制执行。模板里的原则是：

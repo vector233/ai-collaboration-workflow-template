@@ -120,13 +120,51 @@ See `examples/example-saas/` for a fictional end-to-end walkthrough.
 
 ## Companion Skill
 
-This repository includes an optional Codex-compatible skill:
+This repository includes an optional Agent Skills-compatible skill:
 
 ```text
 skills/ai-collaboration-workflow/
 ```
 
 Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/REVIEW documents, check implementation readiness, record validation, handle evidence-based review feedback, and write lessons back to the knowledge base.
+
+### Install For Claude Code
+
+Personal install, available across all Claude Code projects:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R skills/ai-collaboration-workflow ~/.claude/skills/
+```
+
+Project install, committed to one repository:
+
+```bash
+mkdir -p .claude/skills
+cp -R skills/ai-collaboration-workflow .claude/skills/
+git add .claude/skills/ai-collaboration-workflow
+```
+
+Then start Claude Code in the project and invoke:
+
+```text
+/ai-collaboration-workflow create a requirement for <task>
+```
+
+Claude may also load the skill automatically when your request matches the skill description.
+
+### Install For Codex
+
+```bash
+mkdir -p ~/.codex/skills
+cp -R skills/ai-collaboration-workflow ~/.codex/skills/
+```
+
+Then invoke:
+
+```text
+Use $ai-collaboration-workflow to create a requirement, technical design, or review handoff.
+```
 
 ## Naming Rules
 
