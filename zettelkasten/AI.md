@@ -61,6 +61,21 @@ zettelkasten/
 
 Directories are physical organization. Double-bracket wiki links are the retrieval system.
 
+## Syntax Compatibility
+
+This vault is Obsidian-compatible Markdown.
+
+Use these defaults:
+
+| Use case | Syntax | Reason |
+|---|---|---|
+| Link between project notes | `[[02-architecture/current-architecture-flow]]` | Compact Obsidian wiki link; useful for graph navigation |
+| External URL | `[label](https://example.com)` | Standard Markdown; readable in GitHub and Obsidian |
+| Image or asset that should render on GitHub | `![alt](assets/example.png)` | Standard Markdown image syntax |
+| Obsidian-only file embed | `![[example.png]]` | Valid in Obsidian, but do not expect GitHub to render it |
+
+Prefer wiki links for note-to-note navigation inside `zettelkasten/`. Prefer standard Markdown for external links and images that should render outside Obsidian.
+
 ## Task Routing
 
 | Task type | Start here |

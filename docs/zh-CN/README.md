@@ -13,6 +13,8 @@
 - review 反馈是否有证据，如何处理？
 - 本轮学到的架构事实、测试流程或踩坑应该写回哪里？
 
+它借鉴 Zettelkasten 的笔记方式：每个 note 尽量短、聚焦一个主题，并通过链接组成知识网络。模板里的 `zettelkasten/` 也可以作为 Obsidian vault 使用。
+
 ## 为什么不复制一套中文模板
 
 这个仓库采用英文作为唯一模板源。中文内容只做理念和使用说明，不复制完整目录和模板文件。
@@ -64,6 +66,19 @@ E2E 或真实环境验证不是所有项目、所有任务都必须强制执行�
 - 不能把“本地单测通过”伪装成“真实链路已验证”。
 
 具体项目怎么跑，写在 `zettelkasten/05-reference/e2e-test.md`。
+
+## Obsidian 和 Markdown 语法
+
+这个模板兼容 Obsidian，但也尽量保留 GitHub 上的可读性。
+
+| 场景 | 建议语法 | 说明 |
+|---|---|---|
+| `zettelkasten/` 内 note 互相链接 | `[[00-governance/ai-workflow]]` | Obsidian wiki link，适合知识图谱和双向链接 |
+| 外部链接 | `[label](https://example.com)` | 普通 Markdown，Obsidian 和 GitHub 都能正常显示 |
+| 希望 GitHub 正常显示的图片 | `![alt](assets/example.png)` | 普通 Markdown 图片语法 |
+| 只在 Obsidian 内使用的嵌入 | `![[example.png]]` | Obsidian 可识别，但 GitHub 不会按图片渲染 |
+
+简单原则：项目 note 之间用 `[[...]]`；外部链接、图片和需要 GitHub 渲染的资源用普通 Markdown。
 
 ## 适合什么项目
 

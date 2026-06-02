@@ -1,6 +1,6 @@
 # AI Collaboration Workflow Template
 
-A reusable documentation template for long-running software projects built with AI coding agents.
+A Zettelkasten-style, Obsidian-compatible documentation template for long-running software projects built with AI coding agents.
 
 This repository packages a practical AI collaboration workflow. It gives agents a durable project memory, explicit requirement and design gates, evidence-based review handoffs, and a place to write back lessons after each slice of work.
 
@@ -52,6 +52,19 @@ The default template is intentionally plain: no specialized process jargon, no h
 This template is inspired by the Zettelkasten note-taking method: small notes, explicit links, and knowledge that grows through connections instead of one large document. In this project, that idea is adapted for AI coding agents: requirements, technical designs, review handoffs, architecture notes, validation runbooks, and gotchas are separate notes that link to each other.
 
 The goal is practical retrieval. A future agent should be able to start from a task, follow links to the minimum context, do the work, and write back what changed.
+
+## Obsidian And Markdown Compatibility
+
+The knowledge base is designed to work well as an Obsidian vault, but it stays close to plain Markdown where that helps GitHub readability.
+
+| Use case | Preferred syntax | Notes |
+|---|---|---|
+| Link between notes in `zettelkasten/` | `[[00-governance/ai-workflow]]` | Obsidian-compatible wiki link; compact and good for graph navigation |
+| External links | `[label](https://example.com)` | Standard Markdown; works in Obsidian and GitHub |
+| Images or assets that should render on GitHub | `![alt](assets/example.png)` | Standard Markdown image syntax |
+| Obsidian-only embeds | `![[example.png]]` | Good inside Obsidian, but not rendered by GitHub Markdown |
+
+Obsidian supports both wiki links and Markdown links for internal notes. This template uses wiki links for project-note navigation because the Zettelkasten graph is the core workflow. Use standard Markdown links and images when the content should render cleanly outside Obsidian.
 
 ## Language
 
