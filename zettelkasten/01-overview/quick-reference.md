@@ -79,6 +79,10 @@ npm run lint
 - example-owner/foo-portal
 -->
 
+## Community Publishing
+
+- [[05-reference/community-publishing]] — platform-specific posting flow for Obsidian Forum, X, and future launch channels
+
 ## See Also
 
 - [[01-overview/product-vision]] — product positioning and audience

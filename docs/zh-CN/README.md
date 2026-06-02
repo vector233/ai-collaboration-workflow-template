@@ -115,6 +115,16 @@ E2E 或真实环境验证不是所有项目、所有任务都必须强制执行�
 
 具体项目怎么跑，写在 `zettelkasten/05-reference/e2e-test.md`。
 
+## 发布和宣传流程
+
+如果要在 Obsidian Forum、X 等平台宣传项目，不要每次重新摸索。先参考 canonical runbook：
+
+```text
+zettelkasten/05-reference/community-publishing.md
+```
+
+这份文档记录平台规则、推荐文案、发布前检查、最终确认点，以及这次实际踩到的 X 富文本编辑器状态问题。
+
 ## Obsidian 和 Markdown 语法
 
 这个模板兼容 Obsidian，但也尽量保留 GitHub 上的可读性。
