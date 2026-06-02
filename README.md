@@ -128,6 +128,17 @@ skills/ai-collaboration-workflow/
 
 Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/REVIEW documents, check implementation readiness, record validation, handle evidence-based review feedback, and write lessons back to the knowledge base.
 
+The skill is a companion to the template. If you invoke it in a project that does not yet contain `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/`, it will guide the AI agent to bootstrap those template files from this repository before continuing.
+
+Install with skills.sh:
+
+```bash
+npx skills add vector233/ai-collaboration-workflow-template \
+  --skill ai-collaboration-workflow \
+  -a claude-code \
+  -g
+```
+
 ### Install For Claude Code
 
 Personal install, available across all Claude Code projects:
