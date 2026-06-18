@@ -57,6 +57,8 @@ This design defines how one portable Skill can guide daily workflow operations a
 | Implementation language | Python standard library | Portable and testable without third-party packages | Requires Python 3.9+ |
 | Initialization authority | Continue through `INIT.md` | Project-specific metadata cannot be inferred safely | Bootstrap and initialization remain separate phases |
 | Daily workflow authority | Target repository files | Installed Skill may lag project-specific rules | Skill provides routing, not a competing source of truth |
+| Cross-agent instruction authority | `AGENTS.md` is canonical; `CLAUDE.md` imports it | Codex reads `AGENTS.md` directly while Claude Code officially loads `CLAUDE.md` | One shared rule set without duplicated vendor files |
+| Session memory | Repository artifacts are authoritative | Vendor memory and chat history are not portable or guaranteed | Handoffs must persist resume context in REQ/TECH/REVIEW and durable notes |
 
 ## Impact Boundaries
 

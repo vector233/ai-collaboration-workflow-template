@@ -23,6 +23,15 @@ Before changing the template, Skill, scripts, or project documents, read:
 
 Any change to workflow rules must consider both the payload and the Skill. Do not update the root maintenance knowledge base as a substitute for updating `template/`.
 
+## Cross-Agent Collaboration Contract
+
+- `AGENTS.md` is the canonical shared instruction file. Codex reads it directly; `CLAUDE.md` imports it for Claude Code.
+- Root `zettelkasten/` is the shared project memory. Required state must not exist only in chat history, Codex memories, Claude auto memory, or another tool's local files.
+- Every agent starts from the repository state and linked workflow documents, not assumptions about what a previous agent did.
+- Before editing, inspect the active REQ, approved TECH, and open REVIEW. If a handoff is open, continue or close it before starting another implementation slice.
+- Before yielding, persist completed work, exact validation, worktree state, unresolved decisions, risks, and the next allowed action.
+- Vendor-specific files are adapters only. Shared requirements, architecture, decisions, validation, and handoff rules remain vendor-neutral.
+
 ## Development Workflow
 
 For non-trivial changes:

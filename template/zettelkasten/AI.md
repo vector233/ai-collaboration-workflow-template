@@ -8,6 +8,16 @@ It is not a linear documentation site. The useful object is the network of notes
 
 The human-readable project index is [[{{PROJECT_NAME_SAFE}}]].
 
+## Cross-Agent Entry Points
+
+| Agent | Automatic project instruction entry | Shared knowledge entry |
+|---|---|---|
+| Codex | `AGENTS.md` | this file |
+| Claude Code | `CLAUDE.md`, which imports `AGENTS.md` | this file |
+| Other repository-aware agents | explicitly read `AGENTS.md` | this file |
+
+Agent-local memory and chat history may help an individual session, but they are never required project state. A fresh agent must be able to reconstruct the current task, implementation gate, validation evidence, risks, and next allowed action from committed or visible repository files.
+
 ## Core Wiki-Link Rules
 
 1. **Atomic notes**: one concept or workflow per note.

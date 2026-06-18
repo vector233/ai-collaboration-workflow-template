@@ -128,6 +128,20 @@ For non-trivial work, agents should follow this loop:
 
 See `examples/example-saas/` for a fictional end-to-end walkthrough.
 
+## Cross-Agent Compatibility
+
+The workflow is vendor-neutral; tool-specific files are thin adapters:
+
+| Agent | Project instruction entry | Shared workflow state |
+|---|---|---|
+| Codex | `AGENTS.md` | `zettelkasten/` |
+| Claude Code | `CLAUDE.md` imports `AGENTS.md` | `zettelkasten/` |
+| Other repository-aware agents | explicitly read `AGENTS.md` | `zettelkasten/` |
+
+Required project state must not live only in a chat transcript, Codex memory, Claude auto memory, or another agent's private state. A different agent must be able to resume from the active REQ, approved TECH, open REVIEW, validation evidence, worktree state, risks, and next allowed action.
+
+The companion Skill follows the open Agent Skills format used by both Codex and Claude Code, but the core workflow does not depend on the Skill being installed after initialization.
+
 ## Companion Skill
 
 This repository includes an optional Agent Skills-compatible skill:

@@ -46,6 +46,15 @@ This handoff tells the next AI agent or human reviewer what changed, what was va
 
 <!-- Paste or summarize `git status --short` so reviewers know whether there are uncommitted changes. -->
 
+## Resume Context
+
+- Previous agent / tool (optional; informational only):
+- Last completed step:
+- Next allowed action:
+- Must-read files for the next agent:
+- Unresolved decisions or assumptions:
+- Environment or setup needed to continue:
+
 ## Known Risks / Blockers
 
 - Risk:

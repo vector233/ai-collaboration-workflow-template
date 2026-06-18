@@ -41,6 +41,17 @@ The workflow answers five questions for every non-trivial task:
 
 `in-progress` means the requirement is active. It does not automatically mean implementation is allowed. Implementation readiness is decided by the technical design gate.
 
+## Cross-Agent Handoff Contract
+
+The workflow must survive a change of AI vendor, model, session, or human owner.
+
+- Treat repository files as the source of truth; chat history and agent-local memory are optional caches.
+- Record confirmed facts separately from assumptions and unresolved decisions.
+- Every active slice must link its REQ, controlling TECH, and current REVIEW.
+- Every handoff must state the last completed step, exact validation evidence, current branch/worktree state, known risks, and next allowed action.
+- Do not use vendor-specific capabilities as an undocumented prerequisite. Record required commands, tools, credentials setup, or manual steps in project runbooks.
+- A receiving agent must verify repository state and evidence before continuing rather than trusting a previous agent's narrative.
+
 ## Tiny-Fix Waivers
 
 A tiny-fix waiver can be recorded in the requirement or review document when the change is clearly low risk and does not alter behavior contracts.

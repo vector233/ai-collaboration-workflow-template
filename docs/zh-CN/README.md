@@ -70,6 +70,20 @@
 
 仓库根目录还包含本项目自身的需求、技术设计、review 和发布资料，不是下游模板内容。请使用 Skill 或复制 `template/` 的内容；不要把整个仓库根目录当作干净模板。
 
+## 跨 AI 协作
+
+核心流程不绑定某一家 AI：
+
+| AI | 自动读取入口 | 共享项目状态 |
+|---|---|---|
+| Codex | `AGENTS.md` | `zettelkasten/` |
+| Claude Code | `CLAUDE.md` 通过 `@AGENTS.md` 导入同一份规则 | `zettelkasten/` |
+| 其他能读取仓库的 AI | 明确要求先读取 `AGENTS.md` | `zettelkasten/` |
+
+聊天记录、Codex memory、Claude auto memory 或其他工具的本地状态都只能作为辅助缓存，不能成为项目继续推进所必需的信息。新的 AI 应当能从当前 REQ、approved TECH、open REVIEW、验证证据、worktree 状态、风险和 next action 恢复工作。
+
+Skill 使用 Codex 和 Claude Code 都支持的 Agent Skills 开放格式；项目初始化完成后，即使没有安装 Skill，仓库内的规范仍然能够独立指导 AI。
+
 ## Skill 安装
 
 仓库内提供一个可选 skill：

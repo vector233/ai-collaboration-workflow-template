@@ -97,6 +97,28 @@ def validate_payload_boundary() -> None:
     require((PAYLOAD / "AGENTS.md").is_file(), "payload AGENTS.md is missing")
     require((PAYLOAD / "CLAUDE.md").is_file(), "payload CLAUDE.md is missing")
     require((PAYLOAD / "INIT.md").is_file(), "payload INIT.md is missing")
+    claude_adapter = (PAYLOAD / "CLAUDE.md").read_text()
+    require(
+        claude_adapter.lstrip().startswith("@AGENTS.md"),
+        "payload CLAUDE.md does not import AGENTS.md",
+    )
+    agents_text = (PAYLOAD / "AGENTS.md").read_text()
+    require(
+        "## Cross-Agent Collaboration Contract" in agents_text,
+        "payload AGENTS.md is missing the cross-agent contract",
+    )
+    ai_entry = (PAYLOAD / "zettelkasten/AI.md").read_text()
+    require(
+        "## Cross-Agent Entry Points" in ai_entry,
+        "payload AI.md is missing cross-agent entry points",
+    )
+    review_template = (
+        PAYLOAD / "zettelkasten/00-governance/templates/review.md"
+    ).read_text()
+    require(
+        "## Resume Context" in review_template,
+        "payload review template is missing resume context",
+    )
 
     for directory in REQUIRED_STATE_DIRECTORIES:
         require((PAYLOAD / directory).is_dir(), f"payload directory is missing: {directory}")

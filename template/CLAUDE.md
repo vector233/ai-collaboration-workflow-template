@@ -1,13 +1,5 @@
-# Claude Code Instructions
+@AGENTS.md
 
-Follow `AGENTS.md` as the canonical repository instruction file.
+# Claude Code Adapter
 
-For project knowledge, start with:
-
-- `zettelkasten/AI.md`
-- `zettelkasten/00-governance/ai-workflow.md`
-- `zettelkasten/06-requirements/README.md`
-- `zettelkasten/08-technical-designs/README.md`
-- `zettelkasten/07-review/README.md`
-
-Do not duplicate or override rules from `AGENTS.md` here. This file exists only as a Claude Code adapter.
+`AGENTS.md` is imported above as the canonical cross-agent instruction file. Keep Claude-specific additions minimal and do not duplicate shared workflow rules here.

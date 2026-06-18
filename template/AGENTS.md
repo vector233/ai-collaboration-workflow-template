@@ -15,6 +15,15 @@ Before changing code or project documents, read the smallest relevant context pa
 
 If this is an umbrella repository, also read the relevant subproject's own `AGENTS.md`, `CLAUDE.md`, or module-specific notes before editing that subproject.
 
+## Cross-Agent Collaboration Contract
+
+- `AGENTS.md` is the canonical shared instruction file. Codex reads it directly; `CLAUDE.md` imports it for Claude Code.
+- `zettelkasten/` is the shared project memory. Required state must not exist only in chat history, Codex memories, Claude auto memory, or another tool's local files.
+- Every agent starts from repository state and linked workflow documents, not assumptions about a previous agent's conversation.
+- Before editing, inspect the active REQ, approved TECH, and open REVIEW. Continue or close an open handoff before starting another implementation slice.
+- Before yielding, persist completed work, exact validation, worktree state, unresolved decisions, risks, and the next allowed action.
+- Vendor-specific files are adapters only. Shared requirements, architecture, decisions, validation, and handoff rules remain vendor-neutral.
+
 ## Project Structure
 
 - `zettelkasten/00-governance/`: AI workflow, validation policy, decisions, glossary, gotchas, templates.
