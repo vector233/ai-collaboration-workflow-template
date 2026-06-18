@@ -136,7 +136,7 @@ This document defines how the repository's companion Skill should guide an AI ag
 
 | Round | Source | Evidence | Feedback summary | Judgment | Status | Fix commit / counter-evidence |
 |---|---|---|---|---|---|---|
-| Round 1 | Project review | Reproducible commands and file locations in linked review | Distribution and self-dogfooding gaps | confirmed | fixed | uncommitted; see linked review evidence |
+| Round 1 | Project review | Reproducible commands and file locations in linked review | Distribution and self-dogfooding gaps | confirmed | fixed | `2b48c31`; see linked review evidence |
 
 ## Documentation Writeback Checklist
 
