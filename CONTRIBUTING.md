@@ -14,11 +14,11 @@ Contributions are welcome when they improve the template as a reusable AI projec
 
 Do not add private project details, customer names, real credentials, internal URLs, production logs, or business-specific assumptions. Use fictional examples such as `ExampleSaaS`.
 
-The repository also uses its own REQ, TECH, and REVIEW workflow while developing the template. Root workflow state documents are maintenance evidence, not downstream template content:
+This repository does not initialize a second root knowledge base. Keep the product and its maintenance material separate:
 
 - keep downstream files under `template/`;
-- keep template-development documents under the root `zettelkasten/` state directories;
-- never copy root publishing, roadmap, requirement, design, or review records into `template/`;
+- keep maintainer and publishing material under `docs/`;
+- never copy repository-specific publishing, roadmap, or maintenance records into `template/`;
 - validate the initialized output as well as the source repository with `python3 scripts/validate_distribution.py`.
 
 ## Change Checklist
@@ -29,7 +29,7 @@ The repository also uses its own REQ, TECH, and REVIEW workflow while developing
   - `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 - Run `git diff --check`.
 - Search for private project terms before submitting.
-- Make sure non-placeholder wiki links resolve to files in `zettelkasten/`.
+- Make sure non-placeholder wiki links resolve to files in `template/zettelkasten/`.
 
 ## Commit Style
 

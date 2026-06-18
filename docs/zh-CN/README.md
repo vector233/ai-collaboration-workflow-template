@@ -1,6 +1,6 @@
 # AI 协作流程模板：中文说明
 
-> 这里是中文说明层，不是模板源文件的中文副本。模板的 canonical 版本仍然是英文，位于仓库根目录和 `zettelkasten/` 下。
+> 这里是中文说明层，不是模板源文件的中文副本。唯一 canonical 模板位于 `template/`。
 
 ## 这个项目是什么
 
@@ -68,7 +68,7 @@
 4. AI 会替换占位符、合并项目自己的 `AGENTS.md` 规则、初始化第一批 note 并删除 `INIT.md`。只有用户要求或仓库规则明确要求时才提交。
 5. 后续每个非极小任务按 `REQ -> TECH -> implementation -> validation -> REVIEW -> writeback` 推进。
 
-仓库根目录还包含本项目自身的需求、技术设计、review 和发布资料，不是下游模板内容。请使用 Skill 或复制 `template/` 的内容；不要把整个仓库根目录当作干净模板。
+本仓库自身不维护第二套根 `zettelkasten/`。请使用 Skill 或复制 `template/` 的内容；不要把整个仓库根目录当作干净模板。
 
 ## 跨 AI 协作
 
@@ -155,7 +155,7 @@ E2E 或真实环境验证不是所有项目、所有任务都必须强制执行�
 如果要维护本仓库在 Obsidian Forum、X 等平台的宣传内容，参考根知识库中的项目维护 runbook：
 
 ```text
-zettelkasten/05-reference/community-publishing.md
+docs/community-publishing.md
 ```
 
 这份文档记录平台规则、推荐文案、发布前检查、最终确认点，以及这次实际踩到的 X 富文本编辑器状态问题。

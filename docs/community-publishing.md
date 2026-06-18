@@ -179,6 +179,5 @@ Follow-up needed:
 
 ## See Also
 
-- [[01-overview/product-vision]] - project positioning and audience
-- [[01-overview/quick-reference]] - high-frequency project links
-- [[00-governance/gotchas]] - durable lessons from repeated failures
+- [Project README](../README.md) - project positioning, installation, and usage
+- [Chinese guide](zh-CN/README.md) - Chinese-language overview

@@ -1,74 +1,52 @@
 # Repository Guidelines
 
-This repository develops and distributes the AI Collaboration Workflow Template. It also dogfoods the workflow through the initialized root `zettelkasten/`.
+This repository develops and distributes the AI Collaboration Workflow Template. The product knowledge-base payload lives under `template/`; this maintenance repository intentionally does not keep a second root `zettelkasten/`.
 
-## First Files To Read
+## Repository Structure
 
-Before changing the template, Skill, scripts, or project documents, read:
-
-- `zettelkasten/AI.md`
-- `zettelkasten/00-governance/ai-workflow.md`
-- `zettelkasten/06-requirements/README.md`
-- `zettelkasten/08-technical-designs/README.md`
-- `zettelkasten/07-review/README.md`
-- The active requirement, technical design, review handoff, architecture note, or runbook linked from the task
-
-## Product And Maintenance Boundaries
-
-- `template/` is the canonical downstream payload copied into user projects.
-- `skills/ai-collaboration-workflow/` is the companion Agent Skill and bootstrap tooling.
-- Root `zettelkasten/` is this repository's own project knowledge and maintenance evidence.
-- `docs/` and `examples/` explain the product but are not copied into initialized projects.
-- Never place repository-specific release, marketing, or maintenance records inside `template/`.
-
-Any change to workflow rules must consider both the payload and the Skill. Do not update the root maintenance knowledge base as a substitute for updating `template/`.
+- `template/`: canonical files copied into downstream projects.
+- `skills/ai-collaboration-workflow/`: companion Agent Skill and bootstrap tooling.
+- `scripts/validate_distribution.py`: end-to-end distribution contract.
+- `docs/`: maintainer and publishing documentation.
+- `examples/`: fictional initialized-project walkthroughs.
 
 ## Cross-Agent Collaboration Contract
 
 - `AGENTS.md` is the canonical shared instruction file. Codex reads it directly; `CLAUDE.md` imports it for Claude Code.
-- Root `zettelkasten/` is the shared project memory. Required state must not exist only in chat history, Codex memories, Claude auto memory, or another tool's local files.
-- Every agent starts from the repository state and linked workflow documents, not assumptions about what a previous agent did.
-- Before editing, inspect the active REQ, approved TECH, and open REVIEW. If a handoff is open, continue or close it before starting another implementation slice.
-- Before yielding, persist completed work, exact validation, worktree state, unresolved decisions, risks, and the next allowed action.
-- Vendor-specific files are adapters only. Shared requirements, architecture, decisions, validation, and handoff rules remain vendor-neutral.
+- Shared behavior belongs in repository files, not chat history, vendor memory, or tool-local state.
+- Vendor-specific files are adapters only. Keep requirements, workflow semantics, validation, and handoff rules vendor-neutral.
+- When workflow behavior changes, align the canonical payload, Skill, documentation, examples, and validation as applicable.
+- Never put repository-specific release, publishing, or maintenance material in `template/`.
 
 ## Development Workflow
 
-For non-trivial changes:
+1. Inspect the smallest relevant set of files.
+2. Make a scoped change and preserve unrelated user or agent work.
+3. Update every affected distribution surface.
+4. Run focused validation.
+5. Record durable maintainer guidance in `AGENTS.md`, `CONTRIBUTING.md`, or `docs/`.
 
-1. Confirm or create a root requirement under `zettelkasten/06-requirements/`.
-2. Confirm the linked technical design is in `zettelkasten/08-technical-designs/approved/`.
-3. Keep implementation within the paths declared by the active requirement.
-4. Run focused validation, including `python3 scripts/validate_distribution.py` when payload or Skill behavior changes.
-5. Create or update a root review handoff under `zettelkasten/07-review/`.
-6. Record exact validation, risks, commit state, and worktree state.
-7. Write durable distribution or workflow lessons back to root architecture, decisions, gotchas, or runbooks.
-
-Tiny-fix waivers are limited to non-behavioral documentation and similarly low-risk local changes.
+The REQ, TECH, and REVIEW workflow is the product being distributed. It is not required for routine maintenance of this template repository itself.
 
 ## Review Rules
 
-- Treat review feedback as a hypothesis until evidence confirms it.
-- Reproduce distribution findings against a temporary target, not only the source tree.
-- Review payload changes for repository-specific content leakage.
-- Do not close a review until confirmed findings are fixed and validation is recorded.
+- Treat review findings as hypotheses and verify them with code, commands, temporary-project output, or official references.
+- Reproduce distribution behavior in a temporary target, not only in the source tree.
+- Check payload changes for repository-specific content leakage.
+- Do not claim validation that did not run.
 
 ## Validation
-
-Use commands from `zettelkasten/01-overview/quick-reference.md` and `zettelkasten/05-reference/e2e-test.md`.
 
 At minimum:
 
 - Documentation: `git diff --check`
-- Payload or bootstrap: `python3 scripts/validate_distribution.py`
-- Skill metadata: run the skill creator validator when its dependencies are available
-- Wiki links: validate both root `zettelkasten/` and `template/zettelkasten/`
-
-Do not claim validation that did not run.
+- Payload, Skill bootstrap, or distribution behavior: `python3 scripts/validate_distribution.py`
+- Skill metadata: run the Skill validator when its dependencies are available
+- Wiki links: validate links under `template/zettelkasten/`
 
 ## Git Hygiene
 
-- Stage only files related to the active task.
+- Stage only files related to the current task.
 - Do not revert unrelated user or agent changes.
 - Keep generated artifacts, temporary clones, caches, secrets, and machine-specific files out of commits.
 - Use concise conventional-style commits.

@@ -437,25 +437,25 @@ def validate_remote_clone_path() -> None:
             )
 
 
-def validate_root_project_state() -> None:
-    require(not (ROOT / "INIT.md").exists(), "root project still has INIT.md")
+def validate_repository_layout() -> None:
     require(
-        (ROOT / "zettelkasten/AI_Collaboration_Workflow_Template.md").is_file(),
-        "root project index is not initialized",
+        not (ROOT / "zettelkasten").exists(),
+        "root zettelkasten must not exist; template/ is the canonical payload",
     )
-    for path in (ROOT / "zettelkasten").rglob("*.md"):
-        if "00-governance/templates" in path.as_posix():
-            continue
-        require(
-            not re.search(r"\{\{[A-Z_]+\}\}", path.read_text()),
-            f"root project placeholder remains: {path}",
-        )
+    require(
+        (ROOT / "docs/community-publishing.md").is_file(),
+        "community publishing runbook is missing",
+    )
+    require(
+        (ROOT / "docs/fresh-agent-resume-evaluation.md").is_file(),
+        "fresh-agent resume evaluation is missing",
+    )
 
 
 def main() -> int:
     try:
         validate_payload_boundary()
-        validate_root_project_state()
+        validate_repository_layout()
         validate_manual_copy_path()
         validate_bootstrap_and_lifecycle()
         validate_symlink_boundary()

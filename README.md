@@ -96,10 +96,11 @@ Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
 │   └── ai-collaboration-workflow/
 ├── scripts/
 │   └── validate_distribution.py
-└── zettelkasten/              # This repository's own initialized project knowledge
+├── docs/                      # Maintainer and publishing documentation
+└── examples/                  # Fictional initialized-project walkthroughs
 ```
 
-The repository root contains maintenance requirements, designs, reviews, examples, and release material. Only `template/` is downstream project content.
+Only `template/` is downstream project content. The repository intentionally has no second root knowledge base, which keeps product files distinct from maintainer documentation.
 
 ## Install The Template Payload
 
@@ -115,7 +116,7 @@ The repository root contains maintenance requirements, designs, reviews, example
 
 Do not treat the full repository root as the install payload. GitHub's template-repository feature copies maintenance files as well, so the supported clean installation surfaces are the Skill and `template/`.
 
-## Daily Workflow
+## Daily Workflow In An Initialized Project
 
 For non-trivial work, agents should follow this loop:
 
@@ -127,6 +128,8 @@ For non-trivial work, agents should follow this loop:
 6. Handle reviewer feedback with evidence, then write durable lessons back to `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
 
 See `examples/example-saas/` for a fictional end-to-end walkthrough.
+
+To evaluate whether a fresh agent can resume from repository state alone, use [docs/fresh-agent-resume-evaluation.md](docs/fresh-agent-resume-evaluation.md).
 
 ## Cross-Agent Compatibility
 

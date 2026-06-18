@@ -1,15 +1,3 @@
----
-title: Fresh Agent Resume Evaluation
-status: active
-project: AI Collaboration Workflow Template
-last_verified_at: 2026-06-18
-source_of_truth: project
-related:
-  - "[[01-overview/product-vision]]"
-  - "[[05-reference/e2e-test]]"
-  - "[[00-governance/ai-workflow]]"
----
-
 # Fresh Agent Resume Evaluation
 
 ## Purpose
@@ -66,3 +54,8 @@ Record:
 ## Interpretation
 
 One successful run proves only that the selected project state was recoverable. Repeat across multiple slices and projects before claiming that the workflow reliably preserves long-term context.
+
+## See Also
+
+- [Template payload](../template/)
+- [Example walkthrough](../examples/example-saas/README.md)
