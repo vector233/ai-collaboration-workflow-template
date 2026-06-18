@@ -1,10 +1,12 @@
-# {{PROJECT_NAME}} — AI Project Knowledge Base
+# AI Collaboration Workflow Template — AI Project Knowledge Base
 
 ## Purpose
 
 This knowledge base is written for AI coding agents. Its job is to turn a new task into the smallest useful context, a clear requirement, an implementation-ready technical design, focused validation, a review handoff, and durable memory writeback.
 
 It is not a linear documentation site. The useful object is the network of notes and links.
+
+The human-readable project index is [[AI_Collaboration_Workflow_Template]].
 
 ## Core Wiki-Link Rules
 
@@ -20,7 +22,7 @@ It is not a linear documentation site. The useful object is the network of notes
 ```text
 zettelkasten/
   AI.md                             <- AI-facing entry point
-  {{PROJECT_NAME}}.md                <- human-readable project index
+  AI_Collaboration_Workflow_Template.md    <- human-readable project index
   00-governance/
     project-overview.md              <- project purpose, stack, constraints
     ai-workflow.md                   <- AI task workflow, gates, validation, writeback

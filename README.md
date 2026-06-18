@@ -6,8 +6,19 @@ This repository packages a practical AI collaboration workflow. It gives agents 
 
 ## Quick Start
 
-1. Click **Use this template** on GitHub, or copy `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/` into an existing repository.
-2. Ask your AI coding assistant:
+1. Install the companion Skill and ask:
+
+   ```text
+   Use $ai-collaboration-workflow to initialize this repository.
+   ```
+
+   Or copy the canonical payload into an existing repository:
+
+   ```bash
+   cp -R /path/to/ai-collaboration-workflow-template/template/. /path/to/your-project/
+   ```
+
+2. If you copied the payload manually, ask your AI coding assistant:
 
    ```text
    Initialize this knowledge base by following INIT.md.
@@ -76,26 +87,23 @@ Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
 
 ```text
 .
-├── AGENTS.md                  # Generic agent rules for an initialized project
-├── CLAUDE.md                  # Claude Code adapter that points back to AGENTS.md
-├── INIT.md                    # AI-run initialization checklist
-└── zettelkasten/
-    ├── AI.md                  # Vendor-neutral AI-facing knowledge base entry point
-    ├── {{PROJECT_NAME}}.md    # Project index, renamed during init
-    ├── 00-governance/         # AI workflow, validation, decisions, gotchas, templates
-    ├── 01-overview/           # Quick reference and product vision
-    ├── 02-architecture/       # Current architecture notes
-    ├── 03-roadmap/            # Phases and release planning
-    ├── 04-cross-cutting/      # Umbrella/cross-module concerns
-    ├── 05-reference/          # External-doc summaries and runbooks
-    ├── 06-requirements/       # Workflow: backlog -> in-progress -> done
-    ├── 07-review/             # Workflow: pending -> in-review -> done
-    └── 08-technical-designs/  # Workflow: pending -> approved -> implemented
+├── template/                  # Canonical downstream payload
+│   ├── AGENTS.md
+│   ├── CLAUDE.md
+│   ├── INIT.md
+│   └── zettelkasten/
+├── skills/
+│   └── ai-collaboration-workflow/
+├── scripts/
+│   └── validate_distribution.py
+└── zettelkasten/              # This repository's own initialized project knowledge
 ```
 
-## Use As A Template
+The repository root contains maintenance requirements, designs, reviews, examples, and release material. Only `template/` is downstream project content.
 
-1. Create a new repository from this template, or copy `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/` into an existing project.
+## Install The Template Payload
+
+1. Use the Skill bootstrap, or copy everything under `template/` into the target repository. This includes `INIT.md`.
 2. In your AI coding tool, say:
 
    ```text
@@ -103,7 +111,9 @@ Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
    ```
 
 3. Answer the initialization questions.
-4. Let the agent replace placeholders, prune single-repo or umbrella-only sections, create the first notes, remove `INIT.md`, and commit the initialized knowledge base.
+4. Let the agent replace placeholders, merge project-specific `AGENTS.md` rules, prune single-repo or umbrella-only sections, create the first notes, and remove `INIT.md`. Commit only when requested or required by repository policy.
+
+Do not treat the full repository root as the install payload. GitHub's template-repository feature copies maintenance files as well, so the supported clean installation surfaces are the Skill and `template/`.
 
 ## Daily Workflow
 
@@ -128,7 +138,7 @@ skills/ai-collaboration-workflow/
 
 Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/REVIEW documents, check implementation readiness, record validation, handle evidence-based review feedback, and write lessons back to the knowledge base.
 
-The skill is a companion to the template. If you invoke it in a project that does not yet contain `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/`, it will guide the AI agent to bootstrap those template files from this repository before continuing.
+The skill is a companion to the template. If you invoke it in a project that does not yet contain `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/`, it can safely bootstrap the template before continuing. Its bootstrap script previews changes, copies only missing files, skips identical files, and leaves differing existing files untouched for explicit merging.
 
 Install with skills.sh:
 
@@ -174,8 +184,26 @@ cp -R skills/ai-collaboration-workflow ~/.codex/skills/
 Then invoke:
 
 ```text
+Use $ai-collaboration-workflow to initialize this repository.
+```
+
+For an initialized project:
+
+```text
 Use $ai-collaboration-workflow to create a requirement, technical design, or review handoff.
 ```
+
+The default bootstrap source is this canonical Git repository and automatically selects its `template/` directory. For offline use, pass either the repository checkout or `template/` directly with `--source`.
+
+## Distribution Validation
+
+Run:
+
+```bash
+python3 scripts/validate_distribution.py
+```
+
+The smoke test checks payload isolation, state-directory presence, bootstrap dry-run and installation, sample initialization, wiki links, and creation of the first REQ, TECH, and REVIEW artifacts.
 
 ## Naming Rules
 

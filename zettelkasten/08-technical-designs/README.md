@@ -1,8 +1,8 @@
 ---
 title: Technical Designs
 status: active
-project: {{PROJECT_NAME}}
-last_verified_at: YYYY-MM-DD
+project: AI Collaboration Workflow Template
+last_verified_at: 2026-06-18
 source_of_truth: mixed
 related:
   - "[[00-governance/ai-workflow]]"

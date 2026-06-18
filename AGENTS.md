@@ -1,83 +1,65 @@
 # Repository Guidelines
 
-This repository is a template for AI-assisted project documentation. The knowledge base lives in `zettelkasten/` and should guide every non-trivial change.
+This repository develops and distributes the AI Collaboration Workflow Template. It also dogfoods the workflow through the initialized root `zettelkasten/`.
 
 ## First Files To Read
 
-Before changing code or project documents, read the smallest relevant context pack:
+Before changing the template, Skill, scripts, or project documents, read:
 
 - `zettelkasten/AI.md`
 - `zettelkasten/00-governance/ai-workflow.md`
 - `zettelkasten/06-requirements/README.md`
 - `zettelkasten/08-technical-designs/README.md`
 - `zettelkasten/07-review/README.md`
-- Any requirement, technical design, review handoff, architecture note, or runbook linked from the current task
+- The active requirement, technical design, review handoff, architecture note, or runbook linked from the task
 
-If this is an umbrella repository, also read the relevant subproject's own `AGENTS.md`, `CLAUDE.md`, or module-specific notes before editing that subproject.
+## Product And Maintenance Boundaries
 
-## Project Structure
+- `template/` is the canonical downstream payload copied into user projects.
+- `skills/ai-collaboration-workflow/` is the companion Agent Skill and bootstrap tooling.
+- Root `zettelkasten/` is this repository's own project knowledge and maintenance evidence.
+- `docs/` and `examples/` explain the product but are not copied into initialized projects.
+- Never place repository-specific release, marketing, or maintenance records inside `template/`.
 
-- `zettelkasten/00-governance/`: AI workflow, validation policy, decisions, glossary, gotchas, templates.
-- `zettelkasten/01-overview/`: quick reference, product vision, high-frequency commands and URLs.
-- `zettelkasten/02-architecture/`: current architecture facts and system flows.
-- `zettelkasten/03-roadmap/`: phase and release planning.
-- `zettelkasten/04-cross-cutting/`: cross-module concerns for umbrella projects.
-- `zettelkasten/05-reference/`: summaries of long docs, E2E runbooks, external references.
-- `zettelkasten/06-requirements/`: requirement workflow, `backlog/ -> in-progress/ -> done/`.
-- `zettelkasten/07-review/`: review handoff workflow, `pending/ -> in-review/ -> done/`.
-- `zettelkasten/08-technical-designs/`: design workflow, `pending/ -> approved/ -> implemented/`.
+Any change to workflow rules must consider both the payload and the Skill. Do not update the root maintenance knowledge base as a substitute for updating `template/`.
 
 ## Development Workflow
 
-For any non-trivial feature, fix, integration, or architecture change:
+For non-trivial changes:
 
-1. Confirm or create a requirement under `zettelkasten/06-requirements/`.
-2. Confirm the requirement has a linked technical design under `zettelkasten/08-technical-designs/`.
-3. Do not edit business code until the technical design is in `approved/`, unless the requirement or review document records a tiny-fix waiver.
-4. Keep the implementation slice small and within the paths declared for the task.
-5. Run focused validation for the changed boundary.
-6. Create or update a review handoff under `zettelkasten/07-review/pending/`.
-7. Record verification, known risks, commit hash, and worktree status in the handoff.
-8. Write back durable lessons to `gotchas.md`, architecture notes, or E2E runbooks.
+1. Confirm or create a root requirement under `zettelkasten/06-requirements/`.
+2. Confirm the linked technical design is in `zettelkasten/08-technical-designs/approved/`.
+3. Keep implementation within the paths declared by the active requirement.
+4. Run focused validation, including `python3 scripts/validate_distribution.py` when payload or Skill behavior changes.
+5. Create or update a root review handoff under `zettelkasten/07-review/`.
+6. Record exact validation, risks, commit state, and worktree state.
+7. Write durable distribution or workflow lessons back to root architecture, decisions, gotchas, or runbooks.
 
-Tiny-fix waivers are appropriate for typo fixes, comments, non-behavioral docs, obvious local null checks, or similarly low-risk changes that do not change contracts, data, security, billing, permissions, persistence, deployment, or cross-module behavior.
+Tiny-fix waivers are limited to non-behavioral documentation and similarly low-risk local changes.
 
 ## Review Rules
 
-Review feedback is not automatically true. Treat each important review point as a hypothesis:
-
-- Accept evidence from code locations, reproducible commands, logs, screenshots, commits, docs, or official references.
-- Ask for evidence when feedback is vague or unsupported.
-- Fix confirmed or partially confirmed issues, then record validation.
-- Reject unsupported or false findings with concrete counter-evidence in the review handoff.
-- Do not start the next development slice until the current review handoff is closed or explicitly waived.
-
-## Documentation Rules
-
-- New requirements use `REQ-YYYYMMDDHHMMSS-short-name.md`.
-- New technical designs use `TECH-YYYYMMDDHHMMSS-short-name.md`.
-- New review handoffs use `REVIEW-YYYYMMDDHHMMSS-short-name.md`.
-- New notes must link to existing notes with double-bracket wiki links.
-- When architecture, workflow, validation, or gotchas change, update the durable note that future agents should read.
-- Never commit secrets, tokens, real credentials, private customer data, or unredacted production logs.
+- Treat review feedback as a hypothesis until evidence confirms it.
+- Reproduce distribution findings against a temporary target, not only the source tree.
+- Review payload changes for repository-specific content leakage.
+- Do not close a review until confirmed findings are fixed and validation is recorded.
 
 ## Validation
 
-Use project-specific commands from `zettelkasten/01-overview/quick-reference.md` and `zettelkasten/05-reference/e2e-test.md`.
+Use commands from `zettelkasten/01-overview/quick-reference.md` and `zettelkasten/05-reference/e2e-test.md`.
 
-As a default:
+At minimum:
 
-- Documentation-only changes: run `git diff --check`.
-- Backend/API changes: run unit or integration tests for the affected package.
-- Frontend changes: run lint/build and browser verification for user-visible flows.
-- Database or migration changes: verify schema changes against a realistic database.
-- Installer, desktop, mobile, hardware, or third-party integration changes: run the closest real-environment smoke test before review.
+- Documentation: `git diff --check`
+- Payload or bootstrap: `python3 scripts/validate_distribution.py`
+- Skill metadata: run the skill creator validator when its dependencies are available
+- Wiki links: validate both root `zettelkasten/` and `template/zettelkasten/`
 
-If required validation cannot be run, record the blocker and residual risk in the review handoff. Do not imply coverage you did not perform.
+Do not claim validation that did not run.
 
 ## Git Hygiene
 
-- Stage only files related to the current task.
+- Stage only files related to the active task.
 - Do not revert unrelated user or agent changes.
-- Use concise conventional-style commits such as `docs: add checkout requirements` or `fix(api): reject expired session tokens`.
-- Keep generated artifacts, temporary logs, secrets, local databases, and machine-specific files out of commits.
+- Keep generated artifacts, temporary clones, caches, secrets, and machine-specific files out of commits.
+- Use concise conventional-style commits.

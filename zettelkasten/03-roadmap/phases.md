@@ -9,29 +9,30 @@ Suggested status markers:
 - Deferred
 - Not started
 
-## Phase 1: <Phase Name>
+## Phase 1: Core Workflow
 
-<!-- Describe the goal and main deliverables. -->
+- [x] Define linked project knowledge structure.
+- [x] Define REQ, TECH, REVIEW, validation, and writeback workflows.
 
-- [ ] Milestone 1
-- [ ] Milestone 2
+## Phase 2: Reliable Distribution
 
-## Phase 2: <Phase Name>
+- [x] Add Agent Skills-compatible companion Skill.
+- [ ] Complete review of isolated payload, bootstrap, and distribution smoke.
+- [ ] Publish a versioned release and installation examples.
 
-- [ ] Milestone 1
-- [ ] Milestone 2
+## Phase 3: Real-Project Validation
 
-## Phase 3: <Phase Name>
-
-- [ ] Milestone 1
+- [ ] Run the workflow through multiple slices in at least one real software project.
+- [ ] Run [[05-reference/fresh-agent-resume-evaluation]] and measure whether a fresh agent can resume work from the knowledge base.
+- [ ] Refine templates based on repeated usage evidence.
 
 ## Overview
 
 | Phase | Status | Notes |
 |---|---|---|
-| Phase 1: <name> | Not started | <one-sentence status> |
-| Phase 2: <name> | Not started | <one-sentence status> |
-| Phase 3: <name> | Not started | <one-sentence status> |
+| Phase 1: Core Workflow | Done | Canonical workflow and document templates exist |
+| Phase 2: Reliable Distribution | In progress | Payload and Skill are being hardened through review |
+| Phase 3: Real-Project Validation | Not started | Requires longitudinal use outside this repository |
 
 ## See Also
 

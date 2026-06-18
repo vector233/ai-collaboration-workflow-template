@@ -1,7 +1,7 @@
 ---
 title: Review Handoff Title
 status: pending
-project: {{PROJECT_NAME}}
+project: AI Collaboration Workflow Template
 review_id: REVIEW-YYYYMMDDHHMMSS-short-name
 created: YYYY-MM-DD
 reviewer:

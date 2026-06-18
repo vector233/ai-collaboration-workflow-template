@@ -4,37 +4,21 @@ This is the highest-frequency lookup note. Agents should check here before runni
 
 ## Common Commands
 
-<!-- Replace with project-specific commands. Example:
-
-### Backend
-
 ```bash
-make build
-make run
-make test
+python3 scripts/validate_distribution.py
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /tmp/ai-workflow-smoke \
+  --dry-run
+git diff --check
 ```
-
-### Frontend
-
-```bash
-npm run dev
-npm run build
-npm run lint
-```
--->
 
 ## Domains And Ports
 
-{{DOMAINS}}
-
-<!-- Example:
-
 | Environment | Domain / port |
 |---|---|
-| Production | example.com |
-| Staging | staging.example.com |
-| Local API | localhost:8080 |
--->
+| Source repository | `https://github.com/vector233/ai-collaboration-workflow-template` |
+| Local runtime | None; repository is Markdown and Python tooling |
 
 ## API Endpoints
 
@@ -71,13 +55,7 @@ npm run lint
 
 ## Git Repositories
 
-{{REPOS}}
-
-<!-- Example:
-
-- example-owner/foo-backend
-- example-owner/foo-portal
--->
+- `vector233/ai-collaboration-workflow-template`
 
 ## Community Publishing
 

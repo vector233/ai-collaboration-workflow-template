@@ -1,7 +1,7 @@
 ---
 title: Technical Design Title
 status: pending
-project: {{PROJECT_NAME}}
+project: AI Collaboration Workflow Template
 technical_design_id: TECH-YYYYMMDDHHMMSS-short-name
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed

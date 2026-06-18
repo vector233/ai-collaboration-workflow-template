@@ -1,7 +1,7 @@
 ---
 title: Requirement Title
 status: backlog
-project: {{PROJECT_NAME}}
+project: AI Collaboration Workflow Template
 requirement_id: REQ-YYYYMMDDHHMMSS-short-name
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed

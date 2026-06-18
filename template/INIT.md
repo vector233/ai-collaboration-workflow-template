@@ -20,7 +20,8 @@ Replace every placeholder below:
 
 | Placeholder | Meaning | Example |
 |---|---|---|
-| `{{PROJECT_NAME}}` | Project name for titles and the index filename | `ExampleSaaS` |
+| `{{PROJECT_NAME}}` | Project name for titles and prose | `ExampleSaaS` |
+| `{{PROJECT_NAME_SAFE}}` | Project index filename without `.md`; replace spaces with underscores | `Example_SaaS` |
 | `{{PROJECT_DESCRIPTION}}` | One-sentence project description | `Team workspace for collaborative project planning` |
 | `{{TECH_STACK}}` | Short stack summary | `TypeScript · Next.js · PostgreSQL · Redis` |
 | `{{REPO_TYPE}}` | `umbrella` or `single` | `umbrella` |
@@ -85,6 +86,7 @@ If the project name contains spaces, use underscores in the filename.
 Replace placeholders in all Markdown files under `zettelkasten/`:
 
 - `{{PROJECT_NAME}}`
+- `{{PROJECT_NAME_SAFE}}`
 - `{{PROJECT_DESCRIPTION}}`
 - `{{TECH_STACK}}`
 - `{{DOMAINS}}`
@@ -98,6 +100,7 @@ Single-line values can be replaced mechanically:
 find zettelkasten -type f -name '*.md' -exec \
   sed -i.bak \
     -e 's/{{PROJECT_NAME}}/<value>/g' \
+    -e 's/{{PROJECT_NAME_SAFE}}/<filename-safe-value>/g' \
     -e 's/{{PROJECT_DESCRIPTION}}/<value>/g' \
     -e 's/{{TECH_STACK}}/<value>/g' \
     -e 's/{{REPO_TYPE}}/<umbrella-or-single>/g' \
@@ -132,6 +135,10 @@ find zettelkasten -name '*.bak' -delete
 ## 4. Generate First Project-Specific Notes
 
 Rewrite these files with concrete content from the user's answers. Do not leave them as generic examples.
+
+### 4.0 `AGENTS.md`
+
+Keep the workflow gates, review rules, validation discipline, and Git hygiene. Replace generic repository wording with project-specific structure, common commands, module boundaries, and any existing local agent rules. If the target already had an `AGENTS.md`, merge conservatively instead of discarding local instructions.
 
 ### 4.1 `zettelkasten/00-governance/project-overview.md`
 
@@ -186,14 +193,15 @@ Fix any failure before continuing.
 Delete this file:
 
 ```bash
+rm -f .ai-collaboration-workflow-template
 rm INIT.md
 ```
 
-Create the first commit:
+If the user requested a commit, or repository instructions require one, create the first commit:
 
 ```bash
 git add -A
 git commit -m "chore: initialize knowledge base for <PROJECT_NAME>"
 ```
 
-After that, use `AGENTS.md` and `zettelkasten/AI.md` as the daily entry points.
+Otherwise report the initialized files and leave them uncommitted. After that, use `AGENTS.md` and `zettelkasten/AI.md` as the daily entry points.

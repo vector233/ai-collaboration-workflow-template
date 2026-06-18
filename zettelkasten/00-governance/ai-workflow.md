@@ -1,8 +1,8 @@
 ---
 title: AI Workflow
 status: active
-project: {{PROJECT_NAME}}
-last_verified_at: YYYY-MM-DD
+project: AI Collaboration Workflow Template
+last_verified_at: 2026-06-18
 source_of_truth: mixed
 related:
   - "[[AI]]"
@@ -16,7 +16,7 @@ related:
 
 ## Purpose
 
-This note defines the default workflow for AI-assisted development in {{PROJECT_NAME}}. It is intentionally lightweight: the goal is not to add a management framework, but to make AI work traceable, reviewable, and easy to resume.
+This note defines the default workflow for AI-assisted development in AI Collaboration Workflow Template. It is intentionally lightweight: the goal is not to add a management framework, but to make AI work traceable, reviewable, and easy to resume.
 
 The workflow answers five questions for every non-trivial task:
 

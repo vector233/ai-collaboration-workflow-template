@@ -56,6 +56,25 @@ Append new decisions to this file. Do not delete historical decisions. If a deci
 
 **See also**: [[07-review/README]], [[00-governance/ai-workflow]]
 
+## AD-004: Separate The Downstream Payload From Repository Maintenance
+
+**Decision**: files installed into user projects live under `template/`. The root knowledge base and workflow state directories describe this repository and are not distribution content.
+
+**Why**:
+
+- GitHub's template-repository feature copies every repository file and cannot exclude maintenance evidence.
+- The Skill, manual installation, and validation need one identical payload.
+- Repository-specific release notes, publishing runbooks, requirements, designs, and reviews should not appear in user projects.
+
+**Impact**:
+
+- The supported install surfaces are Skill bootstrap and copying the contents of `template/`.
+- Bootstrap resolves `<source>/template/` when given a repository checkout.
+- Distribution validation must prove state directories exist and maintenance content is absent.
+- Root `zettelkasten/` can now be initialized and used to dogfood the workflow.
+
+**See also**: [[02-architecture/current-architecture-flow]], [[05-reference/e2e-test]]
+
 ## See Also
 
 - [[00-governance/project-overview]] — project overview

@@ -21,6 +21,7 @@ Store summaries and quick indexes for external or long-form source documents. Do
 - `architecture.md` — long-form architecture summary
 - `e2e-test.md` — validation runbook
 - `community-publishing.md` — platform-specific launch and community posting runbook
+- `fresh-agent-resume-evaluation.md` — repeatable continuity test using a clean agent session
 - `competitor-landscape.md` — market or competitor reference
 - `external-api-notes.md` — third-party API reference summary
 
@@ -29,3 +30,4 @@ Store summaries and quick indexes for external or long-form source documents. Do
 - [[AI]] — knowledge base entry point
 - [[00-governance/validation-discipline]] — validation readiness policy
 - [[05-reference/community-publishing]] — repeatable community publishing workflow
+- [[05-reference/fresh-agent-resume-evaluation]] — fresh-session project continuity evaluation

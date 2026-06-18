@@ -46,16 +46,29 @@
 
 ## 推荐使用流程
 
-1. 从这个 GitHub template 创建新仓库，或把 `AGENTS.md` 和 `zettelkasten/` 复制到已有项目。
-2. 让 AI 执行：
+1. 安装 companion Skill，然后让 AI 执行：
+
+   ```text
+   Use $ai-collaboration-workflow to initialize this repository.
+   ```
+
+   也可以把 canonical payload 完整复制到已有项目：
+
+   ```bash
+   cp -R /path/to/ai-collaboration-workflow-template/template/. /path/to/your-project/
+   ```
+
+2. 如果手工复制 payload，让 AI 执行：
 
    ```text
    Initialize this knowledge base by following INIT.md.
    ```
 
 3. 回答项目名称、技术栈、仓库类型、常用命令、域名端口等问题。
-4. AI 会替换占位符、初始化第一批 note、删除 `INIT.md` 并提交。
+4. AI 会替换占位符、合并项目自己的 `AGENTS.md` 规则、初始化第一批 note 并删除 `INIT.md`。只有用户要求或仓库规则明确要求时才提交。
 5. 后续每个非极小任务按 `REQ -> TECH -> implementation -> validation -> REVIEW -> writeback` 推进。
+
+仓库根目录还包含本项目自身的需求、技术设计、review 和发布资料，不是下游模板内容。请使用 Skill 或复制 `template/` 的内容；不要把整个仓库根目录当作干净模板。
 
 ## Skill 安装
 
@@ -65,7 +78,9 @@
 skills/ai-collaboration-workflow/
 ```
 
-它用于帮助 AI 正确使用这套模板：初始化项目、创建 REQ/TECH/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈，以及回写 gotchas / architecture / runbook。
+它用于帮助 AI 正确使用这套模板：安全引导或执行模板安装、初始化项目、创建 REQ/TECH/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈，以及回写 gotchas / architecture / runbook。
+
+Skill 自带 bootstrap 脚本。脚本会先预览变更，只复制缺失文件、跳过相同文件，并把内容不同的已有文件报告为冲突，不会直接覆盖项目已有的 `AGENTS.md`、`CLAUDE.md` 或知识库内容。默认从 canonical Git 仓库的 `template/` 获取 payload；无网络环境可以传入仓库 checkout 或直接传入 `template/`。
 
 ### Claude Code
 
@@ -102,6 +117,12 @@ cp -R skills/ai-collaboration-workflow ~/.codex/skills/
 使用时输入：
 
 ```text
+Use $ai-collaboration-workflow to initialize this repository.
+```
+
+项目初始化后，可以继续输入：
+
+```text
 Use $ai-collaboration-workflow to create a requirement, technical design, or review handoff.
 ```
 
@@ -117,13 +138,15 @@ E2E 或真实环境验证不是所有项目、所有任务都必须强制执行�
 
 ## 发布和宣传流程
 
-如果要在 Obsidian Forum、X 等平台宣传项目，不要每次重新摸索。先参考 canonical runbook：
+如果要维护本仓库在 Obsidian Forum、X 等平台的宣传内容，参考根知识库中的项目维护 runbook：
 
 ```text
 zettelkasten/05-reference/community-publishing.md
 ```
 
 这份文档记录平台规则、推荐文案、发布前检查、最终确认点，以及这次实际踩到的 X 富文本编辑器状态问题。
+
+这份 runbook 不属于 `template/`，不会安装到用户项目中。
 
 ## Obsidian 和 Markdown 语法
 

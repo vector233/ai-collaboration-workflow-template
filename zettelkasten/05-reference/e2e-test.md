@@ -1,13 +1,14 @@
 ---
 title: E2E Test Runbook
 status: draft
-project: {{PROJECT_NAME}}
-last_verified_at: YYYY-MM-DD
+project: AI Collaboration Workflow Template
+last_verified_at: 2026-06-18
 source_of_truth: mixed
 related:
   - "[[00-governance/ai-workflow]]"
   - "[[00-governance/validation-discipline]]"
   - "[[07-review/README]]"
+  - "[[05-reference/fresh-agent-resume-evaluation]]"
 ---
 
 # E2E Test Runbook
@@ -23,36 +24,32 @@ This note records the project-specific commands and evidence rules for realistic
 | Area | Command | Notes |
 |---|---|---|
 | Docs | `git diff --check` | No trailing whitespace or patch formatting issues |
-| Backend |  |  |
-| Frontend |  |  |
-| Database |  |  |
+| Distribution | `python3 scripts/validate_distribution.py` | Validates clean payload, bootstrap, state directories, and first workflow files |
+| Bootstrap preview | `python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py --source . --target <tmp> --dry-run` | Must not modify target |
+| Skill | `quick_validate.py skills/ai-collaboration-workflow` | Requires PyYAML in the validation runtime |
 
 ## Browser / UI Smoke
 
-- Tool:
-- Base URL:
-- Test accounts note:
-- Required flows:
-- Screenshot or trace location:
+- Not applicable; the project has no browser UI.
 
 ## API / Integration Smoke
 
-- Environment:
-- Auth setup:
-- Required read paths:
-- Required write paths:
-- Cleanup:
+- Environment: temporary local directory
+- Auth setup: none
+- Required read paths: `template/` and Skill files
+- Required write paths: temporary target only
+- Cleanup: validator removes temporary files automatically
 
 ## Real Environment Smoke
 
 Use this section for staging, device, installer, desktop, mobile, hardware, provider sandbox, or other realistic validation.
 
-- Environment:
-- Build artifact:
-- Setup:
-- Command or manual flow:
-- Pass criteria:
-- Evidence to paste into review:
+- Environment: local filesystem plus optional public Git clone
+- Build artifact: repository checkout
+- Setup: Python 3; Git only for remote-source smoke
+- Command or manual flow: run distribution validator, then optional remote bootstrap dry-run
+- Pass criteria: clean payload, complete state directories, no maintenance leakage, first REQ/TECH/REVIEW creation succeeds
+- Evidence to paste into review: command, exit code, and summary
 
 ## Evidence Redaction Rules
 
@@ -76,4 +73,4 @@ Prefer:
 
 | Gap | Risk | Owner | Next action |
 |---|---|---|---|
-|  |  |  |  |
+| Longitudinal fresh-agent resume test requires a clean AI session | Core memory value remains only partially proven | Maintainer | Run [[05-reference/fresh-agent-resume-evaluation]] across multiple real-project slices |

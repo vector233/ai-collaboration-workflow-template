@@ -1,49 +1,43 @@
-# Project Overview — {{PROJECT_NAME}}
+# Project Overview — AI Collaboration Workflow Template
 
 ## Product Positioning
 
-**{{PROJECT_NAME}} is {{PROJECT_DESCRIPTION}}.**
+**AI Collaboration Workflow Template is a reusable documentation workflow and companion Skill for long-running software projects built with AI coding agents.**
 
-<!-- Add 2-4 sentences describing the problem, target users, and core value. -->
+The project helps AI coding agents and human maintainers preserve project context across sessions. It packages a canonical Markdown knowledge-base payload, an initialization runbook, and a companion Skill that applies requirement, design, validation, review, and memory-writeback gates consistently.
 
 ## Naming Rules
 
-<!-- If the project has multiple names, brand migrations, product slugs, or legacy repo names, define them here.
-
-- Public product name:
-- Machine-readable slug:
-- Legacy names that may remain in old files:
--->
+- Public product name: AI Collaboration Workflow Template
+- Repository slug: `ai-collaboration-workflow-template`
+- Skill name: `ai-collaboration-workflow`
 
 ## Tech Stack
 
-{{TECH_STACK}}
-
-<!-- Optional detailed stack table:
+Markdown · Python 3 · Agent Skills · Obsidian wiki links · Git
 
 | Component | Technology |
 |---|---|
-| Backend | TypeScript · Node.js · PostgreSQL |
-| Frontend | Next.js · React · Tailwind CSS |
-| Auth | Session cookies · OAuth |
--->
-
-<!-- UMBRELLA-ONLY: keep this section only if {{REPO_TYPE}} == umbrella -->
+| Template payload | Markdown · Obsidian wiki links |
+| Bootstrap and validation | Python 3 standard library |
+| Agent integration | Agent Skills-compatible `SKILL.md` |
+| Distribution | Git · skills.sh · direct payload copy |
 
 ## Subprojects
 
-{{SUB_PROJECTS}}
-
-<!-- /UMBRELLA-ONLY -->
+| Subproject | Path | Responsibility |
+|---|---|---|
+| Template payload | `template/` | Canonical files copied into user repositories |
+| Companion Skill | `skills/ai-collaboration-workflow/` | Bootstrap and daily workflow guidance |
+| Project maintenance | root `zettelkasten/` | Requirements, designs, reviews, architecture, and runbooks for this repository |
 
 ## Project Constraints
 
-<!-- Capture project-level non-negotiables. Examples:
-
-- Workspace isolation: every data access path must enforce a workspace boundary.
-- Auditability: write operations must leave an audit trail.
-- Privacy: logs must not include sensitive payloads.
--->
+- The canonical downstream payload lives only under `template/`.
+- Repository-maintenance documents must not leak into downstream projects.
+- Bootstrap must preserve differing existing files by default.
+- Installation paths must be testable without relying on an AI reconstructing missing directories.
+- Canonical template rules remain English-first; translations explain usage without duplicating the payload.
 
 ## AI Collaboration Rules
 

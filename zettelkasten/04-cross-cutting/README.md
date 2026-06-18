@@ -1,23 +1,15 @@
-<!-- UMBRELLA-ONLY: keep this directory only if {{REPO_TYPE}} == umbrella -->
-
 # 04-cross-cutting
 
-Use this directory only for umbrella repositories or systems with multiple subprojects.
+This repository has two distributed surfaces: the template payload and the companion Skill.
 
-Store cross-module concerns here: shared authentication, routing, consistency rules, privacy model, shared release process, common schemas, or platform-wide policies.
+Cross-cutting rules:
 
-If this is a single-project repository, `INIT.md` removes this directory.
-
-## Typical Notes
-
-- `shared-auth.md` — authentication across subprojects
-- `routing.md` — shared routing or tenancy boundaries
-- `privacy-model.md` — cross-system privacy and data retention rules
-- `release-coordination.md` — release ordering across subprojects
+- Workflow semantics must remain aligned between `template/` and the Skill.
+- The root maintenance knowledge base is not downstream payload content.
+- Distribution validation must exercise the same payload consumed by users.
+- Documentation must not advertise an installation path that bypasses `INIT.md`.
 
 ## See Also
 
 - [[AI]] — knowledge base entry point
 - [[02-architecture/current-architecture-flow]] — current architecture flow
-
-<!-- /UMBRELLA-ONLY -->

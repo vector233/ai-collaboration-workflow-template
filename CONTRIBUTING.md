@@ -14,6 +14,13 @@ Contributions are welcome when they improve the template as a reusable AI projec
 
 Do not add private project details, customer names, real credentials, internal URLs, production logs, or business-specific assumptions. Use fictional examples such as `ExampleSaaS`.
 
+The repository also uses its own REQ, TECH, and REVIEW workflow while developing the template. Root workflow state documents are maintenance evidence, not downstream template content:
+
+- keep downstream files under `template/`;
+- keep template-development documents under the root `zettelkasten/` state directories;
+- never copy root publishing, roadmap, requirement, design, or review records into `template/`;
+- validate the initialized output as well as the source repository with `python3 scripts/validate_distribution.py`.
+
 ## Change Checklist
 
 - Keep naming rules consistent:
