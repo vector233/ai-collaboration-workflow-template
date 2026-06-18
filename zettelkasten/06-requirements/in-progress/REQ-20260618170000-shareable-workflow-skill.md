@@ -37,6 +37,7 @@ This document defines how the repository's companion Skill should guide an AI ag
 - Define one canonical downstream template payload that excludes this repository's maintenance evidence.
 - Make the repository itself use an initialized knowledge base instead of template placeholders.
 - Provide an executable distribution smoke test that creates the first workflow artifacts.
+- Ensure Claude Code and Codex consume one canonical instruction set and can hand work to each other without chat-history dependency.
 
 ## Non-Goals
 
@@ -119,6 +120,8 @@ This document defines how the repository's companion Skill should guide an AI ag
 - Downstream payload contains no repository-specific publishing or maintenance records.
 - The root knowledge base describes this repository with no unresolved project placeholders.
 - A distribution smoke test bootstraps a temporary project and creates sample REQ, TECH, and REVIEW files.
+- `CLAUDE.md` imports canonical `AGENTS.md`; Codex reads `AGENTS.md` directly.
+- The workflow and review template define enough resume context for a different AI vendor or session to continue safely.
 
 ## Validation Record
 
@@ -137,6 +140,7 @@ This document defines how the repository's companion Skill should guide an AI ag
 | Round | Source | Evidence | Feedback summary | Judgment | Status | Fix commit / counter-evidence |
 |---|---|---|---|---|---|---|
 | Round 1 | Project review | Reproducible commands and file locations in linked review | Distribution and self-dogfooding gaps | confirmed | fixed | `2b48c31`; see linked review evidence |
+| Round 2 | Product intent clarification | Official Codex and Claude Code instruction-loading documentation | Cross-agent portability must not depend on a textual request to read another vendor's file | confirmed | fixed | `64c80dd` |
 
 ## Documentation Writeback Checklist
 

@@ -37,6 +37,7 @@ This handoff records the implementation and validation evidence for the portable
 ## Latest Commit
 
 - Implementation commit: `2b48c31` (`feat: harden workflow template distribution`) on `main`.
+- Cross-agent compatibility commit: `64c80dd` (`feat: standardize cross-agent handoffs`) on `main`.
 - Handoff metadata: committed separately after recording the implementation SHA.
 - PR / MR: none.
 
@@ -73,6 +74,15 @@ This handoff records the implementation and validation evidence for the portable
 - Risk: the script assumes Python 3.9+ and Git for remote bootstrap; `--source` removes the Git and network requirement.
 - Residual validation gap: the distribution lifecycle is executable, but the core long-term-memory claim still needs repeated clean-agent runs in real software projects. Use [[05-reference/fresh-agent-resume-evaluation]].
 
+## Resume Context
+
+- Previous agent / tool: Codex.
+- Last completed step: cross-agent adapter and repository handoff contract implemented, validated, and committed in `64c80dd`.
+- Next allowed action: use the workflow in a real project and run the fresh-agent resume evaluation.
+- Must-read files for the next agent: `AGENTS.md`, `CLAUDE.md`, [[AI]], linked REQ and TECH, and this review.
+- Unresolved decisions or assumptions: generic AI tools without repository access cannot automatically follow project files; supported automatic entry points are Codex and Claude Code.
+- Environment or setup needed to continue: Python 3; PyYAML only for the Skill schema validator.
+
 ## Next Steps
 
 - Next: review the canonical payload boundary, bootstrap marker contract, and distribution validator.
@@ -94,6 +104,8 @@ This handoff records the implementation and validation evidence for the portable
 | Round 1 | Template payload contains repository-maintenance material | Canonical payload moved to `template/`; leakage scan and clean-state checks pass | confirmed | fixed in `2b48c31` |
 | Round 1 | Repository does not dogfood an initialized knowledge base | Root project knowledge is initialized and has no unresolved project placeholders outside reusable templates | confirmed | fixed in `2b48c31` |
 | Round 1 | Long-lived workflow has no executable distribution smoke | `scripts/validate_distribution.py` passes; fresh-agent continuity has a repeatable evaluation runbook | confirmed | fixed in `2b48c31` with residual longitudinal validation |
+| Round 2 | Claude Code and Codex must consume one canonical rule set | Claude Code official docs say it reads `CLAUDE.md`, not `AGENTS.md`, and recommends `@AGENTS.md`; Codex reads `AGENTS.md` directly | confirmed | fixed in `64c80dd` |
+| Round 2 | Handoff must survive vendor/session changes | Repository contract and review template now prohibit chat/local memory as required state and require explicit resume context | confirmed | fixed in `64c80dd` |
 
 ## Close Conditions
 
