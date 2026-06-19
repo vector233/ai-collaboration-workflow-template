@@ -5,7 +5,7 @@ Contributions are welcome when they improve the template as a reusable AI projec
 ## Good Contributions
 
 - clearer agent workflow rules;
-- better requirement, TECH, review, or assignment templates;
+- better requirement, TECH, PLAN, review, or assignment templates;
 - generic examples that do not depend on a private project;
 - validation or link-check scripts;
 - documentation that helps users initialize the template in real repositories.
@@ -26,6 +26,7 @@ This repository does not initialize a second root knowledge base. Keep the produ
 - Keep naming rules consistent:
   - `REQ-YYYYMMDDHHMMSS-short-name.md`
   - `TECH-YYYYMMDDHHMMSS-short-name.md`
+  - `PLAN-YYYYMMDDHHMMSS-short-name.md`
   - `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 - Run `git diff --check`.
 - Search for private project terms before submitting.

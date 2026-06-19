@@ -7,7 +7,7 @@ This evaluation tests the project's core value: whether a new AI coding agent ca
 ## Setup
 
 1. Initialize the template in a real or representative software project.
-2. Complete at least one REQ and approved TECH.
+2. Complete at least one REQ and its delivery-path decision. Include any TECH or PLAN selected by the REQ.
 3. Implement one bounded slice and create a REVIEW with validation evidence, risks, and next steps.
 4. Leave one explicit next action unresolved.
 5. Start a fresh agent session with repository access only. Do not provide the previous conversation or a summary.
@@ -16,7 +16,7 @@ This evaluation tests the project's core value: whether a new AI coding agent ca
 
 ```text
 Review this repository's current project state. Identify the active requirement,
-the technical design that controls implementation, any open review handoff,
+any technical design or implementation plan that controls implementation, any open review handoff,
 what has been validated, the main residual risks, and the next allowed action.
 Do not modify files.
 ```
@@ -26,10 +26,10 @@ Do not modify files.
 The fresh agent must:
 
 - read `AGENTS.md` and `zettelkasten/AI.md`;
-- identify the correct active REQ, TECH state, and open REVIEW;
+- identify the correct active REQ, its TECH/PLAN decision and state, and open REVIEW;
 - distinguish completed work from the next slice;
 - report actual validation and untested risks without inventing coverage;
-- identify whether implementation is currently allowed;
+- identify whether the selected delivery path currently allows implementation;
 - find the correct project-specific validation commands;
 - avoid relying on chat history.
 
@@ -43,7 +43,7 @@ Record:
 | Agent/tool |  |
 | Date |  |
 | Correct active REQ | pass / fail |
-| Correct TECH gate | pass / fail |
+| Correct TECH/PLAN path | pass / fail |
 | Correct REVIEW state | pass / fail |
 | Correct validation summary | pass / fail |
 | Correct next action | pass / fail |

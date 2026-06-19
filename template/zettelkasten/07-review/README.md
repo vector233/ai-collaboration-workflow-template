@@ -18,7 +18,7 @@ Review is the evidence checkpoint in [[00-governance/ai-workflow]].
 
 1. When a slice is ready, copy [[00-governance/templates/review]] into `pending/`.
 2. The handoff records scope, commit, validation, worktree status, risks, next steps, and suggested review focus.
-3. A reviewer reads the handoff, linked requirement, linked technical design, and changed files.
+3. A reviewer reads the handoff, linked requirement, any controlling TECH or PLAN, and changed files.
 4. Important feedback must include evidence: code location, failing command, log, screenshot, linked doc, commit, or reproducible flow.
 5. Move the document to `in-review/` when feedback is being handled.
 6. The implementation owner verifies each claim before fixing or rejecting it.
@@ -81,12 +81,13 @@ Move the review file between state directories. Do not change linked requirement
 
 Requirement documents describe the work and implementation progress. Review documents preserve handoff, feedback, judgment, fixes, validation, and closure.
 
-Requirements should link to their review documents, and review documents should link back to their requirements and technical designs.
+Requirements should link to their review documents, and review documents should link back to their requirements and any controlling technical designs or implementation plans.
 
 ## See Also
 
 - [[06-requirements/README]]
 - [[08-technical-designs/README]]
+- [[09-implementation-plans/README]]
 - [[00-governance/ai-workflow]]
 - [[00-governance/validation-discipline]]
 - [[00-governance/templates/review]]

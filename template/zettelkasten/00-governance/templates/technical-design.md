@@ -10,6 +10,7 @@ related_requirement:
 related:
   - "[[02-architecture/current-architecture-flow]]"
   - "[[08-technical-designs/README]]"
+  - "[[09-implementation-plans/README]]"
 ---
 
 # Technical Design Title
@@ -72,6 +73,12 @@ Describe the target flow in 5-10 steps. Avoid line-by-line implementation detail
 - Browser / E2E:
 - Operations / config:
 - Realistic environment smoke:
+
+## Implementation Planning
+
+- Standalone PLAN required: yes / no
+- If yes, linked PLAN:
+- If no, where implementation slices are recorded:
 
 ## Architecture Writeback Checklist
 

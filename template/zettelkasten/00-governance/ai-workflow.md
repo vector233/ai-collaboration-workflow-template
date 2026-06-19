@@ -8,6 +8,7 @@ related:
   - "[[AI]]"
   - "[[06-requirements/README]]"
   - "[[08-technical-designs/README]]"
+  - "[[09-implementation-plans/README]]"
   - "[[07-review/README]]"
   - "[[00-governance/gotchas]]"
 ---
@@ -18,11 +19,13 @@ related:
 
 This note defines the default workflow for AI-assisted development in {{PROJECT_NAME}}. It is intentionally lightweight: the goal is not to add a management framework, but to make AI work traceable, reviewable, and easy to resume.
 
-The workflow answers five questions for every non-trivial task:
+The workflow answers seven questions for every tracked task:
 
 - What is the smallest useful context?
 - What is the requirement and acceptance criteria?
-- Is the technical approach ready for implementation?
+- Does this task need a standalone technical design?
+- Does this task need a standalone implementation plan?
+- Is the selected delivery path ready for implementation?
 - What validation proves the change works?
 - What should be written back for future agents?
 
@@ -31,15 +34,48 @@ The workflow answers five questions for every non-trivial task:
 1. **Classify the task** as feature, bugfix, review feedback, architecture change, documentation, validation, release, or research.
 2. **Load the context pack**: read this file, [[01-overview/quick-reference]], and the requirement, technical design, review handoff, architecture note, or runbook linked from the task.
 3. **Check the requirement**: find or create a requirement under [[06-requirements/README]].
-4. **Check implementation readiness**: before business-code edits, confirm the related technical design is in `approved/`, or record a tiny-fix waiver.
-5. **Implement one slice**: keep the change small and within the task's declared paths.
-6. **Validate the changed boundary**: run the smallest test, build, browser check, integration smoke, or realistic environment check that gives signal.
+4. **Choose the delivery path**: in the REQ, mark standalone TECH and PLAN as required or not required, with reasons.
+5. **Check implementation readiness**: approve required TECH/PLAN artifacts. When they are not required, complete the REQ's inline technical readiness and implementation slices.
+6. **Implement and validate one slice**: keep the change within declared paths and run the smallest check that gives signal.
 7. **Create or update review handoff**: record scope, commit, validation, worktree status, risks, and review focus under [[07-review/README]].
 8. **Handle feedback with evidence**: verify reviewer claims before fixing or rejecting them.
 9. **Write durable lessons back**: update gotchas, architecture notes, runbooks, or workflow boards when facts change.
-10. **Close the loop**: move requirement, technical design, and review documents only when their state rules are satisfied.
+10. **Close the loop**: close the review, write back current-state facts, and update any REQ, TECH, or PLAN states that exist.
 
-`in-progress` means the requirement is active. It does not automatically mean implementation is allowed. Implementation readiness is decided by the technical design gate.
+## Delivery Paths
+
+Use the lightest path that preserves safety and resumability:
+
+| Change shape | Default path |
+|---|---|
+| Tiny, non-behavioral change | change -> validate |
+| Bounded, low-risk bug with known cause and local impact | REQ -> implement and validate -> REVIEW -> writeback |
+| Standard feature or change with meaningful technical decisions | REQ -> TECH -> implement and validate -> REVIEW -> writeback |
+| Complex, multi-slice, multi-session, or coordinated change | REQ -> TECH when needed -> PLAN -> implement and validate -> REVIEW -> writeback |
+
+Technical reasoning is never optional. A standalone TECH is optional when the REQ can clearly record the confirmed cause or approach, affected paths, risks, and validation plan.
+
+Execution decomposition is never optional. A standalone PLAN is optional when the REQ's implementation slices are sufficient for one agent or session to proceed safely.
+
+## Standalone TECH Triggers
+
+Create a TECH when any of these apply:
+
+- architecture, API, schema, persistence, security, billing, permission, deployment, or data-retention behavior changes;
+- multiple modules, repositories, jobs, or third-party systems are affected;
+- important technical decisions or competing approaches remain unresolved;
+- rollback, compatibility, migration, or operational behavior needs design review;
+- the technical flow is too large or unstable to remain clear inside the REQ.
+
+## Standalone PLAN Triggers
+
+Create a PLAN under [[09-implementation-plans/README]] when any of these apply:
+
+- implementation has multiple dependent slices;
+- work is expected to span multiple sessions, agents, owners, or repositories;
+- file ownership, sequencing, migration order, or release checkpoints must be explicit;
+- each slice needs its own validation and review checkpoint;
+- a detailed execution plan materially improves safe resumption.
 
 ## Cross-Agent Handoff Contract
 
@@ -47,10 +83,16 @@ The workflow must survive a change of AI vendor, model, session, or human owner.
 
 - Treat repository files as the source of truth; chat history and agent-local memory are optional caches.
 - Record confirmed facts separately from assumptions and unresolved decisions.
-- Every active slice must link its REQ, controlling TECH, and current REVIEW.
+- Every active slice must link its REQ, any controlling TECH or PLAN, and current REVIEW.
 - Every handoff must state the last completed step, exact validation evidence, current branch/worktree state, known risks, and next allowed action.
 - Do not use vendor-specific capabilities as an undocumented prerequisite. Record required commands, tools, credentials setup, or manual steps in project runbooks.
 - A receiving agent must verify repository state and evidence before continuing rather than trusting a previous agent's narrative.
+
+## Optional External Process Skills
+
+This workflow does not depend on Superpowers or any other external process Skill. When one is available, use it as an execution aid and map its durable output back into this knowledge base instead of creating a second source of truth.
+
+Use [[00-governance/external-skill-interoperability]] when an external Skill requests its own spec, plan, review, commit, branch, or worktree workflow. Map its output to the REQ and optional TECH/PLAN selected for the task.
 
 ## Tiny-Fix Waivers
 
@@ -106,7 +148,7 @@ Write durable lessons back when:
 - an architecture or data-flow fact changed;
 - validation commands or runbooks changed;
 - a reviewer found a real process gap;
-- a requirement or technical design status changed;
+- a requirement, technical design, or implementation plan status changed;
 - an external dependency, provider, or deployment assumption changed.
 
 Suggested destinations:
@@ -115,13 +157,13 @@ Suggested destinations:
 - architecture facts -> `02-architecture/`
 - cross-module rules -> `04-cross-cutting/`
 - validation commands -> [[05-reference/e2e-test]] or [[01-overview/quick-reference]]
-- workflow status -> [[06-requirements/README]], [[08-technical-designs/README]], [[07-review/README]]
+- workflow status -> [[06-requirements/README]], [[08-technical-designs/README]], [[09-implementation-plans/README]], [[07-review/README]]
 
 ## Definition Of Done
 
 A slice is done when:
 
-- the related requirement and technical design status are explicit;
+- the related requirement and any selected TECH/PLAN states are explicit;
 - changes are scoped to the current task;
 - required validation ran or blockers are recorded;
 - review handoff is created or updated when needed;

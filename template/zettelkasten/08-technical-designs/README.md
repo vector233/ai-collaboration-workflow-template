@@ -16,7 +16,7 @@ related:
 
 ## Purpose
 
-This directory answers: after a requirement is understood, how does it become an implementation-ready technical plan?
+This directory stores standalone technical designs for changes whose architecture, contracts, risks, or operational behavior need more space and review than the REQ should carry.
 
 Requirements describe **why, what, non-goals, and acceptance criteria**. Technical designs describe **system flow, boundaries, decisions, risks, and validation**.
 
@@ -26,17 +26,21 @@ Requirements describe **why, what, non-goals, and acceptance criteria**. Technic
 - `approved/` — confirmed design, allowed as implementation input
 - `implemented/` — implemented, reviewed, and written back to current architecture notes
 
+## When To Create A Standalone TECH
+
+Create one when the REQ marks it required because the change affects architecture, APIs, schemas, persistence, security, billing, permissions, deployment, third parties, multiple modules, migration behavior, or unresolved technical decisions.
+
+Do not create one merely to restate a known local fix. For a bounded low-risk bug, the REQ can carry inline technical readiness.
+
 ## Workflow
 
-The technical design is the implementation readiness gate in [[00-governance/ai-workflow]].
-
-1. When a requirement enters `in-progress/`, check whether it has a linked technical design.
-2. If not, copy [[00-governance/templates/technical-design]] into `pending/`.
+1. Confirm the REQ marks standalone TECH as required.
+2. Copy [[00-governance/templates/technical-design]] into `pending/`.
 3. Keep the design at architecture-flow level. Do not turn it into line-by-line implementation instructions.
 4. Resolve decisions that affect implementation.
 5. Move the design to `approved/` when it is ready to guide code work.
 6. If implementation proves a design assumption wrong, update the design before continuing.
-7. Link review handoffs back to the technical design.
+7. Link any PLAN and review handoffs back to the technical design.
 8. After implementation, review close, and architecture writeback, move the design to `implemented/`.
 
 ## Naming
@@ -86,12 +90,13 @@ Move the file between state directories. Do not change `technical_design_id`.
 
 - A technical design is not a review handoff.
 - A design can be reviewed before it becomes `approved/`.
-- Implementation handoffs should link the technical design used for the slice.
+- Implementation handoffs should link the technical design used for the slice when one exists.
 - Review feedback about a design still needs evidence.
 
 ## See Also
 
-- [[00-governance/ai-workflow]] — implementation readiness gate
+- [[00-governance/ai-workflow]] — adaptive delivery paths
 - [[06-requirements/README]] — requirement workflow
+- [[09-implementation-plans/README]] — optional detailed execution planning
 - [[07-review/README]] — review workflow
 - [[00-governance/templates/technical-design]] — technical design template

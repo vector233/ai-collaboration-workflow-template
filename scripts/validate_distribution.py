@@ -34,6 +34,10 @@ REQUIRED_STATE_DIRECTORIES = (
     Path("zettelkasten/08-technical-designs/implemented"),
 )
 
+REQUIRED_PAYLOAD_DIRECTORIES = REQUIRED_STATE_DIRECTORIES + (
+    Path("zettelkasten/09-implementation-plans"),
+)
+
 FORBIDDEN_PAYLOAD_TEXT = (
     "vector233",
     "community-publishing",
@@ -107,10 +111,50 @@ def validate_payload_boundary() -> None:
         "## Cross-Agent Collaboration Contract" in agents_text,
         "payload AGENTS.md is missing the cross-agent contract",
     )
+    require(
+        "## Optional External Process Skills" in agents_text,
+        "payload AGENTS.md is missing optional external Skill rules",
+    )
+    require(
+        "External process skills, plugins, and agent frameworks are optional"
+        in agents_text,
+        "payload AGENTS.md does not keep external Skills optional",
+    )
     ai_entry = (PAYLOAD / "zettelkasten/AI.md").read_text()
     require(
         "## Cross-Agent Entry Points" in ai_entry,
         "payload AI.md is missing cross-agent entry points",
+    )
+    interoperability = (
+        PAYLOAD
+        / "zettelkasten/00-governance/external-skill-interoperability.md"
+    )
+    require(
+        interoperability.is_file(),
+        "payload external Skill interoperability note is missing",
+    )
+    interoperability_text = interoperability.read_text()
+    require(
+        "## No External Skill Installed" in interoperability_text,
+        "external Skill interoperability does not define the no-plugin path",
+    )
+    require(
+        "No external command, plugin, directory, or document is required."
+        in interoperability_text,
+        "external Skill interoperability introduces an implicit dependency",
+    )
+    for expected_mapping in (
+        "Treat the REQ plus selected technical-readiness content as the requested spec output",
+        "do not create `docs/superpowers/plans/`",
+        "The REQ's delivery-path decision defines implementation readiness",
+    ):
+        require(
+            expected_mapping in interoperability_text,
+            f"external Skill mapping is incomplete: {expected_mapping}",
+        )
+    require(
+        not (PAYLOAD / "docs/superpowers").exists(),
+        "tool-specific Superpowers workflow tree leaked into payload",
     )
     review_template = (
         PAYLOAD / "zettelkasten/00-governance/templates/review.md"
@@ -119,8 +163,19 @@ def validate_payload_boundary() -> None:
         "## Resume Context" in review_template,
         "payload review template is missing resume context",
     )
+    require(
+        (
+            PAYLOAD
+            / "zettelkasten/00-governance/templates/implementation-plan.md"
+        ).is_file(),
+        "payload implementation plan template is missing",
+    )
+    require(
+        (PAYLOAD / "zettelkasten/09-implementation-plans/README.md").is_file(),
+        "payload implementation plan workflow is missing",
+    )
 
-    for directory in REQUIRED_STATE_DIRECTORIES:
+    for directory in REQUIRED_PAYLOAD_DIRECTORIES:
         require((PAYLOAD / directory).is_dir(), f"payload directory is missing: {directory}")
 
     for path in payload_markdown_files():
@@ -185,11 +240,12 @@ def replace_placeholders(target: Path) -> None:
         )
 
 
-def create_first_workflow_artifacts(target: Path) -> None:
+def create_full_workflow_artifacts(target: Path) -> None:
     vault = target / "zettelkasten"
     requirement_id = "REQ-20260618190000-sample-change"
     technical_design_id = "TECH-20260618190100-sample-change"
-    review_id = "REVIEW-20260618190200-sample-change"
+    plan_id = "PLAN-20260618190200-sample-change"
+    review_id = "REVIEW-20260618190300-sample-change"
 
     requirement = (
         vault
@@ -201,6 +257,7 @@ def create_first_workflow_artifacts(target: Path) -> None:
         / "08-technical-designs/approved"
         / f"{technical_design_id}.md"
     )
+    plan = vault / "09-implementation-plans" / f"{plan_id}.md"
     review = vault / "07-review/pending" / f"{review_id}.md"
 
     shutil.copy2(
@@ -212,6 +269,10 @@ def create_first_workflow_artifacts(target: Path) -> None:
         technical_design,
     )
     shutil.copy2(
+        vault / "00-governance/templates/implementation-plan.md",
+        plan,
+    )
+    shutil.copy2(
         vault / "00-governance/templates/review.md",
         review,
     )
@@ -219,11 +280,29 @@ def create_first_workflow_artifacts(target: Path) -> None:
     common_replacements = {
         "REQ-YYYYMMDDHHMMSS-short-name": requirement_id,
         "TECH-YYYYMMDDHHMMSS-short-name": technical_design_id,
+        "PLAN-YYYYMMDDHHMMSS-short-name": plan_id,
         "REVIEW-YYYYMMDDHHMMSS-short-name": review_id,
     }
     artifacts = (
-        (requirement, {"status: backlog": "status: in-progress"}),
+        (
+            requirement,
+            {
+                "status: backlog": "status: in-progress",
+                "- Standalone TECH: required / not required": "- Standalone TECH: required",
+                "- Standalone PLAN: required / not required": "- Standalone PLAN: required",
+            },
+        ),
         (technical_design, {"status: pending": "status: approved"}),
+        (
+            plan,
+            {
+                "status: draft": "status: ready",
+                "related_technical_design:\n": (
+                    "related_technical_design:\n"
+                    f'  - "[[08-technical-designs/approved/{technical_design_id}]]"\n'
+                ),
+            },
+        ),
         (review, {}),
     )
     for path, state_replacements in artifacts:
@@ -235,7 +314,75 @@ def create_first_workflow_artifacts(target: Path) -> None:
 
     require("status: in-progress" in requirement.read_text(), "REQ state is incorrect")
     require("status: approved" in technical_design.read_text(), "TECH state is incorrect")
+    require("status: ready" in plan.read_text(), "PLAN state is incorrect")
     require("status: pending" in review.read_text(), "REVIEW state is incorrect")
+
+
+def create_bounded_bug_artifacts(target: Path) -> None:
+    vault = target / "zettelkasten"
+    requirement_id = "REQ-20260618191000-bounded-bug"
+    review_id = "REVIEW-20260618191100-bounded-bug"
+    requirement = (
+        vault
+        / "06-requirements/in-progress"
+        / f"{requirement_id}.md"
+    )
+    review = vault / "07-review/pending" / f"{review_id}.md"
+
+    shutil.copy2(
+        vault / "00-governance/templates/requirement.md",
+        requirement,
+    )
+    shutil.copy2(
+        vault / "00-governance/templates/review.md",
+        review,
+    )
+
+    replacements = {
+        "REQ-YYYYMMDDHHMMSS-short-name": requirement_id,
+        "REVIEW-YYYYMMDDHHMMSS-short-name": review_id,
+        "status: backlog": "status: in-progress",
+        "- Change class: bounded bug / standard change / complex change / high-risk change": (
+            "- Change class: bounded bug"
+        ),
+        "- Standalone TECH: required / not required": "- Standalone TECH: not required",
+        "- TECH decision reason:": "- TECH decision reason: confirmed local cause and bounded behavior",
+        "- Standalone PLAN: required / not required": "- Standalone PLAN: not required",
+        "- PLAN decision reason:": "- PLAN decision reason: one bounded slice",
+        "- Why inline readiness is sufficient:": (
+            "- Why inline readiness is sufficient: local low-risk fix"
+        ),
+        "- Confirmed root cause or technical approach:": (
+            "- Confirmed root cause or technical approach: add a focused guard"
+        ),
+        "- Affected paths and behavior boundaries:": (
+            "- Affected paths and behavior boundaries: one module and its tests"
+        ),
+        "- Focused validation plan:": (
+            "- Focused validation plan: affected unit test and regression smoke"
+        ),
+        "- Slice 1:": "- Slice 1: implement guard, test, and validate",
+    }
+    for path in (requirement, review):
+        text = path.read_text()
+        for old, new in replacements.items():
+            text = text.replace(old, new)
+        path.write_text(text)
+
+    requirement_text = requirement.read_text()
+    require("Standalone TECH: not required" in requirement_text, "bounded bug requires TECH")
+    require("Standalone PLAN: not required" in requirement_text, "bounded bug requires PLAN")
+    require(
+        not any(
+            path.name.endswith("-bounded-bug.md")
+            for path in (vault / "08-technical-designs").rglob("TECH-*.md")
+        ),
+        "bounded bug unexpectedly created a TECH",
+    )
+    require(
+        not (vault / "09-implementation-plans/PLAN-20260618191000-bounded-bug.md").exists(),
+        "bounded bug unexpectedly created a PLAN",
+    )
 
 
 def wiki_index(vault: Path) -> dict[str, Path]:
@@ -323,7 +470,18 @@ def validate_bootstrap_and_lifecycle() -> None:
             (target / PAYLOAD_MARKER.name).is_file(),
             "bootstrap omitted the payload marker",
         )
-        for directory in REQUIRED_STATE_DIRECTORIES:
+        require(
+            (
+                target
+                / "zettelkasten/00-governance/external-skill-interoperability.md"
+            ).is_file(),
+            "bootstrap omitted optional external Skill interoperability",
+        )
+        require(
+            not (target / "docs/superpowers").exists(),
+            "bootstrap created a Superpowers-specific workflow tree",
+        )
+        for directory in REQUIRED_PAYLOAD_DIRECTORIES:
             require((target / directory).is_dir(), f"bootstrap omitted: {directory}")
 
         run(
@@ -337,7 +495,8 @@ def validate_bootstrap_and_lifecycle() -> None:
         )
 
         replace_placeholders(target)
-        create_first_workflow_artifacts(target)
+        create_bounded_bug_artifacts(target)
+        create_full_workflow_artifacts(target)
         validate_wiki_links(target / "zettelkasten")
 
         run(
@@ -356,7 +515,18 @@ def validate_manual_copy_path() -> None:
         target = Path(temp_dir) / "target"
         shutil.copytree(PAYLOAD, target)
         require((target / "INIT.md").is_file(), "manual payload copy omitted INIT.md")
-        for directory in REQUIRED_STATE_DIRECTORIES:
+        require(
+            (
+                target
+                / "zettelkasten/00-governance/external-skill-interoperability.md"
+            ).is_file(),
+            "manual payload copy omitted optional external Skill interoperability",
+        )
+        require(
+            not (target / "docs/superpowers").exists(),
+            "manual payload copy created a Superpowers-specific workflow tree",
+        )
+        for directory in REQUIRED_PAYLOAD_DIRECTORIES:
             require(
                 (target / directory).is_dir(),
                 f"manual payload copy omitted: {directory}",
@@ -430,7 +600,7 @@ def validate_remote_clone_path() -> None:
             (target / PAYLOAD_MARKER.name).is_file(),
             "remote bootstrap omitted the payload marker",
         )
-        for directory in REQUIRED_STATE_DIRECTORIES:
+        for directory in REQUIRED_PAYLOAD_DIRECTORIES:
             require(
                 (target / directory).is_dir(),
                 f"remote bootstrap omitted: {directory}",

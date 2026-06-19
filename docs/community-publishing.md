@@ -84,6 +84,7 @@ Instead of one large project document, the template uses small linked notes for:
 
 - requirements
 - technical designs
+- implementation plans when coordination requires them
 - review handoffs
 - architecture notes
 - validation runbooks
@@ -94,9 +95,9 @@ The basic workflow is:
 ```text
 Task
   -> REQ       define scope, non-goals, and acceptance criteria
-  -> TECH      confirm the implementation approach
-  -> Slice     implement one bounded change
-  -> Validate  record what was actually checked
+  -> [TECH]    resolve technical decisions when needed
+  -> [PLAN]    coordinate detailed execution when needed
+  -> Build     implement and validate one bounded change
   -> REVIEW    hand off evidence, feedback, and risk
   -> Writeback update architecture, gotchas, or runbooks
 ```

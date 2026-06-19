@@ -1,6 +1,18 @@
 # ExampleSaaS Walkthrough
 
-This fictional example shows how the template is intended to be used. It is not a complete project knowledge base.
+This fictional example shows how the adaptive workflow is intended to be used. It is not a complete project knowledge base.
+
+## Delivery Path Examples
+
+A bounded bug with a confirmed local cause could use:
+
+```text
+REQ -> implement and validate -> REVIEW -> writeback
+```
+
+The REQ would mark standalone TECH and PLAN as not required, then record the root cause, affected paths, focused fix, validation, and implementation slice inline.
+
+The invitation-link feature below has security, persistence, API, and multi-slice concerns, so it uses a standalone TECH and PLAN.
 
 ## Scenario
 
@@ -20,6 +32,7 @@ Key fields:
 - Non-goal: SSO, domain allowlists, and paid-seat billing changes.
 - Context pack: auth model, workspace membership model, API routes, frontend invite settings page.
 - Acceptance: create link, revoke link, join by link, expired link rejected, non-admin cannot create link.
+- Delivery path: standalone TECH required; standalone PLAN required.
 
 ## 2. Technical Design
 
@@ -38,9 +51,19 @@ Move it to `approved/` only after decisions are clear:
 - audit log behavior;
 - validation plan.
 
-Implementation starts only after this TECH is approved, unless the task is reduced to a documented tiny-fix waiver.
+Implementation starts only after this TECH is approved.
 
-## 3. Implementation Slice
+## 3. Implementation Plan
+
+Create:
+
+```text
+zettelkasten/09-implementation-plans/PLAN-20260601110000-team-invitation-links.md
+```
+
+Set it to `ready` after backend, frontend, migration, validation, and review dependencies are explicit.
+
+## 4. Implementation Slice
 
 Example first slice:
 
@@ -51,7 +74,7 @@ Example first slice:
 
 The requirement or review handoff should make those boundaries explicit before an agent edits files.
 
-## 4. Review Handoff
+## 5. Review Handoff
 
 Create:
 
@@ -61,14 +84,14 @@ zettelkasten/07-review/pending/REVIEW-20260601123000-team-invitation-links-backe
 
 The handoff records:
 
-- linked REQ and approved TECH;
+- linked REQ, approved TECH, and ready PLAN;
 - latest commit;
 - validation commands and result summaries;
 - current `git status --short`;
 - known gaps, such as "frontend UI not implemented";
 - reviewer focus, such as token expiry and permission checks.
 
-## 5. Feedback Handling
+## 6. Feedback Handling
 
 If a reviewer says "non-admins can create links", the feedback must include evidence:
 
@@ -79,12 +102,13 @@ If a reviewer says "non-admins can create links", the feedback must include evid
 
 The implementation agent verifies the claim. If true, it fixes and records validation. If false, it writes counter-evidence in the review document.
 
-## 6. Memory Writeback
+## 7. Memory Writeback
 
 After completion:
 
 - move the REQ to `done/`;
 - move the TECH to `implemented/`;
+- set the PLAN to `completed`;
 - move the review to `done/`;
 - update `02-architecture/current-architecture-flow.md` with the invite flow;
 - add any token/security lessons to `00-governance/gotchas.md` or `00-governance/decisions.md`.
@@ -121,6 +145,11 @@ These snippets show the shape of an initialized project without duplicating a fu
 
 - Technical design: [[08-technical-designs/approved/TECH-20260601104500-team-invitation-links]]
 - Current state: approved
+
+## Implementation Slices
+
+- Implementation plan: [[09-implementation-plans/PLAN-20260601110000-team-invitation-links]]
+- Current state: ready
 ```
 
 ### `zettelkasten/08-technical-designs/approved/TECH-20260601104500-team-invitation-links.md`
@@ -142,6 +171,20 @@ These snippets show the shape of an initialized project without duplicating a fu
 - Unit tests for token expiry, revocation, and permission checks.
 - API smoke for create, revoke, join, expired join, and non-admin create.
 - Browser smoke for workspace settings once frontend slice exists.
+```
+
+### `zettelkasten/09-implementation-plans/PLAN-20260601110000-team-invitation-links.md`
+
+```md
+# Team Invitation Links Implementation Plan
+
+## Execution Map
+
+| Slice | Deliverable | Depends on | Owned paths | Validation | Status |
+|---|---|---|---|---|---|
+| S1 | Backend create/revoke/join API | approved TECH | `backend/invitations/` | backend tests and API smoke | ready |
+| S2 | Workspace settings UI | S1 | `frontend/settings/team/` | lint, build, browser smoke | blocked |
+| S3 | Final integration and writeback | S1, S2 | tests and zettelkasten | full invitation flow | blocked |
 ```
 
 ### `zettelkasten/07-review/pending/REVIEW-20260601123000-team-invitation-links-backend.md`

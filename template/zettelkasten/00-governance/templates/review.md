@@ -7,7 +7,8 @@ created: YYYY-MM-DD
 reviewer:
 target:
   - "[[06-requirements/in-progress/REQ-YYYYMMDDHHMMSS-short-name]]"
-  - "[[08-technical-designs/approved/TECH-YYYYMMDDHHMMSS-short-name]]"
+controlling_technical_design:
+controlling_implementation_plan:
 related:
   - "[[07-review/README]]"
 ---
@@ -54,6 +55,8 @@ This handoff tells the next AI agent or human reviewer what changed, what was va
 - Must-read files for the next agent:
 - Unresolved decisions or assumptions:
 - Environment or setup needed to continue:
+- Controlling TECH or inline readiness:
+- Controlling PLAN or inline slices:
 
 ## Known Risks / Blockers
 

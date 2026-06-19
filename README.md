@@ -29,19 +29,19 @@ This repository packages a practical AI collaboration workflow. It gives agents 
 ```text
 Task
   -> REQ       define scope, non-goals, and acceptance criteria
-  -> TECH      confirm the implementation approach
-  -> Slice     implement one bounded change
-  -> Validate  run the smallest meaningful checks
+  -> [TECH]    add a standalone technical design when risk or uncertainty requires it
+  -> [PLAN]    add a standalone execution plan when coordination requires it
+  -> Build     implement one bounded slice and run meaningful validation
   -> REVIEW    hand off evidence, feedback, and risk
-  -> Writeback update architecture, gotchas, or runbooks
+  -> Writeback update durable knowledge and close the loop
 ```
 
 | Stage | Artifact | Purpose |
 |---|---|---|
 | Requirement | `REQ-*` | Define what changes and how it will be accepted |
-| Technical design | `TECH-*` | Make the implementation approach explicit |
-| Implementation | Code/docs slice | Keep the change small and reviewable |
-| Validation | Test/build/smoke notes | Record what was actually verified |
+| Technical design, optional | `TECH-*` | Resolve architecture, contract, risk, and operational decisions |
+| Implementation plan, optional | `PLAN-*` | Make dependencies, ownership, sequence, and checkpoints explicit |
+| Implementation and validation | Code/docs slice plus evidence | Keep the change bounded and verify the changed boundary |
 | Review | `REVIEW-*` | Preserve feedback, evidence, and risk |
 | Writeback | Architecture/gotchas/runbooks | Keep future agents from rediscovering context |
 
@@ -51,7 +51,7 @@ AI coding agents are strong at local implementation but weak at long-lived proje
 
 - **Context pack**: agents read the smallest necessary context instead of re-discovering the whole repo.
 - **Requirement workflow**: every non-trivial change has scope, acceptance criteria, and known non-goals.
-- **Technical design gate**: code work waits for an approved design unless the task is explicitly a tiny low-risk fix.
+- **Adaptive design and planning**: standalone TECH and PLAN documents are used when risk or coordination justifies them; bounded bugs can keep the necessary reasoning inside the REQ.
 - **Review handoff**: review feedback is treated as a hypothesis that needs evidence and independent verification.
 - **Validation discipline**: build, test, browser, integration, and realistic-environment checks are recorded where future agents can find them.
 - **Memory writeback**: architecture changes, test procedures, and gotchas are written back into the knowledge base.
@@ -122,10 +122,11 @@ For non-trivial work, agents should follow this loop:
 
 1. Read `AGENTS.md`, `zettelkasten/AI.md`, and `zettelkasten/00-governance/ai-workflow.md`.
 2. Find or create the relevant requirement under `zettelkasten/06-requirements/`.
-3. Confirm the linked technical design is approved under `zettelkasten/08-technical-designs/`.
-4. Implement only the current slice and run the smallest meaningful validation.
-5. Create or update a review handoff under `zettelkasten/07-review/`.
-6. Handle reviewer feedback with evidence, then write durable lessons back to `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
+3. In the REQ, decide whether standalone TECH and PLAN documents are required.
+4. Approve required TECH/PLAN artifacts, or complete inline readiness and slices in the REQ.
+5. Implement only the current slice and run the smallest meaningful validation.
+6. Create or update a review handoff under `zettelkasten/07-review/`.
+7. Handle reviewer feedback with evidence, then write durable lessons back to `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
 
 See `examples/example-saas/` for a fictional end-to-end walkthrough.
 
@@ -141,9 +142,22 @@ The workflow is vendor-neutral; tool-specific files are thin adapters:
 | Claude Code | `CLAUDE.md` imports `AGENTS.md` | `zettelkasten/` |
 | Other repository-aware agents | explicitly read `AGENTS.md` | `zettelkasten/` |
 
-Required project state must not live only in a chat transcript, Codex memory, Claude auto memory, or another agent's private state. A different agent must be able to resume from the active REQ, approved TECH, open REVIEW, validation evidence, worktree state, risks, and next allowed action.
+Required project state must not live only in a chat transcript, Codex memory, Claude auto memory, or another agent's private state. A different agent must be able to resume from the active REQ, any controlling TECH or PLAN, open REVIEW, validation evidence, worktree state, risks, and next allowed action.
 
 The companion Skill follows the open Agent Skills format used by both Codex and Claude Code, but the core workflow does not depend on the Skill being installed after initialization.
+
+## Optional External Process Skills
+
+The initialized template does not require Superpowers or any other process plugin. Codex, Claude Code, and other repository-aware agents can use `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> writeback` with only the files in the target repository.
+
+If Superpowers is installed, repository instructions map its brainstorming, planning, TDD, debugging, and review methods into the selected REQ, TECH, PLAN, REVIEW, gotcha, and runbook documents. It must not create a parallel `docs/superpowers/` source of truth.
+
+This is compatibility only:
+
+- no external plugin is installed by the template;
+- no external command is required;
+- standalone TECH and PLAN artifacts remain optional unless the REQ marks them required;
+- removing or disabling the external plugin does not change the repository workflow.
 
 ## Companion Skill
 
@@ -153,7 +167,7 @@ This repository includes an optional Agent Skills-compatible skill:
 skills/ai-collaboration-workflow/
 ```
 
-Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/REVIEW documents, check implementation readiness, record validation, handle evidence-based review feedback, and write lessons back to the knowledge base.
+Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/PLAN/REVIEW documents when appropriate, check implementation readiness, record validation, handle evidence-based review feedback, and write lessons back to the knowledge base.
 
 The skill is a companion to the template. If you invoke it in a project that does not yet contain `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/`, it can safely bootstrap the template before continuing. Its bootstrap script previews changes, copies only missing files, skips identical files, and leaves differing existing files untouched for explicit merging.
 
@@ -207,7 +221,7 @@ Use $ai-collaboration-workflow to initialize this repository.
 For an initialized project:
 
 ```text
-Use $ai-collaboration-workflow to create a requirement, technical design, or review handoff.
+Use $ai-collaboration-workflow to choose the delivery path and create the required workflow artifacts.
 ```
 
 The default bootstrap source is this canonical Git repository and automatically selects its `template/` directory. For offline use, pass either the repository checkout or `template/` directly with `--source`.
@@ -220,12 +234,13 @@ Run:
 python3 scripts/validate_distribution.py
 ```
 
-The smoke test checks payload isolation, state-directory presence, bootstrap dry-run and installation, sample initialization, wiki links, and creation of the first REQ, TECH, and REVIEW artifacts.
+The smoke test checks payload isolation, state-directory presence, bootstrap dry-run and installation, sample initialization, wiki links, a bounded REQ-only bug path, and a full REQ/TECH/PLAN/REVIEW path.
 
 ## Naming Rules
 
 - Requirements: `REQ-YYYYMMDDHHMMSS-short-name.md`
 - Technical designs: `TECH-YYYYMMDDHHMMSS-short-name.md`
+- Implementation plans: `PLAN-YYYYMMDDHHMMSS-short-name.md`
 - Review handoffs: `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 
 ## What To Customize

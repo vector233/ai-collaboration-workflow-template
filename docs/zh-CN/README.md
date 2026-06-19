@@ -39,7 +39,8 @@
 | `zettelkasten/AI.md` | 当前知识库入口，说明如何导航项目上下文 |
 | `zettelkasten/00-governance/ai-workflow.md` | AI 协作流程：上下文、需求、设计、验证、review、回写 |
 | `zettelkasten/06-requirements/` | 需求状态机：`backlog -> in-progress -> done` |
-| `zettelkasten/08-technical-designs/` | 技术方案状态机：`pending -> approved -> implemented` |
+| `zettelkasten/08-technical-designs/` | 按需使用的独立技术方案：`pending -> approved -> implemented` |
+| `zettelkasten/09-implementation-plans/` | 按需使用的独立实施计划 |
 | `zettelkasten/07-review/` | review 交接状态机：`pending -> in-review -> done` |
 | `zettelkasten/05-reference/e2e-test.md` | 项目具体 E2E / smoke / 验证命令 |
 | `zettelkasten/00-governance/gotchas.md` | 历史踩坑、根因和教训 |
@@ -66,7 +67,7 @@
 
 3. 回答项目名称、技术栈、仓库类型、常用命令、域名端口等问题。
 4. AI 会替换占位符、合并项目自己的 `AGENTS.md` 规则、初始化第一批 note 并删除 `INIT.md`。只有用户要求或仓库规则明确要求时才提交。
-5. 后续每个非极小任务按 `REQ -> TECH -> implementation -> validation -> REVIEW -> writeback` 推进。
+5. 后续任务按 `REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> writeback` 推进。方括号表示独立文档按风险和复杂度选用。
 
 本仓库自身不维护第二套根 `zettelkasten/`。请使用 Skill 或复制 `template/` 的内容；不要把整个仓库根目录当作干净模板。
 
@@ -80,9 +81,28 @@
 | Claude Code | `CLAUDE.md` 通过 `@AGENTS.md` 导入同一份规则 | `zettelkasten/` |
 | 其他能读取仓库的 AI | 明确要求先读取 `AGENTS.md` | `zettelkasten/` |
 
-聊天记录、Codex memory、Claude auto memory 或其他工具的本地状态都只能作为辅助缓存，不能成为项目继续推进所必需的信息。新的 AI 应当能从当前 REQ、approved TECH、open REVIEW、验证证据、worktree 状态、风险和 next action 恢复工作。
+聊天记录、Codex memory、Claude auto memory 或其他工具的本地状态都只能作为辅助缓存，不能成为项目继续推进所必需的信息。新的 AI 应当能从当前 REQ、存在时的 TECH / PLAN、open REVIEW、验证证据、worktree 状态、风险和 next action 恢复工作。
 
 Skill 使用 Codex 和 Claude Code 都支持的 Agent Skills 开放格式；项目初始化完成后，即使没有安装 Skill，仓库内的规范仍然能够独立指导 AI。
+
+## 可选外部流程 Skill
+
+模板不依赖 Superpowers 或其他流程插件。没有安装这些插件时，Codex、Claude Code 或其他 AI 仍然直接使用：
+
+```text
+REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> writeback
+```
+
+独立 TECH 用于架构、接口、数据、安全、部署、跨模块或方案不确定的变更；独立 PLAN 用于多 slice、多 session、多 AI、依赖顺序或迁移发布协调。根因明确、影响局部的小型 BUG 可以在 REQ 内记录技术准备和实施 slices，不必创建独立 TECH 或 PLAN。
+
+如果项目安装了 Superpowers，仓库规则会把它的 brainstorming、planning、TDD、debugging 和 review 过程映射到选定的 REQ、TECH、PLAN、REVIEW、gotchas 和 runbook。它不能建立 `docs/superpowers/` 平行事实源。
+
+因此这只是兼容层：
+
+- 模板不会安装 Superpowers；
+- 没有任何外部命令是必需的；
+- 禁用或删除 Superpowers 不影响知识库工作流；
+- 外部 Skill 默认要求的 commit、branch 或 worktree 仍需服从项目 Git 规则和用户明确指令。
 
 ## Skill 安装
 
@@ -92,7 +112,7 @@ Skill 使用 Codex 和 Claude Code 都支持的 Agent Skills 开放格式；项�
 skills/ai-collaboration-workflow/
 ```
 
-它用于帮助 AI 正确使用这套模板：安全引导或执行模板安装、初始化项目、创建 REQ/TECH/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈，以及回写 gotchas / architecture / runbook。
+它用于帮助 AI 正确使用这套模板：安全引导或执行模板安装、初始化项目、选择交付路径、按需创建 REQ/TECH/PLAN/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈，以及回写 gotchas / architecture / runbook。
 
 Skill 自带 bootstrap 脚本。脚本会先预览变更，只复制缺失文件、跳过相同文件，并把内容不同的已有文件报告为冲突，不会直接覆盖项目已有的 `AGENTS.md`、`CLAUDE.md` 或知识库内容。默认从 canonical Git 仓库的 `template/` 获取 payload；无网络环境可以传入仓库 checkout 或直接传入 `template/`。
 
@@ -137,7 +157,7 @@ Use $ai-collaboration-workflow to initialize this repository.
 项目初始化后，可以继续输入：
 
 ```text
-Use $ai-collaboration-workflow to create a requirement, technical design, or review handoff.
+Use $ai-collaboration-workflow to choose the delivery path and create the required workflow artifacts.
 ```
 
 ## E2E 的定位
@@ -152,7 +172,7 @@ E2E 或真实环境验证不是所有项目、所有任务都必须强制执行�
 
 ## 发布和宣传流程
 
-如果要维护本仓库在 Obsidian Forum、X 等平台的宣传内容，参考根知识库中的项目维护 runbook：
+如果要维护本仓库在 Obsidian Forum、X 等平台的宣传内容，参考 `docs/` 下的项目维护 runbook：
 
 ```text
 docs/community-publishing.md

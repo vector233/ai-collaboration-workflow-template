@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Guide AI-assisted project work with the AI Collaboration Workflow Template. Use when Codex or another coding agent needs to install or initialize the template in a repository; create, advance, or close REQ, TECH, and REVIEW documents; check implementation readiness; record validation; evaluate review feedback with evidence; or write durable lessons back to architecture notes, gotchas, and runbooks.
+description: Guide AI-assisted project work with the AI Collaboration Workflow Template. Use when Codex or another coding agent needs to install or initialize the template; create a REQ and choose whether standalone TECH or PLAN artifacts are needed; create or close REVIEW handoffs; check implementation readiness; record validation; evaluate review feedback; write durable lessons back; or integrate an external process Skill such as Superpowers without creating parallel project state.
 ---
 
 # AI Collaboration Workflow
@@ -25,7 +25,7 @@ python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --inspe
 
 Classify the result:
 
-- **Missing or incomplete**: core files are absent. Bootstrap before creating REQ, TECH, or REVIEW documents.
+- **Missing or incomplete**: core files are absent. Bootstrap before creating workflow artifacts.
 - **Present, not initialized**: `INIT.md` exists or template placeholders remain. Continue initialization.
 - **Initialized**: core files exist, `INIT.md` is absent, and placeholder checks pass. Apply the daily workflow.
 
@@ -95,7 +95,7 @@ For initialized projects, read:
 1. `AGENTS.md`
 2. `zettelkasten/AI.md`
 3. `zettelkasten/00-governance/ai-workflow.md`
-4. The relevant requirement, technical design, review handoff, architecture note, or runbook
+4. The relevant requirement, technical design, implementation plan, review handoff, architecture note, or runbook
 5. The workflow README for any state being changed
 
 Read subproject-specific `AGENTS.md`, `CLAUDE.md`, or module notes before editing that subproject.
@@ -106,24 +106,45 @@ Use the target repository's templates instead of inventing document structures:
 
 - Requirement: `zettelkasten/00-governance/templates/requirement.md`
 - Technical design: `zettelkasten/00-governance/templates/technical-design.md`
+- Implementation plan: `zettelkasten/00-governance/templates/implementation-plan.md`
 - Review handoff: `zettelkasten/00-governance/templates/review.md`
 
 Use timestamped names and keep IDs stable when moving files:
 
 - `REQ-YYYYMMDDHHMMSS-short-name.md`
 - `TECH-YYYYMMDDHHMMSS-short-name.md`
+- `PLAN-YYYYMMDDHHMMSS-short-name.md`
 - `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 
 Route work as follows:
 
-- **New feature or non-trivial fix**: find or create a REQ and link a TECH.
-- **Before business-code edits**: require the TECH in `approved/`, unless a documented tiny-fix waiver applies.
+- **Tracked feature or fix**: find or create a REQ and record the delivery-path decision.
+- **Standalone TECH**: require it for architecture, API, schema, persistence, security, billing, permission, deployment, third-party, cross-module, migration, or unresolved technical decisions. Otherwise complete inline technical readiness in the REQ.
+- **Standalone PLAN**: require it for dependent slices, multi-session or multi-agent work, cross-repository coordination, migration or release sequencing, or explicit ownership and checkpoints. Otherwise keep sufficient implementation slices in the REQ.
+- **Before business-code edits**: require every artifact selected by the REQ to be ready: TECH in `approved/`, PLAN with `status: ready`, or complete inline readiness and slices.
 - **Implementation slice complete**: create or update a REVIEW with scope, validation, worktree state, risks, and review focus.
 - **Review feedback**: treat it as a hypothesis; require evidence, verify independently, fix confirmed issues, and record counter-evidence for rejected findings.
 - **Durable learning**: update architecture notes, `gotchas.md`, validation runbooks, and workflow boards.
 - **Next slice**: wait until the current review is closed or explicitly waived.
 
-Do not treat a REQ in `in-progress/` as implementation approval. Do not claim validation that did not run.
+Do not treat a REQ in `in-progress/` as implementation approval. Check its selected delivery path. Do not claim validation that did not run.
+
+## Interoperate With External Process Skills
+
+External process Skills are optional. Never make Superpowers or another plugin a prerequisite for using this workflow.
+
+When an external Skill is present or invoked:
+
+1. Read `zettelkasten/00-governance/external-skill-interoperability.md`.
+2. Keep the repository REQ and selected TECH, PLAN, and REVIEW artifacts canonical.
+3. Map brainstorming output into the active REQ and a standalone TECH only when the REQ requires one.
+4. Map detailed planning into a required PLAN or the REQ implementation slices.
+5. Map TDD, debugging, execution, verification, and review evidence into the current REVIEW and durable gotcha or runbook notes.
+6. Do not create `docs/superpowers/specs/`, `docs/superpowers/plans/`, or another parallel workflow tree unless the user explicitly requests an export.
+7. Treat an approved TECH or complete inline technical readiness as satisfying an external design gate. Treat a ready PLAN or sufficient REQ slices as satisfying an external planning gate.
+8. Follow repository Git rules instead of an external Skill's default commit, branch, or worktree behavior.
+
+If no external process Skill is installed, ignore this section and apply the daily workflow unchanged.
 
 ## Validate And Hand Off
 

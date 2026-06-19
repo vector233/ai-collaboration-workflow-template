@@ -10,8 +10,9 @@ Before changing code or project documents, read the smallest relevant context pa
 - `zettelkasten/00-governance/ai-workflow.md`
 - `zettelkasten/06-requirements/README.md`
 - `zettelkasten/08-technical-designs/README.md`
+- `zettelkasten/09-implementation-plans/README.md` when the task uses a standalone plan
 - `zettelkasten/07-review/README.md`
-- Any requirement, technical design, review handoff, architecture note, or runbook linked from the current task
+- Any requirement, technical design, implementation plan, review handoff, architecture note, or runbook linked from the current task
 
 If this is an umbrella repository, also read the relevant subproject's own `AGENTS.md`, `CLAUDE.md`, or module-specific notes before editing that subproject.
 
@@ -20,9 +21,23 @@ If this is an umbrella repository, also read the relevant subproject's own `AGEN
 - `AGENTS.md` is the canonical shared instruction file. Codex reads it directly; `CLAUDE.md` imports it for Claude Code.
 - `zettelkasten/` is the shared project memory. Required state must not exist only in chat history, Codex memories, Claude auto memory, or another tool's local files.
 - Every agent starts from repository state and linked workflow documents, not assumptions about a previous agent's conversation.
-- Before editing, inspect the active REQ, approved TECH, and open REVIEW. Continue or close an open handoff before starting another implementation slice.
+- Before editing, inspect the active REQ, any controlling TECH or PLAN, and open REVIEW. Continue or close an open handoff before starting another implementation slice.
 - Before yielding, persist completed work, exact validation, worktree state, unresolved decisions, risks, and the next allowed action.
 - Vendor-specific files are adapters only. Shared requirements, architecture, decisions, validation, and handoff rules remain vendor-neutral.
+
+## Optional External Process Skills
+
+External process skills, plugins, and agent frameworks are optional. The repository workflow must remain fully usable when none are installed.
+
+- Repository files and the `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> writeback` flow remain the source of truth. Bracketed artifacts are optional unless the REQ marks them required.
+- External brainstorming may refine the active REQ and TECH; it must not create a parallel specification system.
+- External implementation planning should update the REQ implementation slices or a linked PLAN. It does not make PLAN mandatory for every task.
+- External TDD, debugging, execution, or review skills may guide how work is performed, but their durable results must be recorded in the current REQ, TECH, PLAN, REVIEW, architecture note, gotcha, or runbook.
+- Do not create `docs/superpowers/specs/`, `docs/superpowers/plans/`, or equivalent tool-specific project state unless the user explicitly requests a parallel export.
+- An approved TECH, or complete inline technical readiness in the REQ when standalone TECH is not required, satisfies an external design gate.
+- External instructions to commit, branch, or create a worktree do not override this repository's Git policy or explicit user direction.
+
+Read `zettelkasten/00-governance/external-skill-interoperability.md` only when an external process skill is installed, invoked, or causing workflow conflicts.
 
 ## Project Structure
 
@@ -35,21 +50,26 @@ If this is an umbrella repository, also read the relevant subproject's own `AGEN
 - `zettelkasten/06-requirements/`: requirement workflow, `backlog/ -> in-progress/ -> done/`.
 - `zettelkasten/07-review/`: review handoff workflow, `pending/ -> in-review/ -> done/`.
 - `zettelkasten/08-technical-designs/`: design workflow, `pending/ -> approved/ -> implemented/`.
+- `zettelkasten/09-implementation-plans/`: optional detailed execution plans.
 
 ## Development Workflow
 
-For any non-trivial feature, fix, integration, or architecture change:
+For any tracked feature, fix, integration, or architecture change:
 
 1. Confirm or create a requirement under `zettelkasten/06-requirements/`.
-2. Confirm the requirement has a linked technical design under `zettelkasten/08-technical-designs/`.
-3. Do not edit business code until the technical design is in `approved/`, unless the requirement or review document records a tiny-fix waiver.
-4. Keep the implementation slice small and within the paths declared for the task.
-5. Run focused validation for the changed boundary.
+2. In the REQ, decide whether standalone TECH and PLAN documents are required.
+3. If TECH is required, do not edit business code until it is in `approved/`. If it is not required, complete the REQ's inline technical readiness.
+4. If PLAN is required, do not implement until it is `ready`. If it is not required, keep sufficient implementation slices in the REQ.
+5. Implement one bounded slice and run focused validation for the changed boundary.
 6. Create or update a review handoff under `zettelkasten/07-review/pending/`.
 7. Record verification, known risks, commit hash, and worktree status in the handoff.
 8. Write back durable lessons to `gotchas.md`, architecture notes, or E2E runbooks.
 
-Tiny-fix waivers are appropriate for typo fixes, comments, non-behavioral docs, obvious local null checks, or similarly low-risk changes that do not change contracts, data, security, billing, permissions, persistence, deployment, or cross-module behavior.
+Standalone TECH is normally required for architecture, API, schema, persistence, security, billing, permission, deployment, third-party, or cross-module changes, and when important technical decisions remain unresolved.
+
+Standalone PLAN is normally useful for multiple dependent slices, multiple sessions or agents, cross-repository work, migrations, releases, or work needing precise file ownership and checkpoints.
+
+Tiny-fix waivers may bypass REQ/TECH/PLAN documents only for typo fixes, comments, non-behavioral docs, or similarly low-risk changes. A bounded bug can keep a REQ while marking standalone TECH and PLAN as not required.
 
 ## Review Rules
 
@@ -65,6 +85,7 @@ Review feedback is not automatically true. Treat each important review point as 
 
 - New requirements use `REQ-YYYYMMDDHHMMSS-short-name.md`.
 - New technical designs use `TECH-YYYYMMDDHHMMSS-short-name.md`.
+- New implementation plans use `PLAN-YYYYMMDDHHMMSS-short-name.md`.
 - New review handoffs use `REVIEW-YYYYMMDDHHMMSS-short-name.md`.
 - New notes must link to existing notes with double-bracket wiki links.
 - When architecture, workflow, validation, or gotchas change, update the durable note that future agents should read.

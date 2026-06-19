@@ -13,6 +13,7 @@ related:
   - "[[02-architecture/current-architecture-flow]]"
   - "[[05-reference/e2e-test]]"
   - "[[08-technical-designs/README]]"
+  - "[[09-implementation-plans/README]]"
   - "[[07-review/README]]"
 ---
 
@@ -78,22 +79,42 @@ Read these first before implementation. If they are not enough, add the smallest
 - Key changes:
 - Compatibility risks:
 
-## Technical Design
+## Delivery Path
 
-Before implementation, create or confirm the linked technical design under [[08-technical-designs/README]]:
+Choose the lightest path that preserves safety and resumability.
 
-- `TECH-YYYYMMDDHHMMSS-short-name.md`
+- Change class: bounded bug / standard change / complex change / high-risk change
+- Standalone TECH: required / not required
+- TECH decision reason:
+- Standalone PLAN: required / not required
+- PLAN decision reason:
 
-This requirement's technical design:
+## Technical Readiness
 
-- Technical design:
-- Current state: pending / approved / implemented / waived
-- If waived, reason:
+If standalone TECH is required:
+
+- Technical design: `TECH-YYYYMMDDHHMMSS-short-name.md`
+- Current state: pending / approved / implemented
+
+If standalone TECH is not required:
+
+- Why inline readiness is sufficient:
+- Confirmed root cause or technical approach:
+- Affected paths and behavior boundaries:
+- Compatibility / rollback considerations:
+- Focused validation plan:
 
 ## Implementation Slices
 
 - Slice 1:
 - Slice 2:
+
+If standalone PLAN is required:
+
+- Implementation plan: `PLAN-YYYYMMDDHHMMSS-short-name.md`
+- Current state: draft / ready / executing / completed / superseded
+
+If standalone PLAN is not required, the slices above must include enough scope, ordering, affected paths, and validation detail to execute and resume safely.
 
 ## Acceptance Criteria
 

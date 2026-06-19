@@ -138,7 +138,7 @@ Rewrite these files with concrete content from the user's answers. Do not leave 
 
 ### 4.0 `AGENTS.md`
 
-Keep the workflow gates, review rules, validation discipline, and Git hygiene. Replace generic repository wording with project-specific structure, common commands, module boundaries, and any existing local agent rules. If the target already had an `AGENTS.md`, merge conservatively instead of discarding local instructions.
+Keep the adaptive REQ/TECH/PLAN workflow, review rules, optional external Skill interoperability, validation discipline, and Git hygiene. Replace generic repository wording with project-specific structure, common commands, module boundaries, and any existing local agent rules. If the target already had an `AGENTS.md`, merge conservatively instead of discarding local instructions.
 
 ### 4.1 `zettelkasten/00-governance/project-overview.md`
 

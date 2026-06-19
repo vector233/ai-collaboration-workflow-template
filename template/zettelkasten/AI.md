@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This knowledge base is written for AI coding agents. Its job is to turn a new task into the smallest useful context, a clear requirement, an implementation-ready technical design, focused validation, a review handoff, and durable memory writeback.
+This knowledge base is written for AI coding agents. Its job is to turn a new task into the smallest useful context, a clear requirement, the right amount of design and planning, focused implementation and validation, a review handoff, and durable memory writeback.
 
 It is not a linear documentation site. The useful object is the network of notes and links.
 
@@ -36,11 +36,12 @@ zettelkasten/
   00-governance/
     project-overview.md              <- project purpose, stack, constraints
     ai-workflow.md                   <- AI task workflow, gates, validation, writeback
+    external-skill-interoperability.md <- optional external workflow mapping
     validation-discipline.md         <- realistic validation policy
     glossary.md                      <- project terms
     decisions.md                     <- architecture decisions and rationale
     gotchas.md                       <- bugs, root causes, and lessons
-    templates/                       <- requirement, technical design, review templates
+    templates/                       <- requirement, technical design, implementation plan, review templates
   01-overview/
     quick-reference.md               <- commands, URLs, ports, accounts, endpoints
     product-vision.md                <- positioning and audience
@@ -65,10 +66,12 @@ zettelkasten/
     in-review/                       <- feedback being evaluated or fixed
     done/                            <- closed review
   08-technical-designs/
-    README.md                        <- design workflow and implementation gate
+    README.md                        <- optional standalone design workflow
     pending/                         <- proposed, not yet implementation input
     approved/                        <- approved implementation input
     implemented/                     <- implemented and written back
+  09-implementation-plans/
+    README.md                        <- optional detailed execution planning
 ```
 
 Directories are physical organization. Double-bracket wiki links are the retrieval system.
@@ -100,23 +103,25 @@ Prefer wiki links for note-to-note navigation inside `zettelkasten/`. Prefer sta
 | Known bugs and lessons | [[00-governance/gotchas]] |
 | Requirement workflow | [[06-requirements/README]] |
 | Technical design workflow | [[08-technical-designs/README]] |
+| Implementation planning | [[09-implementation-plans/README]] |
 | Review workflow | [[07-review/README]] |
 | Validation policy | [[00-governance/validation-discipline]] |
+| External process Skill conflicts | [[00-governance/external-skill-interoperability]] |
 
 ## Standard Task Flow
 
 1. **Classify**: feature, bugfix, review feedback, architecture change, documentation, validation, release, or research.
 2. **Load context**: read this file, [[00-governance/ai-workflow]], and the minimum linked notes for the task.
 3. **Check requirement state**: find or create the related requirement under [[06-requirements/README]].
-4. **Check technical design state**: before business-code work, confirm the related technical design is in `approved/`, or record a tiny-fix waiver.
-5. **Check review state**: if an earlier handoff is open under [[07-review/README]], handle it before starting the next implementation slice.
-6. **Implement the slice**: keep edits inside the task's declared paths.
-7. **Validate**: run the smallest validation with signal for the changed boundary.
+4. **Choose the delivery path**: record whether standalone TECH and PLAN documents are required.
+5. **Check implementation readiness**: approve required TECH/PLAN artifacts, or complete inline readiness and slices in the REQ.
+6. **Check review state**: if an earlier handoff is open under [[07-review/README]], handle it before starting the next implementation slice.
+7. **Implement and validate the slice**: keep edits inside declared paths and run the smallest meaningful checks.
 8. **Create review handoff**: record scope, commit, validation, worktree status, risks, and review focus.
 9. **Handle feedback with evidence**: verify reviewer claims before fixing or rejecting.
-10. **Write memory back**: update architecture, gotchas, runbooks, boards, or reference notes when durable facts change.
+10. **Write memory back and close**: update architecture, gotchas, runbooks, boards, or reference notes when durable facts change.
 
-`in-progress` means a requirement is active. It does not automatically mean implementation is allowed. The technical design gate decides that.
+`in-progress` means a requirement is active. It does not automatically mean implementation is allowed. The REQ's recorded TECH/PLAN decisions determine readiness.
 
 ## When To Update The Knowledge Base
 

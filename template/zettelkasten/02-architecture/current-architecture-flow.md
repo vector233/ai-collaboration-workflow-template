@@ -16,7 +16,7 @@ related:
 
 This note should describe how the current system actually works today. It is the architecture fact base that agents read before changing behavior.
 
-Keep it current. After an implemented TECH changes system flow, write the still-true conclusions back here or into a more specific architecture note.
+Keep it current. After an implemented change alters system flow, write the still-true conclusions back here or into a more specific architecture note, whether the change used a standalone TECH or inline REQ readiness.
 
 ## System Components
 
@@ -57,12 +57,12 @@ Keep it current. After an implemented TECH changes system flow, write the still-
 
 ## Open Questions
 
-| Question | Owner | Related REQ / TECH | Status |
+| Question | Owner | Related REQ / TECH / PLAN | Status |
 |---|---|---|---|
 |  |  |  |  |
 
 ## Writeback Log
 
-| Date | Source TECH / review | Change |
+| Date | Source REQ / TECH / PLAN / review | Change |
 |---|---|---|
 | YYYY-MM-DD |  | Initial placeholder |

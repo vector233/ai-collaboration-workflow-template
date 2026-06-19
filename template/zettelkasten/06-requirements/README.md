@@ -28,11 +28,13 @@ Follow [[00-governance/ai-workflow]].
 1. Copy [[00-governance/templates/requirement]] into `backlog/`.
 2. Fill in background, goals, non-goals, context pack, confirmed facts, impact, and acceptance criteria.
 3. Move the requirement to `in-progress/` when it becomes active.
-4. Create or confirm the linked technical design under [[08-technical-designs/README]].
-5. Do not start business-code implementation until the linked technical design is in `approved/`, unless a tiny-fix waiver is recorded.
-6. After each implementation slice, create or update a review handoff under [[07-review/README]].
-7. Handle review feedback with evidence.
-8. After implementation, validation, review close, and documentation writeback, move the requirement to `done/`.
+4. Decide whether standalone TECH and PLAN documents are required, and record the reasons.
+5. If TECH is required, create or confirm it under [[08-technical-designs/README]] and wait for `approved/`. Otherwise complete inline technical readiness in the REQ.
+6. If PLAN is required, create it under [[09-implementation-plans/README]] and wait for `status: ready`. Otherwise keep sufficient implementation slices in the REQ.
+7. Implement and validate one bounded slice.
+8. Create or update a review handoff under [[07-review/README]].
+9. Handle review feedback with evidence.
+10. After implementation, validation, review close, and documentation writeback, move the requirement to `done/`.
 
 ## Naming
 
@@ -66,7 +68,9 @@ Every requirement should include:
 - open questions;
 - impact boundaries;
 - acceptance criteria;
-- linked technical design;
+- delivery-path decision;
+- linked technical design when required, or inline technical readiness;
+- linked implementation plan when required, or inline implementation slices;
 - linked review handoff;
 - validation record;
 - documentation writeback checklist.
@@ -75,24 +79,41 @@ The most important sections are:
 
 - **Context pack**: tells future agents what to read first.
 - **Confirmed facts**: separates known facts from guesses.
-- **Technical design**: defines implementation readiness.
+- **Delivery path**: makes TECH and PLAN requirements explicit instead of silently skipping them.
+- **Technical readiness**: records either an approved TECH or enough inline evidence for a bounded low-risk change.
+- **Implementation slices**: provide enough execution structure when no standalone PLAN is used.
 - **Review feedback handling**: prevents unsupported review comments from becoming code churn.
 - **Documentation writeback checklist**: prevents current-state docs from going stale.
 
-## Technical Design Gate
+## Implementation Readiness Gate
 
-Every requirement that reaches implementation should satisfy:
+Every requirement that reaches implementation must satisfy its selected delivery path.
 
-- it links to a `TECH-YYYYMMDDHHMMSS-short-name.md`;
-- the technical design is in `approved/`, or a tiny-fix waiver is recorded;
-- the technical design links relevant architecture and reference notes;
-- architecture writeback is planned if the system flow changes.
+When standalone TECH is required:
 
-A requirement in `in-progress/` with a `pending/` technical design can continue clarification, design, validation prep, or review handling. It is not implementation-ready.
+- the REQ links a `TECH-YYYYMMDDHHMMSS-short-name.md`;
+- the TECH is in `approved/`;
+- relevant architecture, compatibility, risk, and validation decisions are resolved.
+
+When standalone TECH is not required, the REQ records:
+
+- why the change is bounded and low risk;
+- confirmed root cause or technical approach;
+- affected paths and behavior boundaries;
+- focused validation plan.
+
+When standalone PLAN is required:
+
+- the REQ links a `PLAN-YYYYMMDDHHMMSS-short-name.md`;
+- the PLAN has `status: ready`;
+- dependencies, ownership, checkpoints, and per-slice validation are explicit.
+
+When standalone PLAN is not required, the REQ implementation slices must be sufficient to execute and resume the work.
 
 ## See Also
 
 - [[00-governance/ai-workflow]] — default AI workflow
 - [[08-technical-designs/README]] — technical design workflow
+- [[09-implementation-plans/README]] — implementation plan workflow
 - [[07-review/README]] — review workflow
 - [[00-governance/templates/requirement]] — requirement template
