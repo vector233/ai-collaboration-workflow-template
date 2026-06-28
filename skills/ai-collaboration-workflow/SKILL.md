@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Guide AI-assisted project work with the AI Collaboration Workflow Template. Use when Codex or another coding agent needs to install or initialize the template; create a REQ and choose whether standalone TECH or PLAN artifacts are needed; create or close REVIEW handoffs; check implementation readiness; record validation; evaluate review feedback; write durable lessons back; or integrate an external process Skill such as Superpowers without creating parallel project state.
+description: Guide AI-assisted project work with the AI Collaboration Workflow Template. Use when Codex or another coding agent needs to install or initialize the template; create a REQ and choose whether standalone TECH or PLAN artifacts are needed; create or close REVIEW handoffs; check implementation readiness; record validation; evaluate review feedback; run the Rule Promotion Check; write durable lessons back; or integrate an external process Skill such as Superpowers without creating parallel project state.
 ---
 
 # AI Collaboration Workflow
@@ -124,10 +124,13 @@ Route work as follows:
 - **Before business-code edits**: require every artifact selected by the REQ to be ready: TECH in `approved/`, PLAN with `status: ready`, or complete inline readiness and slices.
 - **Implementation slice complete**: create or update a REVIEW with scope, validation, worktree state, risks, and review focus.
 - **Review feedback**: treat it as a hypothesis; require evidence, verify independently, fix confirmed issues, and record counter-evidence for rejected findings.
-- **Durable learning**: update architecture notes, `gotchas.md`, validation runbooks, and workflow boards.
+- **Rule Promotion Check**: before handoff or closeout for a long-running task, bug fix, review fix, or repeated failure mode, decide whether a lesson should become a durable project rule.
+- **Durable learning**: update `AGENTS.md`, architecture notes, `gotchas.md`, validation runbooks, decisions, and workflow boards when the Rule Promotion Check or changed facts require it.
 - **Next slice**: wait until the current review is closed or explicitly waived.
 
 Do not treat a REQ in `in-progress/` as implementation approval. Check its selected delivery path. Do not claim validation that did not run.
+
+Promote a lesson when it is likely to recur and can be written as a clear "must", "never", "prefer", or "check before" rule. Use `AGENTS.md` for repository-wide agent behavior, `gotchas.md` for bug roots and false assumptions, architecture or cross-cutting notes for invariants, `05-reference/e2e-test.md` or `01-overview/quick-reference.md` for setup and validation commands, and `00-governance/decisions.md` for accepted decisions. Do not promote one-off observations or low-confidence guesses; leave those in the current REQ or REVIEW.
 
 ## Interoperate With External Process Skills
 
@@ -140,9 +143,10 @@ When an external Skill is present or invoked:
 3. Map brainstorming output into the active REQ and a standalone TECH only when the REQ requires one.
 4. Map detailed planning into a required PLAN or the REQ implementation slices.
 5. Map TDD, debugging, execution, verification, and review evidence into the current REVIEW and durable gotcha or runbook notes.
-6. Do not create `docs/superpowers/specs/`, `docs/superpowers/plans/`, or another parallel workflow tree unless the user explicitly requests an export.
-7. Treat an approved TECH or complete inline technical readiness as satisfying an external design gate. Treat a ready PLAN or sufficient REQ slices as satisfying an external planning gate.
-8. Follow repository Git rules instead of an external Skill's default commit, branch, or worktree behavior.
+6. Run the Rule Promotion Check before treating external Skill output as complete.
+7. Do not create `docs/superpowers/specs/`, `docs/superpowers/plans/`, or another parallel workflow tree unless the user explicitly requests an export.
+8. Treat an approved TECH or complete inline technical readiness as satisfying an external design gate. Treat a ready PLAN or sufficient REQ slices as satisfying an external planning gate.
+9. Follow repository Git rules instead of an external Skill's default commit, branch, or worktree behavior.
 
 If no external process Skill is installed, ignore this section and apply the daily workflow unchanged.
 
@@ -163,3 +167,5 @@ git status --short
 ```
 
 Verify changed wiki links resolve. Record blockers and residual risk rather than implying unperformed coverage.
+
+Before closing the handoff, complete the REVIEW's Rule Promotion Check and either write the promoted rule to the selected durable destination or record why promotion is not applicable.

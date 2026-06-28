@@ -98,8 +98,8 @@ Task
   -> [TECH]    resolve technical decisions when needed
   -> [PLAN]    coordinate detailed execution when needed
   -> Build     implement and validate one bounded change
-  -> REVIEW    hand off evidence, feedback, and risk
-  -> Writeback update architecture, gotchas, or runbooks
+  -> REVIEW    hand off evidence, feedback, risk, and rule-promotion decisions
+  -> Writeback promote recurring lessons and update architecture, gotchas, or runbooks
 ```
 
 It uses Obsidian-style wiki links like `[[00-governance/ai-workflow]]` for note-to-note navigation, while keeping standard Markdown links and images for GitHub compatibility.

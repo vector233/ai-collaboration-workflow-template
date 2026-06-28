@@ -33,7 +33,7 @@ Append new decisions to this file. Do not delete historical decisions. If a deci
 
 **Impact**:
 
-- A bounded bug may use `REQ -> implement and validate -> REVIEW -> writeback` when the REQ contains inline technical readiness and sufficient implementation slices.
+- A bounded bug may use `REQ -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback` when the REQ contains inline technical readiness and sufficient implementation slices.
 - A standalone TECH is required for meaningful architectural, contract, data, security, deployment, third-party, cross-module, or unresolved technical decisions.
 - A standalone PLAN is required when dependencies, sequencing, ownership, multi-session work, or per-slice checkpoints need durable coordination.
 - Implementation starts only when the REQ's selected TECH/PLAN path is ready.

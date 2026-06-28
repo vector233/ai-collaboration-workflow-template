@@ -1,4 +1,4 @@
 interface:
   display_name: "AI Collaboration Workflow"
   short_description: "Initialize and run the AI collaboration workflow"
-  default_prompt: "Use $ai-collaboration-workflow to initialize this repository or choose and guide its next REQ, optional TECH/PLAN, and REVIEW workflow step."
+  default_prompt: "Use $ai-collaboration-workflow to initialize this repository or choose and guide its next REQ, optional TECH/PLAN, REVIEW, and Rule Promotion workflow step."

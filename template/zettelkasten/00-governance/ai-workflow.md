@@ -19,7 +19,7 @@ related:
 
 This note defines the default workflow for AI-assisted development in {{PROJECT_NAME}}. It is intentionally lightweight: the goal is not to add a management framework, but to make AI work traceable, reviewable, and easy to resume.
 
-The workflow answers seven questions for every tracked task:
+The workflow answers eight questions for every tracked task:
 
 - What is the smallest useful context?
 - What is the requirement and acceptance criteria?
@@ -27,6 +27,7 @@ The workflow answers seven questions for every tracked task:
 - Does this task need a standalone implementation plan?
 - Is the selected delivery path ready for implementation?
 - What validation proves the change works?
+- Which lessons should be promoted into durable project rules?
 - What should be written back for future agents?
 
 ## Default Flow
@@ -39,7 +40,7 @@ The workflow answers seven questions for every tracked task:
 6. **Implement and validate one slice**: keep the change within declared paths and run the smallest check that gives signal.
 7. **Create or update review handoff**: record scope, commit, validation, worktree status, risks, and review focus under [[07-review/README]].
 8. **Handle feedback with evidence**: verify reviewer claims before fixing or rejecting them.
-9. **Write durable lessons back**: update gotchas, architecture notes, runbooks, or workflow boards when facts change.
+9. **Run the Rule Promotion Check**: decide whether the work exposed a repeatable lesson that should become a durable project rule.
 10. **Close the loop**: close the review, write back current-state facts, and update any REQ, TECH, or PLAN states that exist.
 
 ## Delivery Paths
@@ -49,9 +50,9 @@ Use the lightest path that preserves safety and resumability:
 | Change shape | Default path |
 |---|---|
 | Tiny, non-behavioral change | change -> validate |
-| Bounded, low-risk bug with known cause and local impact | REQ -> implement and validate -> REVIEW -> writeback |
-| Standard feature or change with meaningful technical decisions | REQ -> TECH -> implement and validate -> REVIEW -> writeback |
-| Complex, multi-slice, multi-session, or coordinated change | REQ -> TECH when needed -> PLAN -> implement and validate -> REVIEW -> writeback |
+| Bounded, low-risk bug with known cause and local impact | REQ -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
+| Standard feature or change with meaningful technical decisions | REQ -> TECH -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
+| Complex, multi-slice, multi-session, or coordinated change | REQ -> TECH when needed -> PLAN -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
 
 Technical reasoning is never optional. A standalone TECH is optional when the REQ can clearly record the confirmed cause or approach, affected paths, risks, and validation plan.
 
@@ -140,6 +141,39 @@ As a default:
 
 Do not claim coverage that was not run. Record blockers and residual risk in the review handoff.
 
+## Rule Promotion Check
+
+Run this check before handing off a long-running task, closing a bug fix, closing a review fix, or ending work that required non-obvious setup, debugging, or recovery.
+
+Promote a lesson to a durable rule when any of these are true:
+
+- the same mistake would likely recur in another session;
+- an AI or human made a false assumption that future agents may repeat;
+- the task revealed a hidden ordering, setup, validation, environment, or tool requirement;
+- a long-running command, migration, job, or external integration needed a non-obvious guardrail;
+- review found a real process gap or undocumented invariant;
+- the lesson can be expressed as a clear "must", "never", "prefer", or "check before" rule.
+
+Do not promote one-off observations, subjective preferences, temporary incidents, or low-confidence guesses. Record those in the current REQ or REVIEW instead.
+
+For each candidate, record:
+
+- candidate lesson;
+- decision: promote / do not promote;
+- reason;
+- destination note;
+- exact rule or summary written.
+
+Suggested destinations:
+
+- repository-wide agent behavior -> `AGENTS.md`
+- bugs, false assumptions, and repeated failure modes -> [[00-governance/gotchas]]
+- architecture or data-flow invariants -> `02-architecture/`
+- cross-module rules -> `04-cross-cutting/`
+- validation commands, setup, and smoke-test procedures -> [[05-reference/e2e-test]] or [[01-overview/quick-reference]]
+- accepted design or process decisions -> [[00-governance/decisions]]
+- workflow state only -> [[06-requirements/README]], [[08-technical-designs/README]], [[09-implementation-plans/README]], or [[07-review/README]]
+
 ## Memory Writeback
 
 Write durable lessons back when:
@@ -153,6 +187,7 @@ Write durable lessons back when:
 
 Suggested destinations:
 
+- repository-wide agent rules -> `AGENTS.md`
 - bugs and false assumptions -> [[00-governance/gotchas]]
 - architecture facts -> `02-architecture/`
 - cross-module rules -> `04-cross-cutting/`
@@ -168,5 +203,6 @@ A slice is done when:
 - required validation ran or blockers are recorded;
 - review handoff is created or updated when needed;
 - confirmed review feedback is fixed and false feedback has counter-evidence;
+- the Rule Promotion Check is recorded for long-running tasks, bug fixes, review fixes, or repeated failure modes;
 - durable architecture, test, gotcha, or runbook changes are written back;
 - the worktree contains no unintended temporary files, secrets, logs, or unrelated changes.

@@ -12,6 +12,7 @@
 - 完成后用什么验证结果证明它真的可用？
 - review 反馈是否有证据，如何处理？
 - 本轮学到的架构事实、测试流程或踩坑应该写回哪里？
+- 长任务或问题修复暴露出的重复性错误，是否应该升级成项目基础规则？
 
 它借鉴 Zettelkasten 的笔记方式：每个 note 尽量短、聚焦一个主题，并通过链接组成知识网络。模板里的 `zettelkasten/` 也可以作为 Obsidian vault 使用。
 
@@ -37,7 +38,7 @@
 | `AGENTS.md` | AI agent 的仓库级工作规则 |
 | `CLAUDE.md` | Claude Code 适配层，指向 `AGENTS.md` 和知识库入口 |
 | `zettelkasten/AI.md` | 当前知识库入口，说明如何导航项目上下文 |
-| `zettelkasten/00-governance/ai-workflow.md` | AI 协作流程：上下文、需求、设计、验证、review、回写 |
+| `zettelkasten/00-governance/ai-workflow.md` | AI 协作流程：上下文、需求、设计、验证、review、规则升级和回写 |
 | `zettelkasten/06-requirements/` | 需求状态机：`backlog -> in-progress -> done` |
 | `zettelkasten/08-technical-designs/` | 按需使用的独立技术方案：`pending -> approved -> implemented` |
 | `zettelkasten/09-implementation-plans/` | 按需使用的独立实施计划 |
@@ -67,7 +68,9 @@
 
 3. 回答项目名称、技术栈、仓库类型、常用命令、域名端口等问题。
 4. AI 会替换占位符、合并项目自己的 `AGENTS.md` 规则、初始化第一批 note 并删除 `INIT.md`。只有用户要求或仓库规则明确要求时才提交。
-5. 后续任务按 `REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> writeback` 推进。方括号表示独立文档按风险和复杂度选用。
+5. 后续任务按 `REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> Rule Promotion Check -> writeback` 推进。方括号表示独立文档按风险和复杂度选用。
+
+`Rule Promotion Check` 用于解决长任务或问题修复后下次又犯同类错误的问题。AI 在关闭长任务、bug fix、review fix 或重复踩坑时，需要判断这次经验是否应该升级成稳定项目规则：仓库级 agent 行为写入 `AGENTS.md`，bug 根因和错误假设写入 `gotchas.md`，架构不变量写入 `02-architecture/` 或 `04-cross-cutting/`，验证和环境步骤写入 `05-reference/e2e-test.md` 或 `01-overview/quick-reference.md`。一次性现象、低置信猜测和临时事故只记录在当前 REQ 或 REVIEW，不升级成规则。
 
 本仓库自身不维护第二套根 `zettelkasten/`。请使用 Skill 或复制 `template/` 的内容；不要把整个仓库根目录当作干净模板。
 
@@ -90,7 +93,7 @@ Skill 使用 Codex 和 Claude Code 都支持的 Agent Skills 开放格式；项�
 模板不依赖 Superpowers 或其他流程插件。没有安装这些插件时，Codex、Claude Code 或其他 AI 仍然直接使用：
 
 ```text
-REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> writeback
+REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> Rule Promotion Check -> writeback
 ```
 
 独立 TECH 用于架构、接口、数据、安全、部署、跨模块或方案不确定的变更；独立 PLAN 用于多 slice、多 session、多 AI、依赖顺序或迁移发布协调。根因明确、影响局部的小型 BUG 可以在 REQ 内记录技术准备和实施 slices，不必创建独立 TECH 或 PLAN。
@@ -112,7 +115,7 @@ REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> writeback
 skills/ai-collaboration-workflow/
 ```
 
-它用于帮助 AI 正确使用这套模板：安全引导或执行模板安装、初始化项目、选择交付路径、按需创建 REQ/TECH/PLAN/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈，以及回写 gotchas / architecture / runbook。
+它用于帮助 AI 正确使用这套模板：安全引导或执行模板安装、初始化项目、选择交付路径、按需创建 REQ/TECH/PLAN/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈、执行 Rule Promotion Check，以及回写 gotchas / architecture / runbook。
 
 Skill 自带 bootstrap 脚本。脚本会先预览变更，只复制缺失文件、跳过相同文件，并把内容不同的已有文件报告为冲突，不会直接覆盖项目已有的 `AGENTS.md`、`CLAUDE.md` 或知识库内容。默认从 canonical Git 仓库的 `template/` 获取 payload；无网络环境可以传入仓库 checkout 或直接传入 `template/`。
 

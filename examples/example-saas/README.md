@@ -7,7 +7,7 @@ This fictional example shows how the adaptive workflow is intended to be used. I
 A bounded bug with a confirmed local cause could use:
 
 ```text
-REQ -> implement and validate -> REVIEW -> writeback
+REQ -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback
 ```
 
 The REQ would mark standalone TECH and PLAN as not required, then record the root cause, affected paths, focused fix, validation, and implementation slice inline.
@@ -89,6 +89,7 @@ The handoff records:
 - validation commands and result summaries;
 - current `git status --short`;
 - known gaps, such as "frontend UI not implemented";
+- Rule Promotion Check, such as whether token expiry pitfalls should become a durable security rule;
 - reviewer focus, such as token expiry and permission checks.
 
 ## 6. Feedback Handling
@@ -110,8 +111,16 @@ After completion:
 - move the TECH to `implemented/`;
 - set the PLAN to `completed`;
 - move the review to `done/`;
+- complete the Rule Promotion Check;
 - update `02-architecture/current-architecture-flow.md` with the invite flow;
 - add any token/security lessons to `00-governance/gotchas.md` or `00-governance/decisions.md`.
+
+Example promotion decision:
+
+- Candidate lesson: invitation tokens must be stored only as hashes and validated with explicit expiry checks.
+- Promote: yes.
+- Destination: `00-governance/gotchas.md` for the root cause pattern, and `02-architecture/current-architecture-flow.md` for the current invite-token invariant.
+- Rule written: "Invite-token flows must validate hash match, expiry, revocation, and workspace permission together before accepting the invite."
 
 ## Initialized File Snippets
 

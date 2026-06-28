@@ -24,7 +24,7 @@ This repository develops and distributes the AI Collaboration Workflow Template.
 2. Make a scoped change and preserve unrelated user or agent work.
 3. Update every affected distribution surface.
 4. Run focused validation.
-5. Record durable maintainer guidance in `AGENTS.md`, `CONTRIBUTING.md`, or `docs/`.
+5. Run a Rule Promotion Check for long tasks, fixes, and review corrections: if the lesson would prevent a likely repeat mistake, record durable maintainer guidance in `AGENTS.md`, `CONTRIBUTING.md`, or `docs/`.
 
 The REQ, TECH, and REVIEW workflow is the product being distributed. It is not required for routine maintenance of this template repository itself.
 

@@ -23,13 +23,14 @@ If this is an umbrella repository, also read the relevant subproject's own `AGEN
 - Every agent starts from repository state and linked workflow documents, not assumptions about a previous agent's conversation.
 - Before editing, inspect the active REQ, any controlling TECH or PLAN, and open REVIEW. Continue or close an open handoff before starting another implementation slice.
 - Before yielding, persist completed work, exact validation, worktree state, unresolved decisions, risks, and the next allowed action.
+- After long-running tasks, bug fixes, or review fixes, perform a Rule Promotion Check: decide whether the lesson should become a durable project rule, and write it to the future agent entry point that will prevent the mistake from recurring.
 - Vendor-specific files are adapters only. Shared requirements, architecture, decisions, validation, and handoff rules remain vendor-neutral.
 
 ## Optional External Process Skills
 
 External process skills, plugins, and agent frameworks are optional. The repository workflow must remain fully usable when none are installed.
 
-- Repository files and the `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> writeback` flow remain the source of truth. Bracketed artifacts are optional unless the REQ marks them required.
+- Repository files and the `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> Rule Promotion Check -> writeback` flow remain the source of truth. Bracketed artifacts are optional unless the REQ marks them required.
 - External brainstorming may refine the active REQ and TECH; it must not create a parallel specification system.
 - External implementation planning should update the REQ implementation slices or a linked PLAN. It does not make PLAN mandatory for every task.
 - External TDD, debugging, execution, or review skills may guide how work is performed, but their durable results must be recorded in the current REQ, TECH, PLAN, REVIEW, architecture note, gotcha, or runbook.
@@ -63,7 +64,7 @@ For any tracked feature, fix, integration, or architecture change:
 5. Implement one bounded slice and run focused validation for the changed boundary.
 6. Create or update a review handoff under `zettelkasten/07-review/pending/`.
 7. Record verification, known risks, commit hash, and worktree status in the handoff.
-8. Write back durable lessons to `gotchas.md`, architecture notes, or E2E runbooks.
+8. Run the Rule Promotion Check and write back durable lessons to `AGENTS.md`, `gotchas.md`, architecture notes, cross-cutting rules, or E2E runbooks.
 
 Standalone TECH is normally required for architecture, API, schema, persistence, security, billing, permission, deployment, third-party, or cross-module changes, and when important technical decisions remain unresolved.
 
@@ -89,6 +90,7 @@ Review feedback is not automatically true. Treat each important review point as 
 - New review handoffs use `REVIEW-YYYYMMDDHHMMSS-short-name.md`.
 - New notes must link to existing notes with double-bracket wiki links.
 - When architecture, workflow, validation, or gotchas change, update the durable note that future agents should read.
+- Promote a lesson to a durable rule when it prevents a likely repeat mistake. Use `AGENTS.md` for repository-wide must/never/always behavior, `gotchas.md` for bug roots and false assumptions, architecture or cross-cutting notes for system invariants, and runbooks for commands or environment steps.
 - Never commit secrets, tokens, real credentials, private customer data, or unredacted production logs.
 
 ## Validation

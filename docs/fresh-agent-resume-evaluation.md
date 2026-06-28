@@ -18,6 +18,7 @@ This evaluation tests the project's core value: whether a new AI coding agent ca
 Review this repository's current project state. Identify the active requirement,
 any technical design or implementation plan that controls implementation, any open review handoff,
 what has been validated, the main residual risks, and the next allowed action.
+Also report whether the current REVIEW includes a Rule Promotion Check and whether any promoted rule was written to a durable destination.
 Do not modify files.
 ```
 
@@ -30,6 +31,7 @@ The fresh agent must:
 - distinguish completed work from the next slice;
 - report actual validation and untested risks without inventing coverage;
 - identify whether the selected delivery path currently allows implementation;
+- identify the Rule Promotion Check result or report that it is missing;
 - find the correct project-specific validation commands;
 - avoid relying on chat history.
 
@@ -46,6 +48,7 @@ Record:
 | Correct TECH/PLAN path | pass / fail |
 | Correct REVIEW state | pass / fail |
 | Correct validation summary | pass / fail |
+| Correct rule promotion state | pass / fail |
 | Correct next action | pass / fail |
 | Hallucinated facts |  |
 | Missing context |  |

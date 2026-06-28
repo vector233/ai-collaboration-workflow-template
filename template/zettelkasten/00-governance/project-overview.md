@@ -49,7 +49,7 @@
 
 - Non-trivial work goes through [[06-requirements/README]] and [[08-technical-designs/README]] before implementation.
 - Review handoffs live under [[07-review/README]], and review feedback must be evidence-backed.
-- New architecture facts, validation procedures, and gotchas must be written back to durable notes.
+- New architecture facts, validation procedures, gotchas, and promoted project rules must be written back to durable notes.
 - Parallel AI work must declare non-overlapping file ownership in the requirement or review handoff.
 
 ## See Also

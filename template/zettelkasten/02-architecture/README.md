@@ -22,5 +22,5 @@ Create these as needed:
 ## See Also
 
 - [[00-governance/decisions]] — architecture decision records
-- [[00-governance/ai-workflow]] — memory writeback rules
+- [[00-governance/ai-workflow]] — rule promotion and memory writeback rules
 - [[AI]] — knowledge base entry point

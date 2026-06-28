@@ -30,7 +30,7 @@ The repository knowledge base remains the only durable source of truth.
 | TDD or execution progress | Current REVIEW validation and resume context |
 | Debugging findings and root causes | Current REVIEW and `00-governance/gotchas.md` |
 | Code-review findings | Current REVIEW feedback table |
-| Durable architecture or operational learning | Architecture notes or runbooks |
+| Durable architecture or operational learning | REVIEW Rule Promotion Check, then architecture notes, runbooks, gotchas, decisions, or `AGENTS.md` |
 
 Do not create a tool-specific parallel tree such as `docs/superpowers/specs/` or `docs/superpowers/plans/` unless the user explicitly asks for an export. Use the selected REQ, TECH, and PLAN artifacts instead.
 
@@ -53,7 +53,8 @@ When Superpowers is installed:
 3. Treat the REQ plus selected technical-readiness content as the requested spec output; do not also create `docs/superpowers/specs/`.
 4. Map `writing-plans` into a required PLAN or the REQ implementation slices; do not create `docs/superpowers/plans/`.
 5. Record TDD, execution, verification, and code-review evidence in the current REVIEW.
-6. Follow repository Git rules. Do not commit, branch, or create a worktree solely because an external Skill defaults to doing so.
+6. Run the Rule Promotion Check before treating the external Skill output as complete.
+7. Follow repository Git rules. Do not commit, branch, or create a worktree solely because an external Skill defaults to doing so.
 
 Superpowers may still be used for its process discipline. This mapping changes where durable state is stored, not whether its reasoning methods may be used.
 
@@ -62,7 +63,7 @@ Superpowers may still be used for its process discipline. This mapping changes w
 Do nothing special. Follow [[00-governance/ai-workflow]] normally:
 
 ```text
-REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> writeback
+REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> Rule Promotion Check -> writeback
 ```
 
 No external command, plugin, directory, or document is required.

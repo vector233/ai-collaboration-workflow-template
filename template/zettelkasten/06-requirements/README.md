@@ -34,7 +34,7 @@ Follow [[00-governance/ai-workflow]].
 7. Implement and validate one bounded slice.
 8. Create or update a review handoff under [[07-review/README]].
 9. Handle review feedback with evidence.
-10. After implementation, validation, review close, and documentation writeback, move the requirement to `done/`.
+10. After implementation, validation, review close, Rule Promotion Check, and documentation writeback, move the requirement to `done/`.
 
 ## Naming
 
@@ -51,7 +51,7 @@ Example:
 | State directory | Enter when | Leave when |
 |---|---|---|
 | `backlog/` | Requirement is identified but not active | Decided for current work -> move to `in-progress/` |
-| `in-progress/` | Requirement is active | Implementation, validation, review, and writeback are complete -> move to `done/` |
+| `in-progress/` | Requirement is active | Implementation, validation, review, Rule Promotion Check, and writeback are complete -> move to `done/` |
 | `done/` | Completed and written back | Do not move |
 
 Move the file between state directories. Do not change `requirement_id`.
@@ -73,6 +73,7 @@ Every requirement should include:
 - linked implementation plan when required, or inline implementation slices;
 - linked review handoff;
 - validation record;
+- Rule Promotion Check result;
 - documentation writeback checklist.
 
 The most important sections are:
@@ -83,6 +84,7 @@ The most important sections are:
 - **Technical readiness**: records either an approved TECH or enough inline evidence for a bounded low-risk change.
 - **Implementation slices**: provide enough execution structure when no standalone PLAN is used.
 - **Review feedback handling**: prevents unsupported review comments from becoming code churn.
+- **Rule Promotion Check**: prevents repeated mistakes from remaining trapped in one session's review context.
 - **Documentation writeback checklist**: prevents current-state docs from going stale.
 
 ## Implementation Readiness Gate

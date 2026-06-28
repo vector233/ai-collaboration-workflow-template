@@ -73,6 +73,15 @@ This handoff tells the next AI agent or human reviewer what changed, what was va
 - Focus 1:
 - Focus 2:
 
+## Rule Promotion Check
+
+- Candidate lesson:
+- Promote to durable rule: yes / no
+- Reason:
+- Destination:
+- Rule or summary written:
+- Follow-up if not written:
+
 ## Reviewer Feedback
 
 | Round | Feedback summary | Evidence | Judgment | Status |
@@ -85,4 +94,5 @@ This handoff tells the next AI agent or human reviewer what changed, what was va
 - The implementation owner has verified each item.
 - Confirmed or partial issues are fixed, validated, and committed.
 - Rejected issues have counter-evidence.
+- Rule Promotion Check is complete, or explicitly marked not applicable.
 - This review round is explicitly closed.

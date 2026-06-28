@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This knowledge base is written for AI coding agents. Its job is to turn a new task into the smallest useful context, a clear requirement, the right amount of design and planning, focused implementation and validation, a review handoff, and durable memory writeback.
+This knowledge base is written for AI coding agents. Its job is to turn a new task into the smallest useful context, a clear requirement, the right amount of design and planning, focused implementation and validation, a review handoff, rule-promotion decisions, and durable memory writeback.
 
 It is not a linear documentation site. The useful object is the network of notes and links.
 
@@ -35,7 +35,7 @@ zettelkasten/
   {{PROJECT_NAME_SAFE}}.md           <- human-readable project index
   00-governance/
     project-overview.md              <- project purpose, stack, constraints
-    ai-workflow.md                   <- AI task workflow, gates, validation, writeback
+    ai-workflow.md                   <- AI task workflow, gates, validation, rule promotion, writeback
     external-skill-interoperability.md <- optional external workflow mapping
     validation-discipline.md         <- realistic validation policy
     glossary.md                      <- project terms
@@ -95,7 +95,7 @@ Prefer wiki links for note-to-note navigation inside `zettelkasten/`. Prefer sta
 
 | Task type | Start here |
 |---|---|
-| AI workflow, gates, review, memory writeback | [[00-governance/ai-workflow]] |
+| AI workflow, gates, review, rule promotion, memory writeback | [[00-governance/ai-workflow]] |
 | Commands, URLs, ports, accounts | [[01-overview/quick-reference]] |
 | Product scope and audience | [[01-overview/product-vision]] |
 | Current architecture | [[02-architecture/current-architecture-flow]] |
@@ -119,7 +119,7 @@ Prefer wiki links for note-to-note navigation inside `zettelkasten/`. Prefer sta
 7. **Implement and validate the slice**: keep edits inside declared paths and run the smallest meaningful checks.
 8. **Create review handoff**: record scope, commit, validation, worktree status, risks, and review focus.
 9. **Handle feedback with evidence**: verify reviewer claims before fixing or rejecting.
-10. **Write memory back and close**: update architecture, gotchas, runbooks, boards, or reference notes when durable facts change.
+10. **Run the Rule Promotion Check and close**: decide whether repeated lessons should become project rules, then update architecture, gotchas, runbooks, boards, or reference notes when durable facts change.
 
 `in-progress` means a requirement is active. It does not automatically mean implementation is allowed. The REQ's recorded TECH/PLAN decisions determine readiness.
 

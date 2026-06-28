@@ -186,6 +186,7 @@ If a reusable flow exists, link to [[05-reference/e2e-test]]. Add requirement-sp
 
 After implementation, check and update:
 
+- Rule Promotion Check:
 - Current architecture notes:
 - Cross-module flow notes:
 - Module / API / data docs:

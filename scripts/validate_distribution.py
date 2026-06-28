@@ -120,6 +120,10 @@ def validate_payload_boundary() -> None:
         in agents_text,
         "payload AGENTS.md does not keep external Skills optional",
     )
+    require(
+        "Rule Promotion Check" in agents_text,
+        "payload AGENTS.md is missing rule promotion guidance",
+    )
     ai_entry = (PAYLOAD / "zettelkasten/AI.md").read_text()
     require(
         "## Cross-Agent Entry Points" in ai_entry,
@@ -162,6 +166,24 @@ def validate_payload_boundary() -> None:
     require(
         "## Resume Context" in review_template,
         "payload review template is missing resume context",
+    )
+    require(
+        "## Rule Promotion Check" in review_template,
+        "payload review template is missing the Rule Promotion Check",
+    )
+    workflow_text = (
+        PAYLOAD / "zettelkasten/00-governance/ai-workflow.md"
+    ).read_text()
+    require(
+        "## Rule Promotion Check" in workflow_text,
+        "payload workflow is missing the Rule Promotion Check",
+    )
+    gotchas_text = (
+        PAYLOAD / "zettelkasten/00-governance/gotchas.md"
+    ).read_text()
+    require(
+        "**Prevention rule**" in gotchas_text,
+        "payload gotchas template is missing prevention-rule guidance",
     )
     require(
         (

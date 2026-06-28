@@ -17,15 +17,16 @@ Review documents are not requirements and not long-term architecture docs. They 
 Review is the evidence checkpoint in [[00-governance/ai-workflow]].
 
 1. When a slice is ready, copy [[00-governance/templates/review]] into `pending/`.
-2. The handoff records scope, commit, validation, worktree status, risks, next steps, and suggested review focus.
+2. The handoff records scope, commit, validation, worktree status, risks, next steps, suggested review focus, and the Rule Promotion Check.
 3. A reviewer reads the handoff, linked requirement, any controlling TECH or PLAN, and changed files.
 4. Important feedback must include evidence: code location, failing command, log, screenshot, linked doc, commit, or reproducible flow.
 5. Move the document to `in-review/` when feedback is being handled.
 6. The implementation owner verifies each claim before fixing or rejecting it.
 7. Confirmed or partially confirmed issues are fixed, validated, and recorded.
 8. False or unsupported issues are rejected with counter-evidence.
-9. Move the document to `done/` when this review round is explicitly closed.
-10. Do not start the next implementation slice until the current review is closed or explicitly waived.
+9. Complete the Rule Promotion Check before closing a long-running task, bug fix, review fix, or repeated failure mode.
+10. Move the document to `done/` when this review round is explicitly closed.
+11. Do not start the next implementation slice until the current review is closed or explicitly waived.
 
 ## Naming
 
@@ -47,6 +48,7 @@ Example:
 - known risks and blockers;
 - next steps;
 - suggested review focus;
+- Rule Promotion Check result;
 - reviewer feedback;
 - implementation-owner judgment and handling status;
 - counter-evidence for rejected findings;
@@ -76,6 +78,18 @@ Move the review file between state directories. Do not change linked requirement
 - UI feedback should include browser evidence or a clear explanation of why it could not be run.
 - Rejected feedback must include counter-evidence.
 - Only confirmed or partially confirmed issues become fix work.
+
+## Rule Promotion
+
+Use the Rule Promotion Check to prevent repeat mistakes. A lesson should be promoted when it is likely to recur across sessions, agents, modules, or future tasks and can be written as a clear project rule.
+
+Common destinations:
+
+- `AGENTS.md` for repository-wide agent behavior;
+- [[00-governance/gotchas]] for bug roots and false assumptions;
+- `02-architecture/` or `04-cross-cutting/` for invariants and cross-module rules;
+- [[05-reference/e2e-test]] or [[01-overview/quick-reference]] for setup, validation, and operational steps;
+- [[00-governance/decisions]] for accepted design or process decisions.
 
 ## Relationship To Requirements
 

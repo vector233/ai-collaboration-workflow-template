@@ -32,8 +32,8 @@ Task
   -> [TECH]    add a standalone technical design when risk or uncertainty requires it
   -> [PLAN]    add a standalone execution plan when coordination requires it
   -> Build     implement one bounded slice and run meaningful validation
-  -> REVIEW    hand off evidence, feedback, and risk
-  -> Writeback update durable knowledge and close the loop
+  -> REVIEW    hand off evidence, feedback, risk, and rule-promotion decisions
+  -> Writeback promote recurring lessons and close the loop
 ```
 
 | Stage | Artifact | Purpose |
@@ -42,8 +42,8 @@ Task
 | Technical design, optional | `TECH-*` | Resolve architecture, contract, risk, and operational decisions |
 | Implementation plan, optional | `PLAN-*` | Make dependencies, ownership, sequence, and checkpoints explicit |
 | Implementation and validation | Code/docs slice plus evidence | Keep the change bounded and verify the changed boundary |
-| Review | `REVIEW-*` | Preserve feedback, evidence, and risk |
-| Writeback | Architecture/gotchas/runbooks | Keep future agents from rediscovering context |
+| Review | `REVIEW-*` | Preserve feedback, evidence, risk, and Rule Promotion Check results |
+| Writeback | `AGENTS.md`, architecture/gotchas/runbooks | Keep future agents from rediscovering context or repeating preventable mistakes |
 
 ## What It Solves
 
@@ -54,7 +54,7 @@ AI coding agents are strong at local implementation but weak at long-lived proje
 - **Adaptive design and planning**: standalone TECH and PLAN documents are used when risk or coordination justifies them; bounded bugs can keep the necessary reasoning inside the REQ.
 - **Review handoff**: review feedback is treated as a hypothesis that needs evidence and independent verification.
 - **Validation discipline**: build, test, browser, integration, and realistic-environment checks are recorded where future agents can find them.
-- **Memory writeback**: architecture changes, test procedures, and gotchas are written back into the knowledge base.
+- **Rule promotion and memory writeback**: recurring mistakes, architecture changes, test procedures, and gotchas are promoted into the durable notes future agents read.
 
 The default template is intentionally plain: no specialized process jargon, no heavy role system, and no requirement to run multiple agents.
 
@@ -126,7 +126,9 @@ For non-trivial work, agents should follow this loop:
 4. Approve required TECH/PLAN artifacts, or complete inline readiness and slices in the REQ.
 5. Implement only the current slice and run the smallest meaningful validation.
 6. Create or update a review handoff under `zettelkasten/07-review/`.
-7. Handle reviewer feedback with evidence, then write durable lessons back to `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
+7. Handle reviewer feedback with evidence, run the Rule Promotion Check, then write durable lessons back to `AGENTS.md`, `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
+
+The Rule Promotion Check is the closeout gate for long-running tasks, bug fixes, review fixes, and repeated failure modes. It asks whether a lesson should become a project rule, where it belongs, and what exact rule was written so the next agent does not repeat the same mistake.
 
 See `examples/example-saas/` for a fictional end-to-end walkthrough.
 
@@ -148,7 +150,7 @@ The companion Skill follows the open Agent Skills format used by both Codex and 
 
 ## Optional External Process Skills
 
-The initialized template does not require Superpowers or any other process plugin. Codex, Claude Code, and other repository-aware agents can use `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> writeback` with only the files in the target repository.
+The initialized template does not require Superpowers or any other process plugin. Codex, Claude Code, and other repository-aware agents can use `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> Rule Promotion Check -> writeback` with only the files in the target repository.
 
 If Superpowers is installed, repository instructions map its brainstorming, planning, TDD, debugging, and review methods into the selected REQ, TECH, PLAN, REVIEW, gotcha, and runbook documents. It must not create a parallel `docs/superpowers/` source of truth.
 
@@ -167,7 +169,7 @@ This repository includes an optional Agent Skills-compatible skill:
 skills/ai-collaboration-workflow/
 ```
 
-Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/PLAN/REVIEW documents when appropriate, check implementation readiness, record validation, handle evidence-based review feedback, and write lessons back to the knowledge base.
+Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/PLAN/REVIEW documents when appropriate, check implementation readiness, record validation, handle evidence-based review feedback, run the Rule Promotion Check, and write lessons back to the knowledge base.
 
 The skill is a companion to the template. If you invoke it in a project that does not yet contain `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/`, it can safely bootstrap the template before continuing. Its bootstrap script previews changes, copies only missing files, skips identical files, and leaves differing existing files untouched for explicit merging.
 
