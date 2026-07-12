@@ -21,7 +21,9 @@ PAYLOAD_REQUIRED_FILES = (
     Path("AGENTS.md"),
     Path("CLAUDE.md"),
     Path("INIT.md"),
+    Path("scripts/workflow_doctor.py"),
     Path("zettelkasten/AI.md"),
+    Path("zettelkasten/CURRENT.md"),
     Path("zettelkasten/00-governance/ai-workflow.md"),
     Path("zettelkasten/06-requirements/README.md"),
     Path("zettelkasten/07-review/README.md"),
@@ -201,6 +203,14 @@ def template_files(source: Path) -> tuple[Path, ...]:
         Path("CLAUDE.md"),
         Path("INIT.md"),
     ]
+    scripts = source / "scripts"
+    if scripts.is_dir():
+        for candidate in sorted(scripts.rglob("*")):
+            if candidate.is_symlink():
+                raise BootstrapError(f"template source contains a symlink: {candidate}")
+            if candidate.is_file():
+                files.append(candidate.relative_to(source))
+
     zettelkasten = source / "zettelkasten"
     for candidate in sorted(zettelkasten.rglob("*")):
         if candidate.is_symlink():

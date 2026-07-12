@@ -55,6 +55,7 @@ AI coding agents are strong at local implementation but weak at long-lived proje
 - **Review handoff**: review feedback is treated as a hypothesis that needs evidence and independent verification.
 - **Validation discipline**: build, test, browser, integration, and realistic-environment checks are recorded where future agents can find them.
 - **Rule promotion and memory writeback**: recurring mistakes, architecture changes, test procedures, and gotchas are promoted into the durable notes future agents read.
+- **Workflow doctor**: a bundled script checks workflow state, wiki links, placeholders, review handoffs, and rule-promotion fields.
 
 The default template is intentionally plain: no specialized process jargon, no heavy role system, and no requirement to run multiple agents.
 
@@ -91,7 +92,11 @@ Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
 │   ├── AGENTS.md
 │   ├── CLAUDE.md
 │   ├── INIT.md
+│   ├── scripts/
 │   └── zettelkasten/
+│       ├── AI.md
+│       ├── CURRENT.md
+│       └── ...
 ├── skills/
 │   └── ai-collaboration-workflow/
 ├── scripts/
@@ -121,16 +126,38 @@ Do not treat the full repository root as the install payload. GitHub's template-
 For non-trivial work, agents should follow this loop:
 
 1. Read `AGENTS.md`, `zettelkasten/AI.md`, and `zettelkasten/00-governance/ai-workflow.md`.
-2. Find or create the relevant requirement under `zettelkasten/06-requirements/`.
+2. Check `zettelkasten/CURRENT.md`, then find or create the relevant requirement under `zettelkasten/06-requirements/`.
 3. In the REQ, decide whether standalone TECH and PLAN documents are required.
 4. Approve required TECH/PLAN artifacts, or complete inline readiness and slices in the REQ.
 5. Implement only the current slice and run the smallest meaningful validation.
 6. Create or update a review handoff under `zettelkasten/07-review/`.
 7. Handle reviewer feedback with evidence, run the Rule Promotion Check, then write durable lessons back to `AGENTS.md`, `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
+8. Run `python3 scripts/workflow_doctor.py` after workflow-state changes and fix any reported errors before handoff.
 
 The Rule Promotion Check is the closeout gate for long-running tasks, bug fixes, review fixes, and repeated failure modes. It asks whether a lesson should become a project rule, where it belongs, and what exact rule was written so the next agent does not repeat the same mistake.
 
-See `examples/example-saas/` for a fictional end-to-end walkthrough.
+## Task Weight Modes
+
+Use the lightest workflow path that preserves safety:
+
+| Mode | Use when | Minimum state |
+|---|---|---|
+| Tiny | Non-behavioral, local, reversible, and obvious | final response plus validation |
+| Bounded | Local behavior change or bug with known cause | REQ with inline readiness and REVIEW |
+| Standard | Meaningful product or technical decision | REQ plus TECH when triggered |
+| Complex | Multi-slice, multi-session, migration, release, or coordination work | REQ plus TECH/PLAN as needed |
+
+## Workflow Doctor
+
+Initialized projects include:
+
+```bash
+python3 scripts/workflow_doctor.py
+```
+
+The doctor checks the core workflow files, unresolved placeholders, wiki links, state-directory/status consistency, REVIEW Rule Promotion Check sections, implementation-plan states, `CURRENT.md` references, and active handoff routing hints. Use `--strict` when warnings should fail the command, such as after initialization.
+
+See `examples/example-saas/` for a fictional end-to-end walkthrough and `examples/practical-scenarios/` for tiny, bounded bug, long-task resume, and review-fix snippets.
 
 To evaluate whether a fresh agent can resume from repository state alone, use [docs/fresh-agent-resume-evaluation.md](docs/fresh-agent-resume-evaluation.md).
 
@@ -236,7 +263,7 @@ Run:
 python3 scripts/validate_distribution.py
 ```
 
-The smoke test checks payload isolation, state-directory presence, bootstrap dry-run and installation, sample initialization, wiki links, a bounded REQ-only bug path, and a full REQ/TECH/PLAN/REVIEW path.
+The smoke test checks payload isolation, state-directory presence, bootstrap dry-run and installation, sample initialization, wiki links, the workflow doctor, a bounded REQ-only bug path, and a full REQ/TECH/PLAN/REVIEW path.
 
 ## Naming Rules
 
@@ -250,6 +277,7 @@ The smoke test checks payload isolation, state-directory presence, bootstrap dry
 Start with these files after initialization:
 
 - `AGENTS.md`: repo-specific AI rules, build commands, test discipline, branch policy.
+- `zettelkasten/CURRENT.md`: active work, open reviews, validation snapshot, and next allowed action.
 - `zettelkasten/00-governance/project-overview.md`: project purpose, stack, constraints.
 - `zettelkasten/01-overview/quick-reference.md`: commands, URLs, ports, test accounts, runbooks.
 - `zettelkasten/02-architecture/current-architecture-flow.md`: current system flow.

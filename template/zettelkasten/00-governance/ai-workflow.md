@@ -19,9 +19,10 @@ related:
 
 This note defines the default workflow for AI-assisted development in {{PROJECT_NAME}}. It is intentionally lightweight: the goal is not to add a management framework, but to make AI work traceable, reviewable, and easy to resume.
 
-The workflow answers eight questions for every tracked task:
+The workflow answers nine questions for every tracked task:
 
 - What is the smallest useful context?
+- What task weight is sufficient?
 - What is the requirement and acceptance criteria?
 - Does this task need a standalone technical design?
 - Does this task need a standalone implementation plan?
@@ -32,7 +33,7 @@ The workflow answers eight questions for every tracked task:
 
 ## Default Flow
 
-1. **Classify the task** as feature, bugfix, review feedback, architecture change, documentation, validation, release, or research.
+1. **Classify the task** by type and weight: feature, bugfix, review feedback, architecture change, documentation, validation, release, or research; then tiny, bounded, standard, or complex.
 2. **Load the context pack**: read this file, [[01-overview/quick-reference]], and the requirement, technical design, review handoff, architecture note, or runbook linked from the task.
 3. **Check the requirement**: find or create a requirement under [[06-requirements/README]].
 4. **Choose the delivery path**: in the REQ, mark standalone TECH and PLAN as required or not required, with reasons.
@@ -47,12 +48,14 @@ The workflow answers eight questions for every tracked task:
 
 Use the lightest path that preserves safety and resumability:
 
-| Change shape | Default path |
-|---|---|
-| Tiny, non-behavioral change | change -> validate |
-| Bounded, low-risk bug with known cause and local impact | REQ -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
-| Standard feature or change with meaningful technical decisions | REQ -> TECH -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
-| Complex, multi-slice, multi-session, or coordinated change | REQ -> TECH when needed -> PLAN -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
+| Task weight | Use when | Minimum path |
+|---|---|---|
+| Tiny | Non-behavioral, local, reversible, and obvious | change -> validate -> optionally note in final response |
+| Bounded | Local behavior change or bug with known cause and focused validation | REQ with inline readiness -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
+| Standard | Meaningful product or technical decision, but one coherent slice | REQ -> TECH if triggered -> implement and validate -> REVIEW -> Rule Promotion Check -> writeback |
+| Complex | Multi-slice, multi-session, multi-agent, migration, release, or coordination work | REQ -> TECH when needed -> PLAN -> per-slice implementation and validation -> REVIEW -> Rule Promotion Check -> writeback |
+
+Tiny work may use a waiver instead of REQ/REVIEW only when it does not alter behavior contracts and the validation signal is clear. If a tiny change uncovers a repeated failure mode, run the Rule Promotion Check anyway.
 
 Technical reasoning is never optional. A standalone TECH is optional when the REQ can clearly record the confirmed cause or approach, affected paths, risks, and validation plan.
 
@@ -141,6 +144,14 @@ As a default:
 
 Do not claim coverage that was not run. Record blockers and residual risk in the review handoff.
 
+For workflow-state changes, run:
+
+```bash
+python3 scripts/workflow_doctor.py
+```
+
+The doctor checks core workflow files, unresolved placeholders, wiki links, state-directory/status consistency, REVIEW Rule Promotion Check sections, implementation-plan states, and active handoff routing hints.
+
 ## Rule Promotion Check
 
 Run this check before handing off a long-running task, closing a bug fix, closing a review fix, or ending work that required non-obvious setup, debugging, or recovery.
@@ -173,6 +184,19 @@ Suggested destinations:
 - validation commands, setup, and smoke-test procedures -> [[05-reference/e2e-test]] or [[01-overview/quick-reference]]
 - accepted design or process decisions -> [[00-governance/decisions]]
 - workflow state only -> [[06-requirements/README]], [[08-technical-designs/README]], [[09-implementation-plans/README]], or [[07-review/README]]
+
+Use this destination matrix to avoid bloating `AGENTS.md`:
+
+| Lesson shape | Destination | Promotion bar |
+|---|---|---|
+| Every future agent must obey it before touching the repo | `AGENTS.md` | High: write as must/never/check-before behavior |
+| A bug root cause, false assumption, or troubleshooting pattern | [[00-governance/gotchas]] | Medium: likely to recur in similar debugging |
+| A current system invariant or data-flow fact | `02-architecture/` or `04-cross-cutting/` | Medium: affects implementation choices |
+| A validation command, setup order, environment step, or smoke procedure | [[05-reference/e2e-test]] or [[01-overview/quick-reference]] | Low: useful as an executable runbook |
+| A durable architecture or process decision with tradeoffs | [[00-governance/decisions]] | Medium: future agents need rationale |
+| A one-off observation, temporary incident, or low-confidence guess | Current REQ or REVIEW only | Do not promote |
+
+If a proposed rule belongs only to one module, do not put it in root `AGENTS.md`; put it in the module note, architecture note, gotcha, or runbook that future agents will naturally read.
 
 ## Memory Writeback
 

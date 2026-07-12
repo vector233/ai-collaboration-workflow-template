@@ -7,6 +7,7 @@ This repository uses the AI Collaboration Workflow Template. The knowledge base 
 Before changing code or project documents, read the smallest relevant context pack:
 
 - `zettelkasten/AI.md`
+- `zettelkasten/CURRENT.md`
 - `zettelkasten/00-governance/ai-workflow.md`
 - `zettelkasten/06-requirements/README.md`
 - `zettelkasten/08-technical-designs/README.md`
@@ -23,6 +24,7 @@ If this is an umbrella repository, also read the relevant subproject's own `AGEN
 - Every agent starts from repository state and linked workflow documents, not assumptions about a previous agent's conversation.
 - Before editing, inspect the active REQ, any controlling TECH or PLAN, and open REVIEW. Continue or close an open handoff before starting another implementation slice.
 - Before yielding, persist completed work, exact validation, worktree state, unresolved decisions, risks, and the next allowed action.
+- Keep `zettelkasten/CURRENT.md` aligned with active work, open reviews, validation status, and next allowed action.
 - After long-running tasks, bug fixes, or review fixes, perform a Rule Promotion Check: decide whether the lesson should become a durable project rule, and write it to the future agent entry point that will prevent the mistake from recurring.
 - Vendor-specific files are adapters only. Shared requirements, architecture, decisions, validation, and handoff rules remain vendor-neutral.
 
@@ -58,13 +60,14 @@ Read `zettelkasten/00-governance/external-skill-interoperability.md` only when a
 For any tracked feature, fix, integration, or architecture change:
 
 1. Confirm or create a requirement under `zettelkasten/06-requirements/`.
-2. In the REQ, decide whether standalone TECH and PLAN documents are required.
+2. Classify task weight as tiny, bounded, standard, or complex. In the REQ, decide whether standalone TECH and PLAN documents are required.
 3. If TECH is required, do not edit business code until it is in `approved/`. If it is not required, complete the REQ's inline technical readiness.
 4. If PLAN is required, do not implement until it is `ready`. If it is not required, keep sufficient implementation slices in the REQ.
 5. Implement one bounded slice and run focused validation for the changed boundary.
 6. Create or update a review handoff under `zettelkasten/07-review/pending/`.
 7. Record verification, known risks, commit hash, and worktree status in the handoff.
 8. Run the Rule Promotion Check and write back durable lessons to `AGENTS.md`, `gotchas.md`, architecture notes, cross-cutting rules, or E2E runbooks.
+9. Run `python3 scripts/workflow_doctor.py` before handoff or closeout when workflow files changed, and fix any reported errors.
 
 Standalone TECH is normally required for architecture, API, schema, persistence, security, billing, permission, deployment, third-party, or cross-module changes, and when important technical decisions remain unresolved.
 
@@ -90,7 +93,7 @@ Review feedback is not automatically true. Treat each important review point as 
 - New review handoffs use `REVIEW-YYYYMMDDHHMMSS-short-name.md`.
 - New notes must link to existing notes with double-bracket wiki links.
 - When architecture, workflow, validation, or gotchas change, update the durable note that future agents should read.
-- Promote a lesson to a durable rule when it prevents a likely repeat mistake. Use `AGENTS.md` for repository-wide must/never/always behavior, `gotchas.md` for bug roots and false assumptions, architecture or cross-cutting notes for system invariants, and runbooks for commands or environment steps.
+- Promote a lesson to a durable rule when it prevents a likely repeat mistake. Use `AGENTS.md` only for repository-wide must/never/always behavior; use `gotchas.md` for bug roots and false assumptions, architecture or cross-cutting notes for system invariants, and runbooks for commands or environment steps.
 - Never commit secrets, tokens, real credentials, private customer data, or unredacted production logs.
 
 ## Validation
@@ -100,6 +103,7 @@ Use project-specific commands from `zettelkasten/01-overview/quick-reference.md`
 As a default:
 
 - Documentation-only changes: run `git diff --check`.
+- Workflow-state changes: run `python3 scripts/workflow_doctor.py`.
 - Backend/API changes: run unit or integration tests for the affected package.
 - Frontend changes: run lint/build and browser verification for user-visible flows.
 - Database or migration changes: verify schema changes against a realistic database.

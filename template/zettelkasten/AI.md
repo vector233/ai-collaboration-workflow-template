@@ -7,6 +7,7 @@ This knowledge base is written for AI coding agents. Its job is to turn a new ta
 It is not a linear documentation site. The useful object is the network of notes and links.
 
 The human-readable project index is [[{{PROJECT_NAME_SAFE}}]].
+The current resume snapshot is [[CURRENT]].
 
 ## Cross-Agent Entry Points
 
@@ -32,6 +33,7 @@ Agent-local memory and chat history may help an individual session, but they are
 ```text
 zettelkasten/
   AI.md                             <- AI-facing entry point
+  CURRENT.md                        <- active work and next-action snapshot
   {{PROJECT_NAME_SAFE}}.md           <- human-readable project index
   00-governance/
     project-overview.md              <- project purpose, stack, constraints
@@ -95,6 +97,7 @@ Prefer wiki links for note-to-note navigation inside `zettelkasten/`. Prefer sta
 
 | Task type | Start here |
 |---|---|
+| Current active work, open reviews, and next action | [[CURRENT]] |
 | AI workflow, gates, review, rule promotion, memory writeback | [[00-governance/ai-workflow]] |
 | Commands, URLs, ports, accounts | [[01-overview/quick-reference]] |
 | Product scope and audience | [[01-overview/product-vision]] |
@@ -112,7 +115,7 @@ Prefer wiki links for note-to-note navigation inside `zettelkasten/`. Prefer sta
 
 1. **Classify**: feature, bugfix, review feedback, architecture change, documentation, validation, release, or research.
 2. **Load context**: read this file, [[00-governance/ai-workflow]], and the minimum linked notes for the task.
-3. **Check requirement state**: find or create the related requirement under [[06-requirements/README]].
+3. **Check current state**: read [[CURRENT]], then find or create the related requirement under [[06-requirements/README]].
 4. **Choose the delivery path**: record whether standalone TECH and PLAN documents are required.
 5. **Check implementation readiness**: approve required TECH/PLAN artifacts, or complete inline readiness and slices in the REQ.
 6. **Check review state**: if an earlier handoff is open under [[07-review/README]], handle it before starting the next implementation slice.
@@ -120,6 +123,10 @@ Prefer wiki links for note-to-note navigation inside `zettelkasten/`. Prefer sta
 8. **Create review handoff**: record scope, commit, validation, worktree status, risks, and review focus.
 9. **Handle feedback with evidence**: verify reviewer claims before fixing or rejecting.
 10. **Run the Rule Promotion Check and close**: decide whether repeated lessons should become project rules, then update architecture, gotchas, runbooks, boards, or reference notes when durable facts change.
+
+Use `python3 scripts/workflow_doctor.py` to check workflow state after changing requirements, designs, plans, review handoffs, wiki links, or initialization files.
+
+Update [[CURRENT]] when active work, open review state, validation status, or next allowed action changes.
 
 `in-progress` means a requirement is active. It does not automatically mean implementation is allowed. The REQ's recorded TECH/PLAN decisions determine readiness.
 

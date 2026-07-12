@@ -38,6 +38,7 @@
 | `AGENTS.md` | AI agent 的仓库级工作规则 |
 | `CLAUDE.md` | Claude Code 适配层，指向 `AGENTS.md` 和知识库入口 |
 | `zettelkasten/AI.md` | 当前知识库入口，说明如何导航项目上下文 |
+| `zettelkasten/CURRENT.md` | 当前 active work、open review、验证快照和 next action |
 | `zettelkasten/00-governance/ai-workflow.md` | AI 协作流程：上下文、需求、设计、验证、review、规则升级和回写 |
 | `zettelkasten/06-requirements/` | 需求状态机：`backlog -> in-progress -> done` |
 | `zettelkasten/08-technical-designs/` | 按需使用的独立技术方案：`pending -> approved -> implemented` |
@@ -45,6 +46,7 @@
 | `zettelkasten/07-review/` | review 交接状态机：`pending -> in-review -> done` |
 | `zettelkasten/05-reference/e2e-test.md` | 项目具体 E2E / smoke / 验证命令 |
 | `zettelkasten/00-governance/gotchas.md` | 历史踩坑、根因和教训 |
+| `scripts/workflow_doctor.py` | 检查工作流状态、wiki 链接、占位符、review handoff 和规则升级字段 |
 
 ## 推荐使用流程
 
@@ -71,6 +73,23 @@
 5. 后续任务按 `REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> Rule Promotion Check -> writeback` 推进。方括号表示独立文档按风险和复杂度选用。
 
 `Rule Promotion Check` 用于解决长任务或问题修复后下次又犯同类错误的问题。AI 在关闭长任务、bug fix、review fix 或重复踩坑时，需要判断这次经验是否应该升级成稳定项目规则：仓库级 agent 行为写入 `AGENTS.md`，bug 根因和错误假设写入 `gotchas.md`，架构不变量写入 `02-architecture/` 或 `04-cross-cutting/`，验证和环境步骤写入 `05-reference/e2e-test.md` 或 `01-overview/quick-reference.md`。一次性现象、低置信猜测和临时事故只记录在当前 REQ 或 REVIEW，不升级成规则。
+
+任务按重量选择最轻安全路径：
+
+| 模式 | 适用情况 | 最小状态 |
+|---|---|---|
+| Tiny | 非行为变更、本地、可逆、明显 | 最终回复和验证结果 |
+| Bounded | 局部行为变更或已知根因 bug | REQ 内联技术准备和 REVIEW |
+| Standard | 有明确产品或技术决策 | REQ，必要时 TECH |
+| Complex | 多 slice、多 session、迁移、发布或协作 | REQ，按需 TECH/PLAN |
+
+工作流状态变更后可以运行：
+
+```bash
+python3 scripts/workflow_doctor.py
+```
+
+它会检查核心文件、初始化占位符、wiki 链接、REQ/TECH/REVIEW 状态目录、REVIEW 是否包含 Rule Promotion Check、PLAN 状态、`CURRENT.md` 是否引用 active work，以及 open review / active requirement 的路由提醒。初始化完成后可用 `--strict` 让 warning 也导致命令失败。
 
 本仓库自身不维护第二套根 `zettelkasten/`。请使用 Skill 或复制 `template/` 的内容；不要把整个仓库根目录当作干净模板。
 
@@ -115,7 +134,7 @@ REQ -> [TECH] -> [PLAN] -> implementation & validation -> REVIEW -> Rule Promoti
 skills/ai-collaboration-workflow/
 ```
 
-它用于帮助 AI 正确使用这套模板：安全引导或执行模板安装、初始化项目、选择交付路径、按需创建 REQ/TECH/PLAN/REVIEW、检查开发准入、记录验证结果、处理带证据的 review 反馈、执行 Rule Promotion Check，以及回写 gotchas / architecture / runbook。
+它用于帮助 AI 正确使用这套模板：安全引导或执行模板安装、初始化项目、选择交付路径、按需创建 REQ/TECH/PLAN/REVIEW、检查开发准入、运行 workflow doctor、记录验证结果、处理带证据的 review 反馈、执行 Rule Promotion Check，以及回写 gotchas / architecture / runbook。
 
 Skill 自带 bootstrap 脚本。脚本会先预览变更，只复制缺失文件、跳过相同文件，并把内容不同的已有文件报告为冲突，不会直接覆盖项目已有的 `AGENTS.md`、`CLAUDE.md` 或知识库内容。默认从 canonical Git 仓库的 `template/` 获取 payload；无网络环境可以传入仓库 checkout 或直接传入 `template/`。
 

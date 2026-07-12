@@ -86,6 +86,7 @@ Instead of one large project document, the template uses small linked notes for:
 - technical designs
 - implementation plans when coordination requires them
 - review handoffs
+- active-state snapshots
 - architecture notes
 - validation runbooks
 - gotchas / lessons learned
@@ -99,6 +100,7 @@ Task
   -> [PLAN]    coordinate detailed execution when needed
   -> Build     implement and validate one bounded change
   -> REVIEW    hand off evidence, feedback, risk, and rule-promotion decisions
+  -> Doctor    check workflow state, links, and handoffs
   -> Writeback promote recurring lessons and update architecture, gotchas, or runbooks
 ```
 

@@ -15,10 +15,11 @@ This evaluation tests the project's core value: whether a new AI coding agent ca
 ## Evaluation Prompt
 
 ```text
-Review this repository's current project state. Identify the active requirement,
+Review this repository's current project state. Start from AGENTS.md, zettelkasten/AI.md, and zettelkasten/CURRENT.md. Identify the active requirement,
 any technical design or implementation plan that controls implementation, any open review handoff,
 what has been validated, the main residual risks, and the next allowed action.
 Also report whether the current REVIEW includes a Rule Promotion Check and whether any promoted rule was written to a durable destination.
+If workflow state changed, identify the workflow doctor command that should be run.
 Do not modify files.
 ```
 
@@ -27,11 +28,13 @@ Do not modify files.
 The fresh agent must:
 
 - read `AGENTS.md` and `zettelkasten/AI.md`;
+- check `zettelkasten/CURRENT.md` for active work and next action;
 - identify the correct active REQ, its TECH/PLAN decision and state, and open REVIEW;
 - distinguish completed work from the next slice;
 - report actual validation and untested risks without inventing coverage;
 - identify whether the selected delivery path currently allows implementation;
 - identify the Rule Promotion Check result or report that it is missing;
+- identify `python3 scripts/workflow_doctor.py` as the workflow-state validator when relevant;
 - find the correct project-specific validation commands;
 - avoid relying on chat history.
 
@@ -44,11 +47,13 @@ Record:
 | Project and commit |  |
 | Agent/tool |  |
 | Date |  |
+| Correct CURRENT snapshot | pass / fail |
 | Correct active REQ | pass / fail |
 | Correct TECH/PLAN path | pass / fail |
 | Correct REVIEW state | pass / fail |
 | Correct validation summary | pass / fail |
 | Correct rule promotion state | pass / fail |
+| Correct workflow doctor guidance | pass / fail |
 | Correct next action | pass / fail |
 | Hallucinated facts |  |
 | Missing context |  |

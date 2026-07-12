@@ -88,8 +88,10 @@ The handoff records:
 - latest commit;
 - validation commands and result summaries;
 - current `git status --short`;
+- `CURRENT.md` entry pointing to this active slice and review;
 - known gaps, such as "frontend UI not implemented";
 - Rule Promotion Check, such as whether token expiry pitfalls should become a durable security rule;
+- workflow doctor result, such as `python3 scripts/workflow_doctor.py`;
 - reviewer focus, such as token expiry and permission checks.
 
 ## 6. Feedback Handling
@@ -111,7 +113,9 @@ After completion:
 - move the TECH to `implemented/`;
 - set the PLAN to `completed`;
 - move the review to `done/`;
+- update `CURRENT.md` so the completed slice no longer appears as active work;
 - complete the Rule Promotion Check;
+- run `python3 scripts/workflow_doctor.py`;
 - update `02-architecture/current-architecture-flow.md` with the invite flow;
 - add any token/security lessons to `00-governance/gotchas.md` or `00-governance/decisions.md`.
 

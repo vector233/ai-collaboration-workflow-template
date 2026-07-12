@@ -60,6 +60,14 @@ If a slice depends on a real browser, database, third-party service, device, ins
 
 If realistic validation could not run, the handoff must record the blocker and residual risk.
 
+When a review handoff is created, moved, or closed, run:
+
+```bash
+python3 scripts/workflow_doctor.py
+```
+
+Fix errors before handoff. Open-review messages are expected until the review closes.
+
 ## State Transitions
 
 | State directory | Enter when | Leave when |

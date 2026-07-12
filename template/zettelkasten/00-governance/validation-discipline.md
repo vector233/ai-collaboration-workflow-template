@@ -31,6 +31,14 @@ The review handoff should include:
 - redacted sensitive values;
 - known gaps that remain untested.
 
+When workflow files, requirements, technical designs, implementation plans, review handoffs, wiki links, or initialization state changed, run:
+
+```bash
+python3 scripts/workflow_doctor.py
+```
+
+Fix reported errors before handoff. Informational open-review or active-requirement messages are routing constraints, not validation failures.
+
 ## When Realistic Validation Matters
 
 Run a realistic smoke test when a slice touches:

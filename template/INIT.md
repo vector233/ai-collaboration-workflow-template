@@ -144,23 +144,27 @@ Keep the adaptive REQ/TECH/PLAN workflow, review rules, optional external Skill 
 
 Fill in project purpose, naming rules if relevant, tech stack, subprojects if umbrella, and project constraints.
 
-### 4.2 `zettelkasten/01-overview/quick-reference.md`
+### 4.2 `zettelkasten/CURRENT.md`
+
+Initialize the current-state snapshot. If there is no active work yet, keep `None` rows and record the initial branch or worktree state if useful.
+
+### 4.3 `zettelkasten/01-overview/quick-reference.md`
 
 Fill in common commands, domains/ports, repositories, and any known local URLs.
 
-### 4.3 `zettelkasten/01-overview/product-vision.md`
+### 4.4 `zettelkasten/01-overview/product-vision.md`
 
 Write one paragraph describing the current product direction. Leave unknown market or pricing details as explicit TODOs.
 
-### 4.4 `zettelkasten/02-architecture/current-architecture-flow.md`
+### 4.5 `zettelkasten/02-architecture/current-architecture-flow.md`
 
 Write the first current-architecture summary. If the project is not implemented yet, mark sections as planned or unknown instead of presenting assumptions as facts.
 
-### 4.5 `zettelkasten/05-reference/e2e-test.md`
+### 4.6 `zettelkasten/05-reference/e2e-test.md`
 
 Fill in known validation commands. If no realistic environment validation exists yet, record that gap and its risk.
 
-### 4.6 Other Files
+### 4.7 Other Files
 
 Keep workflow files, templates, decisions, glossary, and gotchas generic. Replace placeholders only. The project can refine them later.
 
@@ -196,6 +200,14 @@ Delete this file:
 rm -f .ai-collaboration-workflow-template
 rm INIT.md
 ```
+
+Run the workflow doctor after deleting the initialization files:
+
+```bash
+python3 scripts/workflow_doctor.py --strict
+```
+
+Fix any reported error before handoff.
 
 If the user requested a commit, or repository instructions require one, create the first commit:
 

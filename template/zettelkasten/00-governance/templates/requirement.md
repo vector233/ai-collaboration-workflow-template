@@ -83,7 +83,8 @@ Read these first before implementation. If they are not enough, add the smallest
 
 Choose the lightest path that preserves safety and resumability.
 
-- Change class: bounded bug / standard change / complex change / high-risk change
+- Task weight: bounded / standard / complex / high-risk
+- Tiny waiver used before this REQ: yes / no
 - Standalone TECH: required / not required
 - TECH decision reason:
 - Standalone PLAN: required / not required

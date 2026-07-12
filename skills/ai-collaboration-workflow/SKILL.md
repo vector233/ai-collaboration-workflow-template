@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Guide AI-assisted project work with the AI Collaboration Workflow Template. Use when Codex or another coding agent needs to install or initialize the template; create a REQ and choose whether standalone TECH or PLAN artifacts are needed; create or close REVIEW handoffs; check implementation readiness; record validation; evaluate review feedback; run the Rule Promotion Check; write durable lessons back; or integrate an external process Skill such as Superpowers without creating parallel project state.
+description: Guide AI-assisted project work with the AI Collaboration Workflow Template. Use when Codex or another coding agent needs to install or initialize the template; create a REQ and choose whether standalone TECH or PLAN artifacts are needed; create or close REVIEW handoffs; check implementation readiness; run the workflow doctor; record validation; evaluate review feedback; run the Rule Promotion Check; write durable lessons back; or integrate an external process Skill such as Superpowers without creating parallel project state.
 ---
 
 # AI Collaboration Workflow
@@ -94,9 +94,10 @@ For initialized projects, read:
 
 1. `AGENTS.md`
 2. `zettelkasten/AI.md`
-3. `zettelkasten/00-governance/ai-workflow.md`
-4. The relevant requirement, technical design, implementation plan, review handoff, architecture note, or runbook
-5. The workflow README for any state being changed
+3. `zettelkasten/CURRENT.md`
+4. `zettelkasten/00-governance/ai-workflow.md`
+5. The relevant requirement, technical design, implementation plan, review handoff, architecture note, or runbook
+6. The workflow README for any state being changed
 
 Read subproject-specific `AGENTS.md`, `CLAUDE.md`, or module notes before editing that subproject.
 
@@ -118,6 +119,7 @@ Use timestamped names and keep IDs stable when moving files:
 
 Route work as follows:
 
+- **Task weight**: classify work as tiny, bounded, standard, or complex. Use the lightest workflow path that preserves safety and resumability.
 - **Tracked feature or fix**: find or create a REQ and record the delivery-path decision.
 - **Standalone TECH**: require it for architecture, API, schema, persistence, security, billing, permission, deployment, third-party, cross-module, migration, or unresolved technical decisions. Otherwise complete inline technical readiness in the REQ.
 - **Standalone PLAN**: require it for dependent slices, multi-session or multi-agent work, cross-repository coordination, migration or release sequencing, or explicit ownership and checkpoints. Otherwise keep sufficient implementation slices in the REQ.
@@ -126,11 +128,13 @@ Route work as follows:
 - **Review feedback**: treat it as a hypothesis; require evidence, verify independently, fix confirmed issues, and record counter-evidence for rejected findings.
 - **Rule Promotion Check**: before handoff or closeout for a long-running task, bug fix, review fix, or repeated failure mode, decide whether a lesson should become a durable project rule.
 - **Durable learning**: update `AGENTS.md`, architecture notes, `gotchas.md`, validation runbooks, decisions, and workflow boards when the Rule Promotion Check or changed facts require it.
+- **Workflow doctor**: after workflow-state changes, run `python3 scripts/workflow_doctor.py` and fix reported errors before handoff.
+- **Current state**: update `zettelkasten/CURRENT.md` when active work, open review state, validation status, or next allowed action changes.
 - **Next slice**: wait until the current review is closed or explicitly waived.
 
 Do not treat a REQ in `in-progress/` as implementation approval. Check its selected delivery path. Do not claim validation that did not run.
 
-Promote a lesson when it is likely to recur and can be written as a clear "must", "never", "prefer", or "check before" rule. Use `AGENTS.md` for repository-wide agent behavior, `gotchas.md` for bug roots and false assumptions, architecture or cross-cutting notes for invariants, `05-reference/e2e-test.md` or `01-overview/quick-reference.md` for setup and validation commands, and `00-governance/decisions.md` for accepted decisions. Do not promote one-off observations or low-confidence guesses; leave those in the current REQ or REVIEW.
+Promote a lesson when it is likely to recur and can be written as a clear "must", "never", "prefer", or "check before" rule. Use `AGENTS.md` only when every future agent must obey the rule before touching the repo. Use `gotchas.md` for bug roots and false assumptions, architecture or cross-cutting notes for invariants, `05-reference/e2e-test.md` or `01-overview/quick-reference.md` for setup and validation commands, and `00-governance/decisions.md` for accepted decisions. Do not promote one-off observations or low-confidence guesses; leave those in the current REQ or REVIEW.
 
 ## Interoperate With External Process Skills
 
@@ -169,3 +173,11 @@ git status --short
 Verify changed wiki links resolve. Record blockers and residual risk rather than implying unperformed coverage.
 
 Before closing the handoff, complete the REVIEW's Rule Promotion Check and either write the promoted rule to the selected durable destination or record why promotion is not applicable.
+
+When workflow files, requirements, technical designs, implementation plans, review handoffs, wiki links, or initialization state changed, run:
+
+```bash
+python3 scripts/workflow_doctor.py
+```
+
+Use `--strict` after initialization or when warnings should fail the handoff.

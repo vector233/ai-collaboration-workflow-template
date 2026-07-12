@@ -35,6 +35,7 @@ REQUIRED_STATE_DIRECTORIES = (
 )
 
 REQUIRED_PAYLOAD_DIRECTORIES = REQUIRED_STATE_DIRECTORIES + (
+    Path("scripts"),
     Path("zettelkasten/09-implementation-plans"),
 )
 
@@ -101,6 +102,10 @@ def validate_payload_boundary() -> None:
     require((PAYLOAD / "AGENTS.md").is_file(), "payload AGENTS.md is missing")
     require((PAYLOAD / "CLAUDE.md").is_file(), "payload CLAUDE.md is missing")
     require((PAYLOAD / "INIT.md").is_file(), "payload INIT.md is missing")
+    require(
+        (PAYLOAD / "scripts/workflow_doctor.py").is_file(),
+        "payload workflow doctor is missing",
+    )
     claude_adapter = (PAYLOAD / "CLAUDE.md").read_text()
     require(
         claude_adapter.lstrip().startswith("@AGENTS.md"),
@@ -128,6 +133,14 @@ def validate_payload_boundary() -> None:
     require(
         "## Cross-Agent Entry Points" in ai_entry,
         "payload AI.md is missing cross-agent entry points",
+    )
+    require(
+        (PAYLOAD / "zettelkasten/CURRENT.md").is_file(),
+        "payload CURRENT.md is missing",
+    )
+    require(
+        "[[CURRENT]]" in ai_entry,
+        "payload AI.md does not point to CURRENT.md",
     )
     interoperability = (
         PAYLOAD
@@ -178,12 +191,25 @@ def validate_payload_boundary() -> None:
         "## Rule Promotion Check" in workflow_text,
         "payload workflow is missing the Rule Promotion Check",
     )
+    require(
+        "## Delivery Paths" in workflow_text and "Task weight" in workflow_text,
+        "payload workflow is missing task-weight guidance",
+    )
+    require(
+        "Use this destination matrix to avoid bloating `AGENTS.md`" in workflow_text,
+        "payload workflow is missing the rule-promotion destination matrix",
+    )
     gotchas_text = (
         PAYLOAD / "zettelkasten/00-governance/gotchas.md"
     ).read_text()
     require(
         "**Prevention rule**" in gotchas_text,
         "payload gotchas template is missing prevention-rule guidance",
+    )
+    doctor_text = (PAYLOAD / "scripts/workflow_doctor.py").read_text()
+    require(
+        "Rule Promotion Check" in doctor_text,
+        "payload workflow doctor does not check rule promotion state",
     )
     require(
         (
@@ -268,6 +294,7 @@ def create_full_workflow_artifacts(target: Path) -> None:
     technical_design_id = "TECH-20260618190100-sample-change"
     plan_id = "PLAN-20260618190200-sample-change"
     review_id = "REVIEW-20260618190300-sample-change"
+    closed_review_id = "REVIEW-20260618190400-sample-change-closed"
 
     requirement = (
         vault
@@ -281,6 +308,7 @@ def create_full_workflow_artifacts(target: Path) -> None:
     )
     plan = vault / "09-implementation-plans" / f"{plan_id}.md"
     review = vault / "07-review/pending" / f"{review_id}.md"
+    closed_review = vault / "07-review/done" / f"{closed_review_id}.md"
 
     shutil.copy2(
         vault / "00-governance/templates/requirement.md",
@@ -297,6 +325,10 @@ def create_full_workflow_artifacts(target: Path) -> None:
     shutil.copy2(
         vault / "00-governance/templates/review.md",
         review,
+    )
+    shutil.copy2(
+        vault / "00-governance/templates/review.md",
+        closed_review,
     )
 
     common_replacements = {
@@ -326,6 +358,16 @@ def create_full_workflow_artifacts(target: Path) -> None:
             },
         ),
         (review, {}),
+        (
+            closed_review,
+            {
+                "status: pending": "status: done",
+                review_id: closed_review_id,
+                "- Promote to durable rule: yes / no": "- Promote to durable rule: no",
+                "- Reason:": "- Reason: no recurring lesson in this sample closure",
+                "- Rule or summary written:": "- Rule or summary written: not applicable",
+            },
+        ),
     )
     for path, state_replacements in artifacts:
         text = path.read_text()
@@ -338,6 +380,7 @@ def create_full_workflow_artifacts(target: Path) -> None:
     require("status: approved" in technical_design.read_text(), "TECH state is incorrect")
     require("status: ready" in plan.read_text(), "PLAN state is incorrect")
     require("status: pending" in review.read_text(), "REVIEW state is incorrect")
+    require("status: done" in closed_review.read_text(), "closed REVIEW state is incorrect")
 
 
 def create_bounded_bug_artifacts(target: Path) -> None:
@@ -364,9 +407,8 @@ def create_bounded_bug_artifacts(target: Path) -> None:
         "REQ-YYYYMMDDHHMMSS-short-name": requirement_id,
         "REVIEW-YYYYMMDDHHMMSS-short-name": review_id,
         "status: backlog": "status: in-progress",
-        "- Change class: bounded bug / standard change / complex change / high-risk change": (
-            "- Change class: bounded bug"
-        ),
+        "- Task weight: bounded / standard / complex / high-risk": "- Task weight: bounded",
+        "- Tiny waiver used before this REQ: yes / no": "- Tiny waiver used before this REQ: no",
         "- Standalone TECH: required / not required": "- Standalone TECH: not required",
         "- TECH decision reason:": "- TECH decision reason: confirmed local cause and bounded behavior",
         "- Standalone PLAN: required / not required": "- Standalone PLAN: not required",
@@ -392,6 +434,7 @@ def create_bounded_bug_artifacts(target: Path) -> None:
         path.write_text(text)
 
     requirement_text = requirement.read_text()
+    require("Task weight: bounded" in requirement_text, "bounded bug task weight is missing")
     require("Standalone TECH: not required" in requirement_text, "bounded bug requires TECH")
     require("Standalone PLAN: not required" in requirement_text, "bounded bug requires PLAN")
     require(
@@ -503,6 +546,10 @@ def validate_bootstrap_and_lifecycle() -> None:
             not (target / "docs/superpowers").exists(),
             "bootstrap created a Superpowers-specific workflow tree",
         )
+        require(
+            (target / "scripts/workflow_doctor.py").is_file(),
+            "bootstrap omitted the workflow doctor",
+        )
         for directory in REQUIRED_PAYLOAD_DIRECTORIES:
             require((target / directory).is_dir(), f"bootstrap omitted: {directory}")
 
@@ -517,9 +564,32 @@ def validate_bootstrap_and_lifecycle() -> None:
         )
 
         replace_placeholders(target)
+        clean_doctor = run(
+            [
+                sys.executable,
+                "scripts/workflow_doctor.py",
+                "--strict",
+            ],
+            cwd=target,
+        )
+        require(
+            "PASS: workflow state looks consistent" in clean_doctor.stdout,
+            "workflow doctor did not pass on clean initialized target",
+        )
         create_bounded_bug_artifacts(target)
         create_full_workflow_artifacts(target)
         validate_wiki_links(target / "zettelkasten")
+        active_doctor = run(
+            [
+                sys.executable,
+                "scripts/workflow_doctor.py",
+            ],
+            cwd=target,
+        )
+        require(
+            "open review blocks the next implementation slice" in active_doctor.stdout,
+            "workflow doctor did not report open review routing",
+        )
 
         run(
             [
@@ -537,6 +607,10 @@ def validate_manual_copy_path() -> None:
         target = Path(temp_dir) / "target"
         shutil.copytree(PAYLOAD, target)
         require((target / "INIT.md").is_file(), "manual payload copy omitted INIT.md")
+        require(
+            (target / "scripts/workflow_doctor.py").is_file(),
+            "manual payload copy omitted workflow doctor",
+        )
         require(
             (
                 target
@@ -622,6 +696,10 @@ def validate_remote_clone_path() -> None:
             (target / PAYLOAD_MARKER.name).is_file(),
             "remote bootstrap omitted the payload marker",
         )
+        require(
+            (target / "scripts/workflow_doctor.py").is_file(),
+            "remote bootstrap omitted the workflow doctor",
+        )
         for directory in REQUIRED_PAYLOAD_DIRECTORIES:
             require(
                 (target / directory).is_dir(),
@@ -641,6 +719,10 @@ def validate_repository_layout() -> None:
     require(
         (ROOT / "docs/fresh-agent-resume-evaluation.md").is_file(),
         "fresh-agent resume evaluation is missing",
+    )
+    require(
+        (ROOT / "examples/practical-scenarios/README.md").is_file(),
+        "practical scenario examples are missing",
     )
 
 

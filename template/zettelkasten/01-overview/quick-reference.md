@@ -6,6 +6,12 @@ This is the highest-frequency lookup note. Agents should check here before runni
 
 <!-- Replace with project-specific commands. Example:
 
+### Workflow
+
+```bash
+python3 scripts/workflow_doctor.py
+```
+
 ### Backend
 
 ```bash

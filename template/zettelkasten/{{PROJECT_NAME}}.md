@@ -29,6 +29,7 @@ Each subproject should keep implementation-specific details in its own `AGENTS.m
 | Note | Purpose |
 |---|---|
 | [[AI]] | AI entry point: method, routing, standard task flow |
+| [[CURRENT]] | Active work, open reviews, validation snapshot, and next allowed action |
 | [[00-governance/project-overview]] | Project purpose, stack, and constraints |
 | [[00-governance/ai-workflow]] | Adaptive REQ/TECH/PLAN workflow, review, validation, rule promotion, memory writeback |
 | [[00-governance/validation-discipline]] | Realistic validation readiness policy |
