@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import date
 from pathlib import Path
 
 
@@ -15,12 +17,14 @@ ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
 MARKER = PAYLOAD / ".ai-collaboration-workflow-template"
 BOOTSTRAP = ROOT / "skills/ai-collaboration-workflow/scripts/bootstrap_template.py"
+BEHAVIOR_EVALUATOR = ROOT / "scripts/evaluate_workflow_behavior.py"
 
 REQUIRED_FILES = (
     Path("AGENTS.md"),
     Path("CLAUDE.md"),
     Path("INIT.md"),
     Path("scripts/workflow_doctor.py"),
+    Path("scripts/workflow_task.py"),
     Path("scripts/task_worktree.py"),
     Path("zettelkasten/AI.md"),
     Path("zettelkasten/00-governance/ai-workflow.md"),
@@ -38,7 +42,7 @@ REQUIRED_DIRECTORIES = (
     Path("project-skills"),
 )
 
-LEGACY_PATHS = (
+V1_ONLY_PATHS = (
     Path("zettelkasten/CURRENT.md"),
     Path("zettelkasten/06-requirements"),
     Path("zettelkasten/07-review"),
@@ -73,7 +77,12 @@ def require(condition: bool, message: str) -> None:
         raise ValidationFailure(message)
 
 
-def run(command: list[str], *, cwd: Path = ROOT, expected: int = 0) -> subprocess.CompletedProcess[str]:
+def run(
+    command: list[str],
+    *,
+    cwd: Path = ROOT,
+    expected: int = 0,
+) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
     if result.returncode != expected:
         raise ValidationFailure(
@@ -85,45 +94,82 @@ def run(command: list[str], *, cwd: Path = ROOT, expected: int = 0) -> subproces
 
 def validate_payload() -> None:
     require(MARKER.is_file(), "payload marker is missing")
-    require(MARKER.read_text().strip() == "canonical-payload-v2", "payload marker version is incorrect")
+    require(
+        MARKER.read_text().strip() == "canonical-payload-v2",
+        "payload marker version is incorrect",
+    )
     for path in REQUIRED_FILES:
         require((PAYLOAD / path).is_file(), f"payload file is missing: {path}")
     for path in REQUIRED_DIRECTORIES:
         require((PAYLOAD / path).is_dir(), f"payload directory is missing: {path}")
-    for path in LEGACY_PATHS:
-        require(not (PAYLOAD / path).exists(), f"legacy moving-state path remains: {path}")
+    for path in V1_ONLY_PATHS:
+        require(not (PAYLOAD / path).exists(), f"v1-only path remains: {path}")
 
     agents = (PAYLOAD / "AGENTS.md").read_text()
-    require("## Workflow Routing" in agents, "AGENTS.md is missing workflow routing")
-    require("## Project Skills And Experience" in agents, "AGENTS.md is missing project-Skill routing")
-    require("## Git Isolation And Commits" in agents, "AGENTS.md is missing Git isolation")
-    require("Each agent context" in agents, "AGENTS.md is missing context commit policy")
-    require((PAYLOAD / "CLAUDE.md").read_text().lstrip().startswith("@AGENTS.md"), "CLAUDE.md is not an adapter")
+    for section in (
+        "## Workflow Routing",
+        "## Project Skills And Experience",
+        "## Git Isolation And Commits",
+    ):
+        require(section in agents, f"AGENTS.md is missing {section}")
+    require("persistent changes" in agents, "AGENTS.md commit policy permits empty commits")
+    require(
+        (PAYLOAD / "CLAUDE.md").read_text().lstrip().startswith("@AGENTS.md"),
+        "CLAUDE.md is not an adapter",
+    )
 
     workflow = (PAYLOAD / "zettelkasten/00-governance/ai-workflow.md").read_text()
-    for expected in ("## Route Decision", "Direct", "Tracked", "Governed", "## Stable Work Artifacts", "## Experience Promotion Check"):
+    for expected in (
+        "## Route Decision",
+        "Direct",
+        "Tracked",
+        "Governed",
+        "## Stable Work Artifacts",
+        "## Experience Promotion Check",
+        "workflow_task.py",
+    ):
         require(expected in workflow, f"workflow is missing {expected}")
 
-    skill_template = (PAYLOAD / "zettelkasten/00-governance/templates/project-skill.md").read_text()
-    for section in ("## Use", "## Do Not Use", "## Procedure", "## Validation", "## Recovery", "## Provenance"):
+    skill_template = (
+        PAYLOAD / "zettelkasten/00-governance/templates/project-skill.md"
+    ).read_text()
+    for section in (
+        "## Use",
+        "## Do Not Use",
+        "## Procedure",
+        "## Validation",
+        "## Recovery",
+        "## Provenance",
+    ):
         require(section in skill_template, f"project Skill template is missing {section}")
 
     doctor = (PAYLOAD / "scripts/workflow_doctor.py").read_text()
-    require("project-skills" in doctor and "ACTIVE_WORK_STATES" in doctor, "doctor does not validate the new model")
+    for expected in ("--all-worktrees", "--json", "scope_overlaps", "review_after_days"):
+        require(expected in doctor, f"doctor is missing {expected}")
 
     for path in PAYLOAD.rglob("*.md"):
         text = path.read_text()
         for forbidden in FORBIDDEN_PAYLOAD_TEXT:
-            require(forbidden not in text, f"maintenance text leaked into payload: {path}: {forbidden}")
+            require(
+                forbidden not in text,
+                f"maintenance text leaked into payload: {path}: {forbidden}",
+            )
 
 
 def initialize_target(target: Path) -> None:
     vault = target / "zettelkasten"
+    today = date.today().isoformat()
     for path in vault.rglob("*.md"):
         text = path.read_text()
         for placeholder, value in PLACEHOLDERS.items():
             text = text.replace(placeholder, value)
-        text = re.sub(r"<!-- UMBRELLA-ONLY.*?<!-- /UMBRELLA-ONLY -->\n?", "", text, flags=re.DOTALL)
+        text = text.replace("YYYY-MM-DD", today)
+        text = re.sub(
+            r"<!-- UMBRELLA-ONLY.*?<!-- /UMBRELLA-ONLY -->\n?",
+            "",
+            text,
+            flags=re.DOTALL,
+        )
         path.write_text(text)
 
     source_index = vault / "{{PROJECT_NAME}}.md"
@@ -139,7 +185,30 @@ def initialize_target(target: Path) -> None:
         require("UMBRELLA-ONLY" not in text, f"umbrella marker remains: {path}")
 
 
-def copy_artifact(target: Path, template: str, output: str, replacements: dict[str, str]) -> Path:
+def initialize_git(target: Path) -> None:
+    run(["git", "init", "--initial-branch", "main"], cwd=target)
+    run(["git", "add", "."], cwd=target)
+    run(
+        [
+            "git",
+            "-c",
+            "user.name=Validator",
+            "-c",
+            "user.email=validator@example.invalid",
+            "commit",
+            "-m",
+            "test: initialize target",
+        ],
+        cwd=target,
+    )
+
+
+def copy_artifact(
+    target: Path,
+    template: str,
+    output: str,
+    replacements: dict[str, str],
+) -> Path:
     source = target / f"zettelkasten/00-governance/templates/{template}"
     destination = target / f"zettelkasten/06-work/{output}"
     shutil.copy2(source, destination)
@@ -150,53 +219,46 @@ def copy_artifact(target: Path, template: str, output: str, replacements: dict[s
     return destination
 
 
-def create_workflow_state(target: Path) -> None:
-    work_id = "WORK-20260712120000-sample-change"
-    work = copy_artifact(
+def create_governed_and_done_state(target: Path) -> None:
+    governed_id = "WORK-20260712120000-governed-change"
+    copy_artifact(
         target,
         "work-item.md",
-        f"{work_id}.md",
+        f"{governed_id}.md",
         {
-            "WORK-YYYYMMDDHHMMSS-short-name": work_id,
-            "status: backlog": "status: active",
+            "WORK-YYYYMMDDHHMMSS-short-name": governed_id,
             "route: tracked": "route: governed",
-            "branch: task/work-id-short-name": f"branch: task/{work_id.lower()}",
-            "next_action: clarify acceptance criteria": "next_action: implement slice S1",
-            "- Selected route: tracked / governed": "- Selected route: governed",
-            "- Separate TECH required: no / yes, because": "- Separate TECH required: yes, because schema compatibility",
-            "- Separate PLAN required: no / yes, because": "- Separate PLAN required: yes, because dependent slices",
-            "- Separate REVIEW required: no / yes, because": "- Separate REVIEW required: yes, because independent approval",
+            "branch: task/work-id-short-name": "branch: task/governed-change",
+            "next_action: clarify acceptance criteria": "next_action: approve design",
         },
     )
-    require("status: active" in work.read_text(), "active WORK was not created")
-
     copy_artifact(
         target,
         "technical-design.md",
-        "TECH-20260712120100-sample-change.md",
+        "TECH-20260712120100-governed-change.md",
         {
-            "TECH-YYYYMMDDHHMMSS-short-name": "TECH-20260712120100-sample-change",
-            "WORK-YYYYMMDDHHMMSS-short-name": work_id,
+            "TECH-YYYYMMDDHHMMSS-short-name": "TECH-20260712120100-governed-change",
+            "WORK-YYYYMMDDHHMMSS-short-name": governed_id,
             "status: pending": "status: approved",
         },
     )
     copy_artifact(
         target,
         "implementation-plan.md",
-        "PLAN-20260712120200-sample-change.md",
+        "PLAN-20260712120200-governed-change.md",
         {
-            "PLAN-YYYYMMDDHHMMSS-short-name": "PLAN-20260712120200-sample-change",
-            "WORK-YYYYMMDDHHMMSS-short-name": work_id,
+            "PLAN-YYYYMMDDHHMMSS-short-name": "PLAN-20260712120200-governed-change",
+            "WORK-YYYYMMDDHHMMSS-short-name": governed_id,
             "status: draft": "status: ready",
         },
     )
     copy_artifact(
         target,
         "review.md",
-        "REVIEW-20260712120300-sample-change.md",
+        "REVIEW-20260712120300-governed-change.md",
         {
-            "REVIEW-YYYYMMDDHHMMSS-short-name": "REVIEW-20260712120300-sample-change",
-            "WORK-YYYYMMDDHHMMSS-short-name": work_id,
+            "REVIEW-YYYYMMDDHHMMSS-short-name": "REVIEW-20260712120300-governed-change",
+            "WORK-YYYYMMDDHHMMSS-short-name": governed_id,
         },
     )
 
@@ -208,13 +270,19 @@ def create_workflow_state(target: Path) -> None:
         {
             "WORK-YYYYMMDDHHMMSS-short-name": done_id,
             "status: backlog": "status: done",
-            "branch: task/work-id-short-name": f"branch: task/{done_id.lower()}",
+            "branch: task/work-id-short-name": "branch: task/closed-change",
             "next_action: clarify acceptance criteria": "next_action: none",
-            "|  | rule / gotcha / fact / runbook / project-skill | pending |  |  |": "| No reusable lesson | fact | not-promoted | work item | one-off sample |",
+            "|  | rule / gotcha / fact / runbook / project-skill | pending |  |  |": (
+                "| No reusable lesson | fact | not-promoted | work item | one-off sample |"
+            ),
             "- Acceptance complete: yes / no": "- Acceptance complete: yes",
             "- Required gates closed: yes / no": "- Required gates closed: yes",
-            "- Experience Promotion complete: yes / no": "- Experience Promotion complete: yes",
-            "- Durable writeback complete: yes / no": "- Durable writeback complete: yes",
+            "- Experience Promotion complete: yes / no": (
+                "- Experience Promotion complete: YES"
+            ),
+            "- Durable writeback complete: yes / no": (
+                "- Durable writeback complete: yes"
+            ),
         },
     )
 
@@ -223,92 +291,326 @@ def create_project_skill(target: Path) -> None:
     skill_name = "reset-sample-sandbox"
     directory = target / "project-skills" / skill_name
     directory.mkdir()
-    shutil.copy2(target / "zettelkasten/00-governance/templates/project-skill.md", directory / "SKILL.md")
+    shutil.copy2(
+        target / "zettelkasten/00-governance/templates/project-skill.md",
+        directory / "SKILL.md",
+    )
     skill_file = directory / "SKILL.md"
-    text = skill_file.read_text().replace("project-procedure-name", skill_name).replace(
-        "Describe what this procedure does and the concrete repository situations that should trigger it.",
-        "Reset the sample sandbox when integration tests reuse stale provider state or resend flows return an old token.",
+    text = skill_file.read_text().replace("project-procedure-name", skill_name)
+    text = text.replace(
+        "description: Describe what this procedure does and the concrete repository situations that should trigger it.",
+        "description: >\n  Reset the sample sandbox when integration tests reuse stale provider state\n  or resend flows return an old token.",
     )
     skill_file.write_text(text)
     index = target / "project-skills/INDEX.md"
     index.write_text(
         index.read_text().replace(
-            "| None |  |  |  |  |",
-            f"| {skill_name} | stale provider state or old resend token | local unit tests | active | 2026-07-12 |",
+            "| None |  |  |  |  |  |",
+            (
+                f"| {skill_name} | stale provider state or old resend token | "
+                f"local unit tests | active | {date.today().isoformat()} | 180 |"
+            ),
         )
     )
 
 
-def wiki_index(vault: Path) -> dict[str, Path]:
-    index: dict[str, Path] = {}
-    for path in vault.rglob("*.md"):
-        index[path.relative_to(vault).with_suffix("").as_posix()] = path
-        index.setdefault(path.stem, path)
-    return index
+def create_tracked_work_with_cli(target: Path) -> str:
+    work_id = "WORK-20260712122000-tracked-bug"
+    run(["git", "switch", "-c", "task/tracked-bug"], cwd=target)
+    result = run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "new",
+            "tracked-bug",
+            "--id",
+            work_id,
+            "--route",
+            "tracked",
+            "--owned-path",
+            "src/shared/module",
+            "--next-action",
+            "implement regression fix",
+            "--json",
+        ],
+        cwd=target,
+    )
+    require(json.loads(result.stdout)["work_id"] == work_id, "WORK CLI returned wrong ID")
+    work_root = target / "zettelkasten/06-work"
+    related_optional = [
+        path
+        for prefix in ("TECH", "PLAN", "REVIEW")
+        for path in work_root.glob(f"{prefix}-*tracked-bug.md")
+    ]
+    require(not related_optional, "Tracked work created an unnecessary optional artifact")
+    return work_id
+
+
+def exercise_work_cli(target: Path, work_id: str) -> None:
+    run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "checkpoint",
+            work_id,
+            "--completed-step",
+            "confirmed root cause",
+            "--validation",
+            "focused regression test failed before fix",
+            "--next-action",
+            "implement fix",
+        ],
+        cwd=target,
+    )
+    text = (target / f"zettelkasten/06-work/{work_id}.md").read_text()
+    require("- Last completed step: confirmed root cause" in text, "checkpoint was not written")
+
+    close_id = "WORK-20260712122100-close-cli"
+    run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "new",
+            "close-cli",
+            "--id",
+            close_id,
+        ],
+        cwd=target,
+    )
+    close_path = target / f"zettelkasten/06-work/{close_id}.md"
+    close_path.write_text(
+        close_path.read_text().replace(
+            "|  | rule / gotcha / fact / runbook / project-skill | pending |  |  |",
+            "| No reusable lesson | fact | not-promoted | work item | one-off sample |",
+        )
+    )
+    run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "close",
+            close_id,
+            "--acceptance-complete",
+            "--gates-closed",
+            "--promotion-complete",
+            "--writeback-complete",
+            "--integration-result",
+            "validated on task branch",
+        ],
+        cwd=target,
+    )
+    require('status: "done"' in close_path.read_text(), "WORK CLI did not close the task")
+
+
+def validate_doctor_regressions(target: Path, work_id: str) -> None:
+    work = target / f"zettelkasten/06-work/{work_id}.md"
+    original = work.read_text()
+    work.write_text(original.replace('branch: "task/tracked-bug"', "branch:"))
+    blank_branch = run(
+        [sys.executable, "scripts/workflow_doctor.py"],
+        cwd=target,
+        expected=1,
+    )
+    require("active work is missing branch" in blank_branch.stdout, "blank branch bypassed doctor")
+    work.write_text(original)
+
+    ambiguous = target / "zettelkasten/ambiguous-link-test.md"
+    ambiguous.write_text("# Ambiguous\n\n[[README]]\n")
+    ambiguity = run(
+        [sys.executable, "scripts/workflow_doctor.py"],
+        cwd=target,
+        expected=1,
+    )
+    require("ambiguous wiki link [[README]]" in ambiguity.stdout, "ambiguous wiki link passed")
+    ambiguous.unlink()
+
+    stale = target / "zettelkasten/05-reference/stale-test.md"
+    stale.write_text(
+        "---\ntitle: Stale Test\nstatus: active\nlast_verified_at: 2000-01-01\n"
+        "review_after_days: 1\n---\n\n# Stale Test\n"
+    )
+    stale_result = run([sys.executable, "scripts/workflow_doctor.py"], cwd=target)
+    require("knowledge is stale" in stale_result.stdout, "stale knowledge was not reported")
+    stale.unlink()
+
+
+def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
+    run(["git", "add", "."], cwd=target)
+    run(
+        [
+            "git",
+            "-c",
+            "user.name=Validator",
+            "-c",
+            "user.email=validator@example.invalid",
+            "commit",
+            "-m",
+            "test: add tracked workflow state",
+        ],
+        cwd=target,
+    )
+    run(["git", "branch", "task/existing", "main"], cwd=target)
+    existing_path = target.parent / "existing-worktree"
+    existing = run(
+        [
+            sys.executable,
+            "scripts/task_worktree.py",
+            "create",
+            "WORK-existing",
+            "--branch",
+            "task/existing",
+            "--base",
+            "main",
+            "--path",
+            str(existing_path),
+            "--dry-run",
+        ],
+        cwd=target,
+        expected=1,
+    )
+    require("task branch already exists" in existing.stderr, "existing branch was silently reused")
+    reused_with_base = run(
+        [
+            sys.executable,
+            "scripts/task_worktree.py",
+            "create",
+            "WORK-existing",
+            "--branch",
+            "task/existing",
+            "--base",
+            "main",
+            "--reuse-existing",
+            "--path",
+            str(existing_path),
+            "--dry-run",
+        ],
+        cwd=target,
+        expected=1,
+    )
+    require("--base cannot be applied" in reused_with_base.stderr, "reuse still ignored --base")
+
+    dirty_file = target / "dirty-local.txt"
+    dirty_file.write_text("preserve me\n")
+    destination = target.parent / "task-worktree"
+    created = run(
+        [
+            sys.executable,
+            "scripts/task_worktree.py",
+            "create",
+            "WORK-20260712123000-helper",
+            "--slug",
+            "helper",
+            "--base",
+            "main",
+            "--path",
+            str(destination),
+        ],
+        cwd=target,
+    )
+    require("current checkout is dirty" in created.stdout, "dirty checkout warning is missing")
+    require((destination / ".git").is_file(), "task worktree was not created")
+    dirty_file.unlink()
+
+    helper_branch = run(["git", "branch", "--show-current"], cwd=destination).stdout.strip()
+    helper_id = "WORK-20260712123000-helper"
+    helper_new = run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "new",
+            "helper",
+            "--id",
+            helper_id,
+            "--owned-path",
+            "src/shared",
+        ],
+        cwd=destination,
+    )
+    require(helper_id in helper_new.stdout, "helper WORK was not created")
+    require(helper_branch.startswith("task/"), "helper worktree is not on a task branch")
+
+    status = run(
+        [
+            sys.executable,
+            "scripts/workflow_doctor.py",
+            "--status",
+            "--all-worktrees",
+            "--json",
+        ],
+        cwd=target,
+    )
+    payload = json.loads(status.stdout)
+    work_ids = {item["work_id"] for item in payload["active_work"]}
+    require({tracked_work_id, helper_id}.issubset(work_ids), "all-worktree status missed active work")
+    require(payload["scope_overlaps"], "owned-path overlap was not reported")
+    require(not payload["unscoped_work"], "scoped parallel work was reported as unscoped")
 
 
 def validate_wiki_links(vault: Path) -> None:
-    index = wiki_index(vault)
+    exact: set[str] = set()
+    stems: dict[str, list[Path]] = {}
+    for path in sorted(vault.rglob("*.md")):
+        exact.add(path.relative_to(vault).with_suffix("").as_posix())
+        stems.setdefault(path.stem, []).append(path)
     broken: list[str] = []
-    for path in vault.rglob("*.md"):
+    for path in sorted(vault.rglob("*.md")):
         for raw in re.findall(r"(?<!!)\[\[([^\]|#]+)", path.read_text()):
             target = raw.strip().removesuffix(".md")
             if any(marker in target for marker in ("YYYY", "<", "{{")):
                 continue
-            if target not in index:
+            if "/" in target and target not in exact:
                 broken.append(f"{path.relative_to(vault)} -> [[{target}]]")
-    require(not broken, "broken wiki links:\n" + "\n".join(broken))
-
-
-def validate_worktree_helper(target: Path) -> None:
-    run(["git", "init", "--initial-branch", "main"], cwd=target)
-    run(["git", "add", "."], cwd=target)
-    run(
-        ["git", "-c", "user.name=Validator", "-c", "user.email=validator@example.invalid", "commit", "-m", "test: initialize target"],
-        cwd=target,
-    )
-    destination = target.parent / "task-worktree"
-    dry_run = run(
-        [sys.executable, "scripts/task_worktree.py", "create", "WORK-20260712122000-helper", "--slug", "helper", "--path", str(destination), "--dry-run"],
-        cwd=target,
-    )
-    require("Dry run:" in dry_run.stdout, "worktree helper dry-run is missing")
-    run(
-        [sys.executable, "scripts/task_worktree.py", "create", "WORK-20260712122000-helper", "--slug", "helper", "--path", str(destination)],
-        cwd=target,
-    )
-    require((destination / ".git").is_file(), "task worktree was not created")
+            elif "/" not in target and len(stems.get(target, [])) != 1:
+                broken.append(f"{path.relative_to(vault)} -> ambiguous or missing [[{target}]]")
+    require(not broken, "invalid wiki links:\n" + "\n".join(broken))
 
 
 def validate_bootstrap_lifecycle() -> None:
     with tempfile.TemporaryDirectory(prefix="ai-workflow-distribution-") as temp_dir:
         target = Path(temp_dir) / "target"
-        dry_run = run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target), "--dry-run"])
-        require("Would copy:" in dry_run.stdout and not target.exists(), "bootstrap dry-run changed the target")
+        dry_run = run(
+            [
+                sys.executable,
+                str(BOOTSTRAP),
+                "--source",
+                str(ROOT),
+                "--target",
+                str(target),
+                "--dry-run",
+            ]
+        )
+        require("Would copy:" in dry_run.stdout and not target.exists(), "dry-run changed target")
         run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)])
-        identical = run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)])
-        require("Conflicts left untouched: 0" in identical.stdout, "identical bootstrap rerun conflicted")
+        identical = run(
+            [sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)]
+        )
+        require("Conflicts left untouched: 0" in identical.stdout, "identical rerun conflicted")
 
         local_rules = "# Local rules\n"
         (target / "AGENTS.md").write_text(local_rules)
-        conflict = run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)], expected=2)
-        require("conflict: AGENTS.md" in conflict.stdout, "bootstrap did not report AGENTS conflict")
-        require((target / "AGENTS.md").read_text() == local_rules, "bootstrap overwrote local rules")
+        conflict = run(
+            [sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)],
+            expected=2,
+        )
+        require("conflict: AGENTS.md" in conflict.stdout, "AGENTS conflict was not reported")
+        require((target / "AGENTS.md").read_text() == local_rules, "local rules were overwritten")
         shutil.copy2(PAYLOAD / "AGENTS.md", target / "AGENTS.md")
 
         run([sys.executable, str(BOOTSTRAP), "--target", str(target), "--inspect"])
         initialize_target(target)
         clean = run([sys.executable, "scripts/workflow_doctor.py", "--strict"], cwd=target)
-        require("PASS: workflow state looks consistent" in clean.stdout, "doctor failed on clean target")
+        require("PASS: workflow state looks consistent" in clean.stdout, "clean doctor failed")
 
-        create_workflow_state(target)
+        initialize_git(target)
+        tracked_id = create_tracked_work_with_cli(target)
+        exercise_work_cli(target, tracked_id)
+        create_governed_and_done_state(target)
         create_project_skill(target)
+        validate_doctor_regressions(target, tracked_id)
         validate_wiki_links(target / "zettelkasten")
         active = run([sys.executable, "scripts/workflow_doctor.py", "--strict"], cwd=target)
         require("active work:" in active.stdout, "doctor did not report active WORK")
-        status = run([sys.executable, "scripts/workflow_doctor.py", "--status"], cwd=target)
-        require("WORK-20260712120000-sample-change.md" in status.stdout, "status did not route active WORK")
-        validate_worktree_helper(target)
+        validate_worktree_helper(target, tracked_id)
 
 
 def validate_manual_copy() -> None:
@@ -329,8 +631,11 @@ def validate_symlink_boundary() -> None:
         target.mkdir()
         outside.mkdir()
         (target / "zettelkasten").symlink_to(outside, target_is_directory=True)
-        result = run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)], expected=2)
-        require("conflict: zettelkasten/AI.md" in result.stdout, "symlink conflict was not reported")
+        result = run(
+            [sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)],
+            expected=2,
+        )
+        require("conflict: zettelkasten/AI.md" in result.stdout, "symlink was not reported")
         require(not any(outside.iterdir()), "bootstrap wrote through a symlink")
 
 
@@ -343,16 +648,61 @@ def validate_remote_source() -> None:
         shutil.copytree(PAYLOAD, source / "template")
         run(["git", "init", "--initial-branch", "main"], cwd=source)
         run(["git", "add", "template"], cwd=source)
-        run(["git", "-c", "user.name=Validator", "-c", "user.email=validator@example.invalid", "commit", "-m", "test: add payload"], cwd=source)
-        run([sys.executable, str(BOOTSTRAP), "--repo-url", str(source), "--ref", "main", "--target", str(target)])
-        require((target / "project-skills/INDEX.md").is_file(), "remote bootstrap omitted project Skills")
+        run(
+            [
+                "git",
+                "-c",
+                "user.name=Validator",
+                "-c",
+                "user.email=validator@example.invalid",
+                "commit",
+                "-m",
+                "test: add payload",
+            ],
+            cwd=source,
+        )
+        run(
+            [
+                sys.executable,
+                str(BOOTSTRAP),
+                "--repo-url",
+                str(source),
+                "--ref",
+                "main",
+                "--target",
+                str(target),
+            ]
+        )
+        require((target / "project-skills/INDEX.md").is_file(), "remote omitted Skills")
+
+
+def validate_behavior_contract() -> None:
+    run(
+        [
+            sys.executable,
+            str(BEHAVIOR_EVALUATOR),
+            "--responses",
+            str(ROOT / "examples/evaluations/expected-responses.json"),
+        ]
+    )
 
 
 def validate_repository_layout() -> None:
     require(not (ROOT / "zettelkasten").exists(), "root zettelkasten must not exist")
-    require((ROOT / "docs/fresh-agent-resume-evaluation.md").is_file(), "resume evaluation is missing")
-    require((ROOT / "examples/practical-scenarios/README.md").is_file(), "practical scenarios are missing")
-    require((ROOT / "skills/ai-collaboration-workflow/references/routing.md").is_file(), "Skill routing reference is missing")
+    require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
+    require("## License" in (ROOT / "README.md").read_text(), "README License section is missing")
+    require(
+        not (ROOT / "skills/ai-collaboration-workflow/references/migration.md").exists(),
+        "unsupported migration reference remains",
+    )
+    for path in (
+        ROOT / "docs/fresh-agent-resume-evaluation.md",
+        ROOT / "docs/workflow-behavior-evaluation.md",
+        ROOT / "examples/practical-scenarios/README.md",
+        ROOT / "examples/evaluations/workflow-cases.json",
+        ROOT / "skills/ai-collaboration-workflow/references/routing.md",
+    ):
+        require(path.is_file(), f"repository artifact is missing: {path.relative_to(ROOT)}")
 
 
 def main() -> int:
@@ -363,6 +713,7 @@ def main() -> int:
         validate_bootstrap_lifecycle()
         validate_symlink_boundary()
         validate_remote_source()
+        validate_behavior_contract()
     except ValidationFailure as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1

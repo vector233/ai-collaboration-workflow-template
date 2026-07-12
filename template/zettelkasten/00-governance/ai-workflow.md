@@ -77,6 +77,14 @@ Create a separate artifact only when it is reused, independently approved, indep
 8. Record experience candidates.
 9. Repeat until acceptance and validation pass, then run Experience Promotion and close the work item.
 
+Prefer the deterministic helper for state changes:
+
+```bash
+python3 scripts/workflow_task.py new <slug> --route tracked
+python3 scripts/workflow_task.py checkpoint <WORK-ID> --completed-step <text> --validation <evidence> --next-action <text>
+python3 scripts/workflow_task.py close <WORK-ID> --acceptance-complete --gates-closed --promotion-complete --writeback-complete --integration-result <text>
+```
+
 ## Project Skill Routing
 
 Before rediscovering a procedure, scan `project-skills/INDEX.md`. Load only the matching Skill. A project Skill is procedural memory, not general project documentation.

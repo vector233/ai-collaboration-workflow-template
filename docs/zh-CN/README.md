@@ -2,6 +2,8 @@
 
 这是面向 AI coding agents 的项目知识层模板，不是自主执行 runtime。它把项目规则、当前工作、验证证据、可复用流程和交接状态保存在仓库中，让新的 Agent 不依赖聊天记录也能继续工作。
 
+这个版本只面向新项目初始化，不兼容也不迁移旧的移动状态目录架构。
+
 `template/` 是唯一 canonical 下游模板；中文文档只解释设计和使用方式，不复制一套中文模板。
 
 ## 新的轻量模型
@@ -48,7 +50,7 @@ python3 scripts/task_worktree.py create <WORK-ID> --slug <short-name>
 
 默认分支只用于集成。存在依赖或明显修改相同路径的任务不应直接并行。
 
-每个 Agent 上下文或完整实现切片必须形成一个只包含当前任务变更的提交。未完成状态可以在 task branch 使用 `checkpoint:` 或 `wip:`，但破损 checkpoint 不能合入默认分支。
+每个产生持久化修改的 Agent 上下文或完整实现切片必须形成一个只包含当前任务变更的提交。纯分析和只读 Review 不创建空提交。未完成状态可以在 task branch 使用 `checkpoint:` 或 `wip:`，但破损 checkpoint 不能合入默认分支。
 
 共享的 `AGENTS.md`、runbook 和项目 Skill 通常在任务关闭时统一升级，避免多个 worktree 同时修改热点文件。
 
@@ -60,6 +62,7 @@ zettelkasten/AI.md             最小上下文入口
 zettelkasten/06-work/          路径稳定的 WORK/TECH/PLAN/REVIEW
 project-skills/INDEX.md        项目 Skill 触发索引
 scripts/workflow_doctor.py     状态和一致性检查
+scripts/workflow_task.py       WORK 创建、checkpoint 和关闭
 scripts/task_worktree.py       安全创建并行任务 worktree
 ```
 
@@ -88,7 +91,7 @@ python3 scripts/workflow_doctor.py --status
 
 ## Companion Skill
 
-`skills/ai-collaboration-workflow/` 负责模板安装与迁移、流程路由、最小上下文加载、经验升级、Git 隔离和状态验证。详细判断拆分在 `references/` 中，触发后按需加载。
+`skills/ai-collaboration-workflow/` 负责模板安装、流程路由、WORK 更新、最小上下文加载、经验升级、Git 隔离和状态验证。详细判断拆分在 `references/` 中，触发后按需加载。
 
 核心知识层不依赖某一家 AI。`AGENTS.md` 是共享入口，`CLAUDE.md` 等文件只做适配；即使不安装 companion Skill，初始化后的仓库仍可以独立使用。
 
@@ -108,6 +111,4 @@ python3 scripts/validate_distribution.py
 
 检查范围包括稳定工件、状态字段、分支隔离、wiki 链接、占位符、经验升级完成度、项目 Skill 结构、bootstrap 和临时 worktree 行为。
 
-## 旧布局迁移
-
-使用 `CURRENT.md`、`06-requirements/`、`07-review/`、`08-technical-designs/` 或 `09-implementation-plans/` 的项目，应先 checkpoint 当前任务，再把主任务合并为稳定 WORK，只保留真正独立的 TECH/PLAN/REVIEW，更新链接后删除旧状态目录。companion Skill 的 `references/migration.md` 提供迁移步骤。
+并行协调或工具集成使用 `python3 scripts/workflow_doctor.py --status --all-worktrees --json`，它会聚合已注册 worktree、脏状态、最后提交和 owned paths 重叠提示。

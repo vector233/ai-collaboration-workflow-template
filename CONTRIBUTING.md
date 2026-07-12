@@ -30,7 +30,7 @@ This repository does not initialize a second root knowledge base. Keep the produ
   - `REVIEW-YYYYMMDDHHMMSS-short-name.md`
 - Keep workflow artifacts at stable paths under `template/zettelkasten/06-work/`; represent state in frontmatter.
 - Use a task branch for non-trivial work and a dedicated worktree for concurrent work.
-- End each agent context or coherent slice with a task-scoped commit.
+- End each agent context that produces persistent changes, or each coherent slice, with a task-scoped commit; do not create empty commits for read-only analysis.
 - Run `git diff --check`.
 - Search for private project terms before submitting.
 - Make sure non-placeholder wiki links resolve to files in `template/zettelkasten/`.

@@ -4,6 +4,8 @@ A vendor-neutral project knowledge layer for AI-assisted software development.
 
 The template keeps project facts, active work, validation evidence, reusable procedures, and handoff state in the repository so a fresh agent can continue without chat history. It is not an autonomous runtime and does not require every task to create a chain of process documents.
 
+This version is intended for new projects. It does not migrate or emulate the previous moving-state layout.
+
 ## Core Model
 
 ```text
@@ -11,7 +13,7 @@ Task
   -> Route: Direct | Tracked | Governed
   -> Load only the active work item and matched knowledge
   -> Implement, validate, review when needed
-  -> Commit every agent context or coherent slice
+  -> Commit every context that produces persistent changes or a coherent slice
   -> Promote reusable experience into rules, notes, runbooks, or project Skills
 ```
 
@@ -31,6 +33,8 @@ Routing considers scope, uncertainty, risk, reversibility, duration, coordinatio
 - There is no manually duplicated `CURRENT.md`; `workflow_doctor.py --status` resolves active work.
 - Project Skills load on demand from a compact trigger index instead of expanding `AGENTS.md`.
 - Knowledge categories remain separate where they improve retrieval, but active workflow state is consolidated under one directory.
+
+The knowledge base uses plain Markdown and wiki links and can be opened as an Obsidian-compatible vault. Obsidian is an optional editor, not a runtime dependency or plugin requirement.
 
 ## Durable Experience
 
@@ -56,7 +60,7 @@ python3 scripts/task_worktree.py create WORK-20260712120000-example --slug examp
 
 The default branch is integration-only. Shared knowledge updates are normally promoted near task closeout to reduce conflicts between parallel worktrees.
 
-Every agent context or coherent slice ends with a task-scoped commit. Incomplete `checkpoint:` or `wip:` commits may exist on task branches but must not enter the default branch while broken.
+Every agent context that produces persistent changes, or each coherent slice, ends with a task-scoped commit. Read-only analysis does not create an empty commit. Incomplete `checkpoint:` or `wip:` commits may exist on task branches but must not enter the default branch while broken.
 
 ## Quick Start
 
@@ -87,11 +91,16 @@ The agent reads `AGENTS.md`, `zettelkasten/AI.md`, the active `WORK-*`, and only
 Create tracked work from:
 
 ```bash
-cp zettelkasten/00-governance/templates/work-item.md \
-  zettelkasten/06-work/WORK-$(date +%Y%m%d%H%M%S)-<slug>.md
+python3 scripts/workflow_task.py new <slug> --route tracked --owned-path <path>
 ```
 
-All WORK, TECH, PLAN, and REVIEW files remain directly under `zettelkasten/06-work/` for their full lifecycle.
+Use `workflow_task.py checkpoint` and `workflow_task.py close` for later state changes. All WORK, TECH, PLAN, and REVIEW files remain directly under `zettelkasten/06-work/` for their full lifecycle.
+
+For parallel coordination or machine consumers:
+
+```bash
+python3 scripts/workflow_doctor.py --status --all-worktrees --json
+```
 
 ## Structure
 
@@ -102,6 +111,7 @@ template/
   INIT.md
   scripts/
     workflow_doctor.py
+    workflow_task.py
     task_worktree.py
   project-skills/
     INDEX.md
@@ -120,7 +130,7 @@ template/
 
 ## Companion Skill
 
-The Agent Skills-compatible companion is under `skills/ai-collaboration-workflow/`. It handles installation, migration, task routing, minimal context loading, experience promotion, Git isolation, and validation.
+The Agent Skills-compatible companion is under `skills/ai-collaboration-workflow/`. It handles installation, task routing, stable work-item updates, minimal context loading, experience promotion, Git isolation, and validation.
 
 Install with:
 
@@ -143,7 +153,7 @@ For a downstream project:
 python3 scripts/workflow_doctor.py --strict
 ```
 
-The doctor checks required knowledge files, stable artifact names and statuses, active task branches, wiki links, unresolved placeholders, Experience Promotion closure, and project-Skill structure and routing.
+The doctor checks required knowledge files, stable artifact names and statuses, active task branches, ambiguous or broken wiki links, knowledge review dates, Experience Promotion closure, and project-Skill structure and routing. Its all-worktree status reports dirty state and possible owned-path overlap.
 
 For this distribution repository:
 
@@ -153,8 +163,10 @@ python3 scripts/validate_distribution.py
 
 The distribution validator exercises bootstrap, initialization, stable work artifacts, project-Skill discovery, worktree isolation, wiki links, and doctor behavior in temporary repositories.
 
-## Migration
-
-Legacy projects using `CURRENT.md` and moving REQ/REVIEW/TECH state directories should finish or checkpoint active work, consolidate the primary task into a stable WORK file, retain independent optional artifacts only where justified, update links, then remove legacy state. The companion Skill includes `references/migration.md`.
+Fresh-agent routing behavior can be checked with [docs/workflow-behavior-evaluation.md](docs/workflow-behavior-evaluation.md).
 
 Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).

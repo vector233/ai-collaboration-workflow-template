@@ -51,7 +51,11 @@ def default_base(root: Path) -> str:
         root, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD", check=False
     )
     if remote_head.returncode == 0 and remote_head.stdout.strip():
-        return remote_head.stdout.strip().removeprefix("origin/")
+        remote_ref = remote_head.stdout.strip()
+        local_name = remote_ref.removeprefix("origin/")
+        if run_git(root, "show-ref", "--verify", f"refs/heads/{local_name}", check=False).returncode == 0:
+            return local_name
+        return remote_ref
     for candidate in ("main", "master"):
         if run_git(root, "show-ref", "--verify", f"refs/heads/{candidate}", check=False).returncode == 0:
             return candidate
@@ -65,23 +69,19 @@ def branch_exists(root: Path, branch: str) -> bool:
     return run_git(root, "show-ref", "--verify", f"refs/heads/{branch}", check=False).returncode == 0
 
 
-def ensure_clean(root: Path) -> None:
-    status = run_git(root, "status", "--porcelain").stdout
-    if status.strip():
-        raise WorktreeError(
-            "the current checkout is dirty; commit or isolate its changes before creating another task worktree"
-        )
+def dirty_checkout(root: Path) -> bool:
+    return bool(run_git(root, "status", "--porcelain").stdout.strip())
 
 
 def create(args: argparse.Namespace) -> int:
     root = repo_root()
-    ensure_clean(root)
     work_component = slugify(args.work_id)
     suffix = work_component
-    if args.slug and slugify(args.slug) not in work_component:
-        suffix = f"{work_component}-{slugify(args.slug)}"
+    if args.slug:
+        extra_slug = slugify(args.slug)
+        if work_component != extra_slug and not work_component.endswith(f"-{extra_slug}"):
+            suffix = f"{work_component}-{extra_slug}"
     branch = args.branch or f"task/{suffix}"
-    base = args.base or default_base(root)
     destination = (
         args.path.expanduser().resolve()
         if args.path
@@ -90,18 +90,34 @@ def create(args: argparse.Namespace) -> int:
 
     if destination.exists():
         raise WorktreeError(f"worktree destination already exists: {destination}")
-    if run_git(root, "rev-parse", "--verify", base, check=False).returncode != 0:
-        raise WorktreeError(f"base branch or revision does not exist: {base}")
 
     command = ["git", "-C", str(root), "worktree", "add"]
-    if branch_exists(root, branch):
+    existing_branch = branch_exists(root, branch)
+    if existing_branch and not args.reuse_existing:
+        raise WorktreeError(
+            f"task branch already exists: {branch}; pass --reuse-existing only when resuming it intentionally"
+        )
+    if existing_branch and args.reuse_existing and args.base:
+        raise WorktreeError("--base cannot be applied when --reuse-existing resumes an existing branch")
+    if existing_branch:
         command.extend([str(destination), branch])
     else:
+        base = args.base or default_base(root)
+        if run_git(root, "rev-parse", "--verify", base, check=False).returncode != 0:
+            raise WorktreeError(f"base branch or revision does not exist: {base}")
         command.extend(["-b", branch, str(destination), base])
 
     print(f"Branch: {branch}")
-    print(f"Base: {base}")
+    if existing_branch:
+        print("Resume: existing branch tip")
+    else:
+        print(f"Base: {base}")
     print(f"Worktree: {destination}")
+    if dirty_checkout(root):
+        print(
+            "Warning: current checkout is dirty; the new worktree starts from committed Git state "
+            "and does not include those uncommitted changes."
+        )
     if args.dry_run:
         print("Dry run: " + " ".join(command))
         return 0
@@ -129,6 +145,11 @@ def parse_args() -> argparse.Namespace:
     create_parser.add_argument("--slug", help="short human-readable suffix")
     create_parser.add_argument("--base", help="base branch or revision")
     create_parser.add_argument("--branch", help="explicit task branch name")
+    create_parser.add_argument(
+        "--reuse-existing",
+        action="store_true",
+        help="resume an existing task branch instead of creating it from --base",
+    )
     create_parser.add_argument("--path", type=Path, help="explicit worktree destination")
     create_parser.add_argument("--dry-run", action="store_true")
     create_parser.set_defaults(handler=create)

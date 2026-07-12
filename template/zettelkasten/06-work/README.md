@@ -37,3 +37,5 @@ Use stable timestamped IDs:
 ## Resume
 
 Run `python3 scripts/workflow_doctor.py --status`, select the work item matching the current task branch, and read its context pack, checkpoint, validation, and next action. Do not maintain a second manual current-state document.
+
+Use `python3 scripts/workflow_task.py` for deterministic creation, checkpoint, and closure updates. Use `workflow_doctor.py --status --all-worktrees --json` to aggregate parallel worktrees and expose possible owned-path overlap.

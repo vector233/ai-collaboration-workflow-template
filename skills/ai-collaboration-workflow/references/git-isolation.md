@@ -14,9 +14,13 @@ python3 scripts/task_worktree.py create <WORK-ID> --slug <short-name>
 python3 scripts/task_worktree.py list
 ```
 
+The helper may create a new worktree while the current checkout is dirty; it warns that uncommitted changes stay in the original checkout. It refuses to reuse an existing task branch unless `--reuse-existing` is explicit, and `--base` is never applied to a reused branch.
+
+Use `python3 scripts/workflow_doctor.py --status --all-worktrees --json` to aggregate active work and possible owned-path overlap.
+
 ## Commit Contract
 
-At the end of each agent context or coherent slice:
+At the end of each agent context that produces persistent changes, or each coherent slice:
 
 1. inspect the diff and exclude unrelated files;
 2. run the smallest meaningful validation;
@@ -25,5 +29,7 @@ At the end of each agent context or coherent slice:
 5. record the commit and next action.
 
 Use conventional commits for validated slices. Use `checkpoint:` or `wip:` only on task branches when incomplete state must be handed off. Never merge a broken checkpoint into the default branch.
+
+Do not create an empty commit for a read-only analysis or review context.
 
 Delay shared `AGENTS.md`, runbook, and project-Skill edits until closeout when practical. This lets parallel branches record candidates without competing over shared knowledge files.

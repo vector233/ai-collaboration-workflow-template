@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Initialize and operate the AI Collaboration Workflow knowledge layer. Use when an agent needs to install or migrate the template; route a task into Direct, Tracked, or Governed work; create or resume stable WORK/TECH/PLAN/REVIEW artifacts; discover or promote repository experience into an on-demand project Skill; isolate parallel tasks with branches or Git worktrees; enforce per-context commits; validate workflow state; or hand off durable project knowledge across agents.
+description: Initialize and operate the AI Collaboration Workflow knowledge layer for new projects. Use when an agent needs to install the template; route a task into Direct, Tracked, or Governed work; create, checkpoint, close, or resume stable WORK/TECH/PLAN/REVIEW artifacts; discover or promote repository experience into an on-demand project Skill; isolate parallel tasks with branches or Git worktrees; validate cross-worktree state; enforce commits for contexts that produce persistent changes; or hand off durable project knowledge across agents.
 ---
 
 # AI Collaboration Workflow
@@ -34,8 +34,6 @@ Use `--source <checkout-or-template>` for local or offline installation. The boo
 
 If `INIT.md` exists, follow it completely. Preserve stricter local rules, replace all placeholders, initialize only verified project facts, remove initialization files, and run the doctor in strict mode.
 
-If legacy `CURRENT.md`, moving-state REQ directories, or separate review/design/plan state trees exist, read [migration.md](references/migration.md) before creating new artifacts. Do not run both state models for the same task.
-
 ## Load Minimal Context
 
 For initialized projects:
@@ -46,6 +44,8 @@ For initialized projects:
 4. Read only linked knowledge, runbooks, and matching rows from `project-skills/INDEX.md`.
 
 Do not scan all workflow artifacts or project Skills by default.
+
+Use `python3 scripts/workflow_task.py` for deterministic WORK creation, checkpoints, and closure. Use `workflow_doctor.py --status --all-worktrees --json` for parallel coordination or machine-readable state.
 
 ## Route The Task
 
@@ -61,7 +61,7 @@ Use repository templates. Keep artifact paths stable and update frontmatter stat
 
 Read [git-isolation.md](references/git-isolation.md) before starting tracked work, creating a branch or worktree, coordinating parallel agents, or handing off an incomplete context.
 
-Tracked and governed work must not be implemented directly on the default branch. Concurrent tasks use separate worktrees. Every agent context or coherent slice ends with a task-scoped commit; incomplete checkpoints stay on the task branch.
+Tracked and governed work must not be implemented directly on the default branch. Concurrent tasks use separate worktrees. Every context that produces persistent changes, or each coherent slice, ends with a task-scoped commit; incomplete checkpoints stay on the task branch. Read-only contexts do not create empty commits.
 
 ## Promote Experience
 
@@ -79,6 +79,6 @@ git diff --check
 git status --short
 ```
 
-Use `--strict` after initialization, migration, workflow changes, or project-Skill changes. Update the active work checkpoint with the commit, exact validation, risks, worktree status, and next allowed action before yielding.
+Use `--strict` after initialization, workflow changes, or project-Skill changes. Update the active work checkpoint with the commit reference, exact validation, risks, worktree status, and next allowed action before yielding.
 
 Do not claim validation that did not run. Do not stage unrelated user changes. Do not close work while experience candidates remain undecided.

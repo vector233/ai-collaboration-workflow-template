@@ -1,0 +1,74 @@
+[
+  {
+    "id": "direct-doc-link",
+    "prompt": "Fix one broken documentation link. The target is obvious, behavior does not change, and a link check is available.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "direct",
+      "artifacts": [],
+      "isolation": "current-branch",
+      "project_skills": [],
+      "promote_project_skill": false
+    }
+  },
+  {
+    "id": "tracked-local-bug",
+    "prompt": "Fix a local null-handling bug with a confirmed cause and focused regression test. The work may span two agent contexts.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "tracked",
+      "artifacts": ["WORK"],
+      "isolation": "task-branch",
+      "project_skills": [],
+      "promote_project_skill": false
+    }
+  },
+  {
+    "id": "governed-permission-change",
+    "prompt": "Change a small authorization condition that affects workspace access. Require negative-path tests and independent approval.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "governed",
+      "artifacts": ["WORK", "REVIEW"],
+      "isolation": "task-branch",
+      "project_skills": [],
+      "promote_project_skill": false
+    }
+  },
+  {
+    "id": "parallel-independent-feature",
+    "prompt": "Implement a feature while another agent works concurrently on non-overlapping modules in the same repository.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "tracked",
+      "artifacts": ["WORK"],
+      "isolation": "dedicated-worktree",
+      "project_skills": [],
+      "promote_project_skill": false
+    }
+  },
+  {
+    "id": "wake-sandbox-skill",
+    "prompt": "The provider sandbox is returning stale resend tokens during integration tests. Continue the test safely.",
+    "available_project_skills": ["reset-provider-sandbox"],
+    "expected": {
+      "route": "tracked",
+      "artifacts": ["WORK"],
+      "isolation": "task-branch",
+      "project_skills": ["reset-provider-sandbox"],
+      "promote_project_skill": false
+    }
+  },
+  {
+    "id": "one-off-incident",
+    "prompt": "A one-time local network interruption caused one failed command and has not recurred. Decide whether to create a project Skill.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "direct",
+      "artifacts": [],
+      "isolation": "current-branch",
+      "project_skills": [],
+      "promote_project_skill": false
+    }
+  }
+]

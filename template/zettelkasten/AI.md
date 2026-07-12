@@ -11,6 +11,8 @@ The human-readable project index is [[{{PROJECT_NAME_SAFE}}]]. Repository rules 
 
 Do not load the whole vault by default. Workflow state lives in stable files under [[06-work/README]], not in chat history or a manually duplicated current-state note.
 
+For parallel coordination or tool integration, use `python3 scripts/workflow_doctor.py --status --all-worktrees --json`.
+
 ## Cross-Agent Entry Points
 
 | Agent | Instruction entry | Durable knowledge |

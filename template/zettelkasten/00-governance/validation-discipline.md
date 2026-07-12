@@ -4,6 +4,7 @@ status: active
 project: {{PROJECT_NAME}}
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
+review_after_days: 180
 related:
   - "[[00-governance/ai-workflow]]"
   - "[[06-work/README]]"

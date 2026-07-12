@@ -10,6 +10,8 @@ This is the highest-frequency lookup note. Agents should check here before runni
 
 ```bash
 python3 scripts/workflow_doctor.py
+python3 scripts/workflow_doctor.py --status --all-worktrees --json
+python3 scripts/workflow_task.py new <slug> --route tracked
 ```
 
 ### Backend

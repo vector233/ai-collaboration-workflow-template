@@ -4,6 +4,7 @@ status: active
 project: {{PROJECT_NAME}}
 last_verified_at: YYYY-MM-DD
 source_of_truth: project
+review_after_days: 180
 related:
   - "[[00-governance/ai-workflow]]"
   - "[[06-work/README]]"
@@ -31,11 +32,19 @@ Create isolated work with:
 python3 scripts/task_worktree.py create <WORK-ID> --slug <short-name>
 ```
 
+The helper leaves dirty changes in the current checkout and creates the new worktree from committed Git state. It refuses to reuse an existing branch unless `--reuse-existing` is explicit; a reused branch cannot also accept `--base`.
+
+Generate an ID before creating the branch or worktree when needed:
+
+```bash
+python3 scripts/workflow_task.py id <short-name>
+```
+
 Use a normal branch in the current checkout for one sequential task. Use a worktree when work overlaps in time, must preserve an existing dirty checkout, or is delegated to another agent.
 
 ## Context Commit Contract
 
-Every agent context or coherent implementation slice ends with a commit containing only current-task changes.
+Every agent context that produces persistent changes, or each coherent implementation slice, ends with a commit containing only current-task changes. Read-only analysis does not create an empty commit.
 
 - Validated slice: use a conventional commit such as `fix(api): reject expired token`.
 - Incomplete handoff: use `checkpoint:` or `wip:` only on the task branch.

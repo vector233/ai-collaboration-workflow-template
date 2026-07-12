@@ -22,6 +22,7 @@ PAYLOAD_REQUIRED_FILES = (
     Path("CLAUDE.md"),
     Path("INIT.md"),
     Path("scripts/workflow_doctor.py"),
+    Path("scripts/workflow_task.py"),
     Path("scripts/task_worktree.py"),
     Path("zettelkasten/AI.md"),
     Path("zettelkasten/00-governance/ai-workflow.md"),

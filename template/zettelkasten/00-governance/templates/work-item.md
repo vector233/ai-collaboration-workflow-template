@@ -7,6 +7,7 @@ route: tracked
 risk: normal
 branch: task/work-id-short-name
 worktree: current
+owned_paths: []
 next_action: clarify acceptance criteria
 last_verified_at: YYYY-MM-DD
 related: []

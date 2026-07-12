@@ -45,6 +45,8 @@ Rewrite these files with verified repository-specific content:
 - `zettelkasten/05-reference/e2e-test.md`: known validation commands and realistic-environment gaps.
 - `zettelkasten/00-governance/git-collaboration.md`: preserve stricter local branch, PR, and merge policies.
 
+Set every maintained note's `last_verified_at` to the initialization date. Notes with `review_after_days` must have a concrete ISO date before strict validation.
+
 Keep `project-skills/INDEX.md` empty unless the repository already has a verified repeatable procedure worth indexing. Do not invent initial Skills.
 
 ## 4. Confirm Stable Work Layout
@@ -94,4 +96,4 @@ python3 scripts/workflow_doctor.py --strict
 
 Fix all failures. If repository policy requires a commit, commit only initialization changes with a concise conventional message. Otherwise leave the verified changes for the user.
 
-After initialization, daily work starts from `AGENTS.md`, `zettelkasten/AI.md`, and `python3 scripts/workflow_doctor.py --status`.
+After initialization, daily work starts from `AGENTS.md`, `zettelkasten/AI.md`, and `python3 scripts/workflow_doctor.py --status`. Use `scripts/workflow_task.py` to create, checkpoint, and close stable WORK artifacts.

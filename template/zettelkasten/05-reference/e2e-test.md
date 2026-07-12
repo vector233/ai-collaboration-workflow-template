@@ -4,6 +4,7 @@ status: draft
 project: {{PROJECT_NAME}}
 last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
+review_after_days: 90
 related:
   - "[[00-governance/ai-workflow]]"
   - "[[00-governance/validation-discipline]]"
@@ -23,7 +24,7 @@ This note records the project-specific commands and evidence rules for realistic
 | Area | Command | Notes |
 |---|---|---|
 | Docs | `git diff --check` | No trailing whitespace or patch formatting issues |
-| Workflow | `python3 scripts/workflow_doctor.py` | Checks workflow state, wiki links, placeholders, review handoffs, and rule-promotion fields |
+| Workflow | `python3 scripts/workflow_doctor.py` | Checks stable work state, wiki links, knowledge freshness, project Skills, and Experience Promotion |
 | Backend |  |  |
 | Frontend |  |  |
 | Database |  |  |
