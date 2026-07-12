@@ -1,206 +1,128 @@
 # AI Collaboration Workflow Template
 
-A Zettelkasten-style, Obsidian-compatible documentation template for long-running software projects built with AI coding agents.
+A vendor-neutral project knowledge layer for AI-assisted software development.
 
-This repository packages a practical AI collaboration workflow. It gives agents a durable project memory, explicit requirement and design gates, evidence-based review handoffs, and a place to write back lessons after each slice of work.
+The template keeps project facts, active work, validation evidence, reusable procedures, and handoff state in the repository so a fresh agent can continue without chat history. It is not an autonomous runtime and does not require every task to create a chain of process documents.
 
-## Quick Start
-
-1. Install the companion Skill and ask:
-
-   ```text
-   Use $ai-collaboration-workflow to initialize this repository.
-   ```
-
-   Or copy the canonical payload into an existing repository:
-
-   ```bash
-   cp -R /path/to/ai-collaboration-workflow-template/template/. /path/to/your-project/
-   ```
-
-2. If you copied the payload manually, ask your AI coding assistant:
-
-   ```text
-   Initialize this knowledge base by following INIT.md.
-   ```
-
-3. Start non-trivial work with the workflow below.
+## Core Model
 
 ```text
 Task
-  -> REQ       define scope, non-goals, and acceptance criteria
-  -> [TECH]    add a standalone technical design when risk or uncertainty requires it
-  -> [PLAN]    add a standalone execution plan when coordination requires it
-  -> Build     implement one bounded slice and run meaningful validation
-  -> REVIEW    hand off evidence, feedback, risk, and rule-promotion decisions
-  -> Writeback promote recurring lessons and close the loop
+  -> Route: Direct | Tracked | Governed
+  -> Load only the active work item and matched knowledge
+  -> Implement, validate, review when needed
+  -> Commit every agent context or coherent slice
+  -> Promote reusable experience into rules, notes, runbooks, or project Skills
 ```
 
-| Stage | Artifact | Purpose |
+| Route | Use when | Workflow state |
 |---|---|---|
-| Requirement | `REQ-*` | Define what changes and how it will be accepted |
-| Technical design, optional | `TECH-*` | Resolve architecture, contract, risk, and operational decisions |
-| Implementation plan, optional | `PLAN-*` | Make dependencies, ownership, sequence, and checkpoints explicit |
-| Implementation and validation | Code/docs slice plus evidence | Keep the change bounded and verify the changed boundary |
-| Review | `REVIEW-*` | Preserve feedback, evidence, risk, and Rule Promotion Check results |
-| Writeback | `AGENTS.md`, architecture/gotchas/runbooks | Keep future agents from rediscovering context or repeating preventable mistakes |
+| Direct | local, reversible, low-risk, one context | none; validate and commit |
+| Tracked | behavior change, debugging continuity, multiple contexts | one stable `WORK-*` |
+| Governed | high risk, important uncertainty, independent approval, migration, release, multi-owner coordination | `WORK-*` plus only triggered TECH, PLAN, or REVIEW artifacts |
 
-## What It Solves
+Routing considers scope, uncertainty, risk, reversibility, duration, coordination, and verification. A small security or data change can be Governed even when its diff is tiny.
 
-AI coding agents are strong at local implementation but weak at long-lived project continuity unless the project gives them structure. This template turns project documentation into a lightweight operating workflow:
+## Why It Is Lighter
 
-- **Context pack**: agents read the smallest necessary context instead of re-discovering the whole repo.
-- **Requirement workflow**: every non-trivial change has scope, acceptance criteria, and known non-goals.
-- **Adaptive design and planning**: standalone TECH and PLAN documents are used when risk or coordination justifies them; bounded bugs can keep the necessary reasoning inside the REQ.
-- **Review handoff**: review feedback is treated as a hypothesis that needs evidence and independent verification.
-- **Validation discipline**: build, test, browser, integration, and realistic-environment checks are recorded where future agents can find them.
-- **Rule promotion and memory writeback**: recurring mistakes, architecture changes, test procedures, and gotchas are promoted into the durable notes future agents read.
-- **Workflow doctor**: a bundled script checks workflow state, wiki links, placeholders, review handoffs, and rule-promotion fields.
+- Workflow files never move between status directories; frontmatter is the state.
+- Ordinary tracked work keeps requirement, approach, slices, validation, review, checkpoint, and experience candidates in one `WORK-*`.
+- TECH, PLAN, and REVIEW are optional independent artifacts, not mandatory stages.
+- There is no manually duplicated `CURRENT.md`; `workflow_doctor.py --status` resolves active work.
+- Project Skills load on demand from a compact trigger index instead of expanding `AGENTS.md`.
+- Knowledge categories remain separate where they improve retrieval, but active workflow state is consolidated under one directory.
 
-The default template is intentionally plain: no specialized process jargon, no heavy role system, and no requirement to run multiple agents.
+## Durable Experience
 
-## Zettelkasten Inspiration
+Each tracked work item has an Experience Candidates table. At context checkpoints and closeout, agents decide whether each lesson should remain local or be promoted:
 
-This template is inspired by the Zettelkasten note-taking method: small notes, explicit links, and knowledge that grows through connections instead of one large document. In this project, that idea is adapted for AI coding agents: requirements, technical designs, review handoffs, architecture notes, validation runbooks, and gotchas are separate notes that link to each other.
+| Experience | Destination |
+|---|---|
+| repository-wide mandatory behavior | `AGENTS.md` |
+| bug root or false assumption | `zettelkasten/00-governance/gotchas.md` |
+| architecture fact or invariant | architecture or cross-cutting note |
+| simple setup or validation flow | quick reference or runbook |
+| stable conditional multi-step procedure | `project-skills/<name>/SKILL.md` plus `project-skills/INDEX.md` |
 
-The goal is practical retrieval. A future agent should be able to start from a task, follow links to the minimum context, do the work, and write back what changed.
+Project Skills include concrete triggers, exclusions, procedure, validation, recovery, and provenance. One-off incidents and unverified guesses do not become Skills.
 
-## Obsidian And Markdown Compatibility
+## Parallel Development
 
-The knowledge base is designed to work well as an Obsidian vault, but it stays close to plain Markdown where that helps GitHub readability.
+Tracked and Governed tasks use dedicated task branches. Concurrent tasks or agents use separate Git worktrees:
 
-| Use case | Preferred syntax | Notes |
-|---|---|---|
-| Link between notes in `zettelkasten/` | `[[00-governance/ai-workflow]]` | Obsidian-compatible wiki link; compact and good for graph navigation |
-| External links | `[label](https://example.com)` | Standard Markdown; works in Obsidian and GitHub |
-| Images or assets that should render on GitHub | `![alt](assets/example.png)` | Standard Markdown image syntax |
-| Obsidian-only embeds | `![[example.png]]` | Good inside Obsidian, but not rendered by GitHub Markdown |
+```bash
+python3 scripts/task_worktree.py create WORK-20260712120000-example --slug example
+```
 
-Obsidian supports both wiki links and Markdown links for internal notes. This template uses wiki links for project-note navigation because the Zettelkasten graph is the core workflow. Use standard Markdown links and images when the content should render cleanly outside Obsidian.
+The default branch is integration-only. Shared knowledge updates are normally promoted near task closeout to reduce conflicts between parallel worktrees.
 
-## Language
+Every agent context or coherent slice ends with a task-scoped commit. Incomplete `checkpoint:` or `wip:` commits may exist on task branches but must not enter the default branch while broken.
 
-The template is English-first. Keeping the canonical version in one language reduces drift and makes the project easier to reuse globally. Translations can be added later as guides under `docs/zh-CN/` without duplicating the full template.
+## Quick Start
 
-Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
+Install the companion Skill and ask:
+
+```text
+Use $ai-collaboration-workflow to initialize this repository.
+```
+
+Or copy the canonical payload:
+
+```bash
+cp -R /path/to/ai-collaboration-workflow-template/template/. /path/to/your-project/
+```
+
+Then ask the agent to follow `INIT.md`. Initialization discovers repository facts, merges local instructions, records Git defaults, removes placeholders, and validates the knowledge layer.
+
+## Daily Use
+
+Start with:
+
+```bash
+python3 scripts/workflow_doctor.py --status
+```
+
+The agent reads `AGENTS.md`, `zettelkasten/AI.md`, the active `WORK-*`, and only the linked notes or matched project Skill. It does not scan the entire vault.
+
+Create tracked work from:
+
+```bash
+cp zettelkasten/00-governance/templates/work-item.md \
+  zettelkasten/06-work/WORK-$(date +%Y%m%d%H%M%S)-<slug>.md
+```
+
+All WORK, TECH, PLAN, and REVIEW files remain directly under `zettelkasten/06-work/` for their full lifecycle.
 
 ## Structure
 
 ```text
-.
-├── template/                  # Canonical downstream payload
-│   ├── AGENTS.md
-│   ├── CLAUDE.md
-│   ├── INIT.md
-│   ├── scripts/
-│   └── zettelkasten/
-│       ├── AI.md
-│       ├── CURRENT.md
-│       └── ...
-├── skills/
-│   └── ai-collaboration-workflow/
-├── scripts/
-│   └── validate_distribution.py
-├── docs/                      # Maintainer and publishing documentation
-└── examples/                  # Fictional initialized-project walkthroughs
+template/
+  AGENTS.md
+  CLAUDE.md
+  INIT.md
+  scripts/
+    workflow_doctor.py
+    task_worktree.py
+  project-skills/
+    INDEX.md
+  zettelkasten/
+    AI.md
+    00-governance/
+    01-overview/
+    02-architecture/
+    03-roadmap/
+    04-cross-cutting/
+    05-reference/
+    06-work/
 ```
 
-Only `template/` is downstream project content. The repository intentionally has no second root knowledge base, which keeps product files distinct from maintainer documentation.
-
-## Install The Template Payload
-
-1. Use the Skill bootstrap, or copy everything under `template/` into the target repository. This includes `INIT.md`.
-2. In your AI coding tool, say:
-
-   ```text
-   Initialize this knowledge base by following INIT.md.
-   ```
-
-3. Answer the initialization questions.
-4. Let the agent replace placeholders, merge project-specific `AGENTS.md` rules, prune single-repo or umbrella-only sections, create the first notes, and remove `INIT.md`. Commit only when requested or required by repository policy.
-
-Do not treat the full repository root as the install payload. GitHub's template-repository feature copies maintenance files as well, so the supported clean installation surfaces are the Skill and `template/`.
-
-## Daily Workflow In An Initialized Project
-
-For non-trivial work, agents should follow this loop:
-
-1. Read `AGENTS.md`, `zettelkasten/AI.md`, and `zettelkasten/00-governance/ai-workflow.md`.
-2. Check `zettelkasten/CURRENT.md`, then find or create the relevant requirement under `zettelkasten/06-requirements/`.
-3. In the REQ, decide whether standalone TECH and PLAN documents are required.
-4. Approve required TECH/PLAN artifacts, or complete inline readiness and slices in the REQ.
-5. Implement only the current slice and run the smallest meaningful validation.
-6. Create or update a review handoff under `zettelkasten/07-review/`.
-7. Handle reviewer feedback with evidence, run the Rule Promotion Check, then write durable lessons back to `AGENTS.md`, `00-governance/gotchas.md`, `02-architecture/`, or `05-reference/`.
-8. Run `python3 scripts/workflow_doctor.py` after workflow-state changes and fix any reported errors before handoff.
-
-The Rule Promotion Check is the closeout gate for long-running tasks, bug fixes, review fixes, and repeated failure modes. It asks whether a lesson should become a project rule, where it belongs, and what exact rule was written so the next agent does not repeat the same mistake.
-
-## Task Weight Modes
-
-Use the lightest workflow path that preserves safety:
-
-| Mode | Use when | Minimum state |
-|---|---|---|
-| Tiny | Non-behavioral, local, reversible, and obvious | final response plus validation |
-| Bounded | Local behavior change or bug with known cause | REQ with inline readiness and REVIEW |
-| Standard | Meaningful product or technical decision | REQ plus TECH when triggered |
-| Complex | Multi-slice, multi-session, migration, release, or coordination work | REQ plus TECH/PLAN as needed |
-
-## Workflow Doctor
-
-Initialized projects include:
-
-```bash
-python3 scripts/workflow_doctor.py
-```
-
-The doctor checks the core workflow files, unresolved placeholders, wiki links, state-directory/status consistency, REVIEW Rule Promotion Check sections, implementation-plan states, `CURRENT.md` references, and active handoff routing hints. Use `--strict` when warnings should fail the command, such as after initialization.
-
-See `examples/example-saas/` for a fictional end-to-end walkthrough and `examples/practical-scenarios/` for tiny, bounded bug, long-task resume, and review-fix snippets.
-
-To evaluate whether a fresh agent can resume from repository state alone, use [docs/fresh-agent-resume-evaluation.md](docs/fresh-agent-resume-evaluation.md).
-
-## Cross-Agent Compatibility
-
-The workflow is vendor-neutral; tool-specific files are thin adapters:
-
-| Agent | Project instruction entry | Shared workflow state |
-|---|---|---|
-| Codex | `AGENTS.md` | `zettelkasten/` |
-| Claude Code | `CLAUDE.md` imports `AGENTS.md` | `zettelkasten/` |
-| Other repository-aware agents | explicitly read `AGENTS.md` | `zettelkasten/` |
-
-Required project state must not live only in a chat transcript, Codex memory, Claude auto memory, or another agent's private state. A different agent must be able to resume from the active REQ, any controlling TECH or PLAN, open REVIEW, validation evidence, worktree state, risks, and next allowed action.
-
-The companion Skill follows the open Agent Skills format used by both Codex and Claude Code, but the core workflow does not depend on the Skill being installed after initialization.
-
-## Optional External Process Skills
-
-The initialized template does not require Superpowers or any other process plugin. Codex, Claude Code, and other repository-aware agents can use `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> Rule Promotion Check -> writeback` with only the files in the target repository.
-
-If Superpowers is installed, repository instructions map its brainstorming, planning, TDD, debugging, and review methods into the selected REQ, TECH, PLAN, REVIEW, gotcha, and runbook documents. It must not create a parallel `docs/superpowers/` source of truth.
-
-This is compatibility only:
-
-- no external plugin is installed by the template;
-- no external command is required;
-- standalone TECH and PLAN artifacts remain optional unless the REQ marks them required;
-- removing or disabling the external plugin does not change the repository workflow.
+`template/` is the only downstream payload. This maintenance repository intentionally has no second root `zettelkasten/`.
 
 ## Companion Skill
 
-This repository includes an optional Agent Skills-compatible skill:
+The Agent Skills-compatible companion is under `skills/ai-collaboration-workflow/`. It handles installation, migration, task routing, minimal context loading, experience promotion, Git isolation, and validation.
 
-```text
-skills/ai-collaboration-workflow/
-```
-
-Use it when you want an AI agent to apply the template consistently: initialize a project, create REQ/TECH/PLAN/REVIEW documents when appropriate, check implementation readiness, record validation, handle evidence-based review feedback, run the Rule Promotion Check, and write lessons back to the knowledge base.
-
-The skill is a companion to the template. If you invoke it in a project that does not yet contain `AGENTS.md`, `CLAUDE.md`, and `zettelkasten/`, it can safely bootstrap the template before continuing. Its bootstrap script previews changes, copies only missing files, skips identical files, and leaves differing existing files untouched for explicit merging.
-
-Install with skills.sh:
+Install with:
 
 ```bash
 npx skills add vector233/ai-collaboration-workflow-template \
@@ -209,80 +131,30 @@ npx skills add vector233/ai-collaboration-workflow-template \
   -g
 ```
 
-### Install For Claude Code
+For Codex, copy it to `~/.codex/skills/`; for Claude Code, copy it to `~/.claude/skills/` or the repository's project-Skill location supported by the tool.
 
-Personal install, available across all Claude Code projects:
+The initialized repository remains usable without the companion Skill. `AGENTS.md` and repository knowledge stay canonical.
 
-```bash
-mkdir -p ~/.claude/skills
-cp -R skills/ai-collaboration-workflow ~/.claude/skills/
-```
+## Validation
 
-Project install, committed to one repository:
+For a downstream project:
 
 ```bash
-mkdir -p .claude/skills
-cp -R skills/ai-collaboration-workflow .claude/skills/
-git add .claude/skills/ai-collaboration-workflow
+python3 scripts/workflow_doctor.py --strict
 ```
 
-Then start Claude Code in the project and invoke:
+The doctor checks required knowledge files, stable artifact names and statuses, active task branches, wiki links, unresolved placeholders, Experience Promotion closure, and project-Skill structure and routing.
 
-```text
-/ai-collaboration-workflow create a requirement for <task>
-```
-
-Claude may also load the skill automatically when your request matches the skill description.
-
-### Install For Codex
-
-```bash
-mkdir -p ~/.codex/skills
-cp -R skills/ai-collaboration-workflow ~/.codex/skills/
-```
-
-Then invoke:
-
-```text
-Use $ai-collaboration-workflow to initialize this repository.
-```
-
-For an initialized project:
-
-```text
-Use $ai-collaboration-workflow to choose the delivery path and create the required workflow artifacts.
-```
-
-The default bootstrap source is this canonical Git repository and automatically selects its `template/` directory. For offline use, pass either the repository checkout or `template/` directly with `--source`.
-
-## Distribution Validation
-
-Run:
+For this distribution repository:
 
 ```bash
 python3 scripts/validate_distribution.py
 ```
 
-The smoke test checks payload isolation, state-directory presence, bootstrap dry-run and installation, sample initialization, wiki links, the workflow doctor, a bounded REQ-only bug path, and a full REQ/TECH/PLAN/REVIEW path.
+The distribution validator exercises bootstrap, initialization, stable work artifacts, project-Skill discovery, worktree isolation, wiki links, and doctor behavior in temporary repositories.
 
-## Naming Rules
+## Migration
 
-- Requirements: `REQ-YYYYMMDDHHMMSS-short-name.md`
-- Technical designs: `TECH-YYYYMMDDHHMMSS-short-name.md`
-- Implementation plans: `PLAN-YYYYMMDDHHMMSS-short-name.md`
-- Review handoffs: `REVIEW-YYYYMMDDHHMMSS-short-name.md`
+Legacy projects using `CURRENT.md` and moving REQ/REVIEW/TECH state directories should finish or checkpoint active work, consolidate the primary task into a stable WORK file, retain independent optional artifacts only where justified, update links, then remove legacy state. The companion Skill includes `references/migration.md`.
 
-## What To Customize
-
-Start with these files after initialization:
-
-- `AGENTS.md`: repo-specific AI rules, build commands, test discipline, branch policy.
-- `zettelkasten/CURRENT.md`: active work, open reviews, validation snapshot, and next allowed action.
-- `zettelkasten/00-governance/project-overview.md`: project purpose, stack, constraints.
-- `zettelkasten/01-overview/quick-reference.md`: commands, URLs, ports, test accounts, runbooks.
-- `zettelkasten/02-architecture/current-architecture-flow.md`: current system flow.
-- `zettelkasten/05-reference/e2e-test.md`: project-specific validation commands.
-
-## License
-
-MIT. Use it, fork it, and adapt it to your own AI engineering workflow.
+Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).

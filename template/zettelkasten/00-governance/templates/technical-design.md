@@ -3,94 +3,38 @@ title: Technical Design Title
 status: pending
 project: {{PROJECT_NAME}}
 technical_design_id: TECH-YYYYMMDDHHMMSS-short-name
+related_work: "[[06-work/WORK-YYYYMMDDHHMMSS-short-name]]"
 last_verified_at: YYYY-MM-DD
-source_of_truth: mixed
-related_requirement:
-  - "[[06-requirements/in-progress/REQ-YYYYMMDDHHMMSS-short-name]]"
-related:
-  - "[[02-architecture/current-architecture-flow]]"
-  - "[[08-technical-designs/README]]"
-  - "[[09-implementation-plans/README]]"
 ---
 
 # Technical Design Title
 
-## What This Design Answers
+## Decision Scope
 
-This document explains how a confirmed requirement should flow through the system, which architectural decisions are already made, and which boundaries or risks must be clear before implementation.
+- Related work:
+- Decision required:
+- Why this needs an independent lifecycle:
 
-## Related Requirement
-
-- Requirement:
-- Requirement status:
-- Acceptance summary:
-
-## Current Architecture Facts
+## Current Facts And Constraints
 
 - Existing flow:
-- Existing data / API / jobs / config:
-- Confirmed constraints:
+- Contracts, data, jobs, or configuration:
+- Security, compatibility, and operational constraints:
 
-## Target Technical Flow
+## Options And Decision
 
-Describe the target flow in 5-10 steps. Avoid line-by-line implementation detail.
+| Option | Benefits | Costs and risks | Decision |
+|---|---|---|---|
+|  |  |  |  |
+
+## Target Flow
 
 1.
 2.
-3.
 
-## Decisions
+## Validation And Rollback
 
-| Decision | Outcome | Reason | Impact |
-|---|---|---|---|
-|  |  |  |  |
-
-## Impact Boundaries
-
-- Projects / modules:
-- APIs:
-- Data model:
-- Background jobs / queues:
-- Config / secrets:
-- Third-party services:
-- Security and privacy:
-- Observability:
-
-## Non-Goals
-
-- This design does not cover:
-
-## Open Decisions
-
-| Question | Decision owner | Default recommendation | Deadline / blocking point |
-|---|---|---|---|
-|  |  |  |  |
-
-## Validation Plan
-
-- Unit / contract:
-- Integration:
-- Browser / E2E:
-- Operations / config:
-- Realistic environment smoke:
-
-## Implementation Planning
-
-- Standalone PLAN required: yes / no
-- If yes, linked PLAN:
-- If no, where implementation slices are recorded:
-
-## Architecture Writeback Checklist
-
-After implementation, check and update:
-
-- [[02-architecture/current-architecture-flow]]
-- Other `02-architecture/` notes:
-- Related `04-cross-cutting/` notes:
-- Related `05-reference/` notes:
-
-## State History
-
-| Date | State | Notes | Commit |
-|---|---|---|---|
-| YYYY-MM-DD | pending | Initial draft |  |
+- Validation:
+- Migration or compatibility:
+- Rollback or recovery:
+- Approval evidence:

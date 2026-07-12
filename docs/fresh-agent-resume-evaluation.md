@@ -1,69 +1,45 @@
-# Fresh Agent Resume Evaluation
+# Fresh-Agent Resume Evaluation
 
-## Purpose
-
-This evaluation tests the project's core value: whether a new AI coding agent can resume work from repository knowledge without access to the earlier chat.
+Use this maintainer evaluation to verify that a fresh agent can resume from repository state without chat history.
 
 ## Setup
 
-1. Initialize the template in a real or representative software project.
-2. Complete at least one REQ and its delivery-path decision. Include any TECH or PLAN selected by the REQ.
-3. Implement one bounded slice and create a REVIEW with validation evidence, risks, and next steps.
-4. Leave one explicit next action unresolved.
-5. Start a fresh agent session with repository access only. Do not provide the previous conversation or a summary.
+Prepare an initialized temporary project with:
 
-## Evaluation Prompt
+- one active `WORK-*` on a task branch;
+- at least one completed context checkpoint and commit;
+- validation evidence and a next action;
+- one experience candidate;
+- optionally one matching project Skill and one independent governed artifact.
+
+## Prompt
 
 ```text
-Review this repository's current project state. Start from AGENTS.md, zettelkasten/AI.md, and zettelkasten/CURRENT.md. Identify the active requirement,
-any technical design or implementation plan that controls implementation, any open review handoff,
-what has been validated, the main residual risks, and the next allowed action.
-Also report whether the current REVIEW includes a Rule Promotion Check and whether any promoted rule was written to a durable destination.
-If workflow state changed, identify the workflow doctor command that should be run.
-Do not modify files.
+Review this repository's current project state. Start from AGENTS.md and zettelkasten/AI.md, run the workflow status command, and identify the work item matching the current branch. Report its selected route, acceptance state, last checkpoint and commit, validation evidence, unresolved risk, next allowed action, and any matching project Skill. Do not edit files.
 ```
 
 ## Pass Criteria
 
-The fresh agent must:
+- reads `AGENTS.md` and `zettelkasten/AI.md`;
+- uses `workflow_doctor.py --status` instead of scanning every work file;
+- selects the correct stable WORK file for the branch;
+- does not require `CURRENT.md` or chat history;
+- loads only linked knowledge and matching project Skills;
+- reports exact validation and commit evidence;
+- distinguishes pending experience candidates from promoted knowledge;
+- recognizes any governed TECH, PLAN, or REVIEW gate;
+- does not begin implementation before reporting the next allowed action.
 
-- read `AGENTS.md` and `zettelkasten/AI.md`;
-- check `zettelkasten/CURRENT.md` for active work and next action;
-- identify the correct active REQ, its TECH/PLAN decision and state, and open REVIEW;
-- distinguish completed work from the next slice;
-- report actual validation and untested risks without inventing coverage;
-- identify whether the selected delivery path currently allows implementation;
-- identify the Rule Promotion Check result or report that it is missing;
-- identify `python3 scripts/workflow_doctor.py` as the workflow-state validator when relevant;
-- find the correct project-specific validation commands;
-- avoid relying on chat history.
+## Scorecard
 
-## Evidence Record
-
-Record:
-
-| Field | Value |
+| Check | Result |
 |---|---|
-| Project and commit |  |
-| Agent/tool |  |
-| Date |  |
-| Correct CURRENT snapshot | pass / fail |
-| Correct active REQ | pass / fail |
-| Correct TECH/PLAN path | pass / fail |
-| Correct REVIEW state | pass / fail |
-| Correct validation summary | pass / fail |
-| Correct rule promotion state | pass / fail |
-| Correct workflow doctor guidance | pass / fail |
+| Correct active WORK | pass / fail |
+| Correct route and gates | pass / fail |
+| Correct checkpoint and commit | pass / fail |
+| Correct validation and risk | pass / fail |
 | Correct next action | pass / fail |
-| Hallucinated facts |  |
-| Missing context |  |
-| Template improvement |  |
+| Minimal context behavior | pass / fail |
+| Project Skill retrieval | pass / fail / not applicable |
 
-## Interpretation
-
-One successful run proves only that the selected project state was recoverable. Repeat across multiple slices and projects before claiming that the workflow reliably preserves long-term context.
-
-## See Also
-
-- [Template payload](../template/)
-- [Example walkthrough](../examples/example-saas/README.md)
+Record which unnecessary files the agent loaded. Context breadth is a regression signal even when the final answer is correct.

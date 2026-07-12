@@ -1,119 +1,66 @@
-# Repository Guidelines
+# AI Collaboration Rules
 
-This repository uses the AI Collaboration Workflow Template. The knowledge base lives in `zettelkasten/` and should guide every non-trivial change.
+## Start Here
 
-## First Files To Read
+Read only the smallest context needed:
 
-Before changing code or project documents, read the smallest relevant context pack:
+1. `AGENTS.md`
+2. `zettelkasten/AI.md`
+3. `python3 scripts/workflow_doctor.py --status`
+4. the active `zettelkasten/06-work/WORK-*.md`
+5. only the linked architecture note, runbook, or project Skill needed for the current slice
 
-- `zettelkasten/AI.md`
-- `zettelkasten/CURRENT.md`
-- `zettelkasten/00-governance/ai-workflow.md`
-- `zettelkasten/06-requirements/README.md`
-- `zettelkasten/08-technical-designs/README.md`
-- `zettelkasten/09-implementation-plans/README.md` when the task uses a standalone plan
-- `zettelkasten/07-review/README.md`
-- Any requirement, technical design, implementation plan, review handoff, architecture note, or runbook linked from the current task
+Repository files are the durable source of truth. Chat history and vendor memory are optional caches.
 
-If this is an umbrella repository, also read the relevant subproject's own `AGENTS.md`, `CLAUDE.md`, or module-specific notes before editing that subproject.
+## Workflow Routing
 
-## Cross-Agent Collaboration Contract
+Before editing, choose the lightest safe route from `zettelkasten/00-governance/ai-workflow.md`:
 
-- `AGENTS.md` is the canonical shared instruction file. Codex reads it directly; `CLAUDE.md` imports it for Claude Code.
-- `zettelkasten/` is the shared project memory. Required state must not exist only in chat history, Codex memories, Claude auto memory, or another tool's local files.
-- Every agent starts from repository state and linked workflow documents, not assumptions about a previous agent's conversation.
-- Before editing, inspect the active REQ, any controlling TECH or PLAN, and open REVIEW. Continue or close an open handoff before starting another implementation slice.
-- Before yielding, persist completed work, exact validation, worktree state, unresolved decisions, risks, and the next allowed action.
-- Keep `zettelkasten/CURRENT.md` aligned with active work, open reviews, validation status, and next allowed action.
-- After long-running tasks, bug fixes, or review fixes, perform a Rule Promotion Check: decide whether the lesson should become a durable project rule, and write it to the future agent entry point that will prevent the mistake from recurring.
-- Vendor-specific files are adapters only. Shared requirements, architecture, decisions, validation, and handoff rules remain vendor-neutral.
+- **Direct**: local, reversible, low-risk work. No workflow artifact is required.
+- **Tracked**: create one stable `WORK-*` document with scope, acceptance, validation, checkpoints, review, and experience candidates.
+- **Governed**: use a `WORK-*` document and create separate `TECH-*`, `PLAN-*`, or `REVIEW-*` documents only when they need an independent lifecycle.
 
-## Optional External Process Skills
+Route by scope, uncertainty, risk, reversibility, duration, and coordination. A small security, permission, billing, migration, production, or destructive change is governed even when its code diff is small.
 
-External process skills, plugins, and agent frameworks are optional. The repository workflow must remain fully usable when none are installed.
+Do not move workflow files to represent state. Update frontmatter in place so links remain stable.
 
-- Repository files and the `REQ -> [TECH] -> [PLAN] -> implementation and validation -> REVIEW -> Rule Promotion Check -> writeback` flow remain the source of truth. Bracketed artifacts are optional unless the REQ marks them required.
-- External brainstorming may refine the active REQ and TECH; it must not create a parallel specification system.
-- External implementation planning should update the REQ implementation slices or a linked PLAN. It does not make PLAN mandatory for every task.
-- External TDD, debugging, execution, or review skills may guide how work is performed, but their durable results must be recorded in the current REQ, TECH, PLAN, REVIEW, architecture note, gotcha, or runbook.
-- Do not create `docs/superpowers/specs/`, `docs/superpowers/plans/`, or equivalent tool-specific project state unless the user explicitly requests a parallel export.
-- An approved TECH, or complete inline technical readiness in the REQ when standalone TECH is not required, satisfies an external design gate.
-- External instructions to commit, branch, or create a worktree do not override this repository's Git policy or explicit user direction.
+## Project Skills And Experience
 
-Read `zettelkasten/00-governance/external-skill-interoperability.md` only when an external process skill is installed, invoked, or causing workflow conflicts.
+Project Skills are durable, on-demand procedures under `project-skills/`. Scan `project-skills/INDEX.md` for matching triggers before rediscovering a known procedure, then read only the matched `SKILL.md`.
 
-## Project Structure
+At each context checkpoint, record reusable experience candidates in the active work item. Before closing tracked or governed work, run the Experience Promotion Check:
 
-- `zettelkasten/00-governance/`: AI workflow, validation policy, decisions, glossary, gotchas, templates.
-- `zettelkasten/01-overview/`: quick reference, product vision, high-frequency commands and URLs.
-- `zettelkasten/02-architecture/`: current architecture facts and system flows.
-- `zettelkasten/03-roadmap/`: phase and release planning.
-- `zettelkasten/04-cross-cutting/`: cross-module concerns for umbrella projects.
-- `zettelkasten/05-reference/`: summaries of long docs, E2E runbooks, external references.
-- `zettelkasten/06-requirements/`: requirement workflow, `backlog/ -> in-progress/ -> done/`.
-- `zettelkasten/07-review/`: review handoff workflow, `pending/ -> in-review/ -> done/`.
-- `zettelkasten/08-technical-designs/`: design workflow, `pending/ -> approved/ -> implemented/`.
-- `zettelkasten/09-implementation-plans/`: optional detailed execution plans.
+- repository-wide must/never/check-before behavior -> `AGENTS.md`;
+- bug roots and false assumptions -> `zettelkasten/00-governance/gotchas.md`;
+- architecture facts and invariants -> architecture or cross-cutting notes;
+- simple commands and environment steps -> runbooks;
+- repeated, stable, multi-step procedures with validation and recovery -> `project-skills/<skill-name>/SKILL.md` plus `project-skills/INDEX.md`.
 
-## Development Workflow
+Do not create a Skill from a one-off incident, an unverified guess, or a procedure that is simpler as a short rule or runbook entry. Follow `zettelkasten/00-governance/skill-lifecycle.md`.
 
-For any tracked feature, fix, integration, or architecture change:
+## Git Isolation And Commits
 
-1. Confirm or create a requirement under `zettelkasten/06-requirements/`.
-2. Classify task weight as tiny, bounded, standard, or complex. In the REQ, decide whether standalone TECH and PLAN documents are required.
-3. If TECH is required, do not edit business code until it is in `approved/`. If it is not required, complete the REQ's inline technical readiness.
-4. If PLAN is required, do not implement until it is `ready`. If it is not required, keep sufficient implementation slices in the REQ.
-5. Implement one bounded slice and run focused validation for the changed boundary.
-6. Create or update a review handoff under `zettelkasten/07-review/pending/`.
-7. Record verification, known risks, commit hash, and worktree status in the handoff.
-8. Run the Rule Promotion Check and write back durable lessons to `AGENTS.md`, `gotchas.md`, architecture notes, cross-cutting rules, or E2E runbooks.
-9. Run `python3 scripts/workflow_doctor.py` before handoff or closeout when workflow files changed, and fix any reported errors.
+Follow `zettelkasten/00-governance/git-collaboration.md` unless stricter repository rules apply.
 
-Standalone TECH is normally required for architecture, API, schema, persistence, security, billing, permission, deployment, third-party, or cross-module changes, and when important technical decisions remain unresolved.
+- Do not implement tracked or governed work directly on `main` or `master`.
+- Use one task branch per work item. Use one Git worktree per concurrently active task or agent.
+- Do not run dependent or overlapping tasks in parallel without an explicit integration plan.
+- Each agent context or coherent implementation slice must end with a task-scoped commit.
+- Use `checkpoint:` or `wip:` commits only on task branches when incomplete state must be handed off. Broken checkpoints must not be merged into the default branch.
+- Stage only current-task files. Never commit secrets, caches, logs, local databases, generated junk, or unrelated user changes.
+- Record the commit and exact validation result in the work item before yielding.
 
-Standalone PLAN is normally useful for multiple dependent slices, multiple sessions or agents, cross-repository work, migrations, releases, or work needing precise file ownership and checkpoints.
+## Validation And Review
 
-Tiny-fix waivers may bypass REQ/TECH/PLAN documents only for typo fixes, comments, non-behavioral docs, or similarly low-risk changes. A bounded bug can keep a REQ while marking standalone TECH and PLAN as not required.
+- Use project commands from `zettelkasten/01-overview/quick-reference.md` and `zettelkasten/05-reference/e2e-test.md`.
+- Do not claim checks that did not run. Record blockers and residual risk.
+- Treat review feedback as a hypothesis. Verify it with code, commands, logs, screenshots, commits, or official references.
+- Keep review inline in the work item by default. Create a separate `REVIEW-*` only for independent reviewers, multiple rounds, high risk, or a distinct approval lifecycle.
+- Run `python3 scripts/workflow_doctor.py` after workflow or project-Skill changes and before handoff.
 
-## Review Rules
+## Cross-Agent Contract
 
-Review feedback is not automatically true. Treat each important review point as a hypothesis:
-
-- Accept evidence from code locations, reproducible commands, logs, screenshots, commits, docs, or official references.
-- Ask for evidence when feedback is vague or unsupported.
-- Fix confirmed or partially confirmed issues, then record validation.
-- Reject unsupported or false findings with concrete counter-evidence in the review handoff.
-- Do not start the next development slice until the current review handoff is closed or explicitly waived.
-
-## Documentation Rules
-
-- New requirements use `REQ-YYYYMMDDHHMMSS-short-name.md`.
-- New technical designs use `TECH-YYYYMMDDHHMMSS-short-name.md`.
-- New implementation plans use `PLAN-YYYYMMDDHHMMSS-short-name.md`.
-- New review handoffs use `REVIEW-YYYYMMDDHHMMSS-short-name.md`.
-- New notes must link to existing notes with double-bracket wiki links.
-- When architecture, workflow, validation, or gotchas change, update the durable note that future agents should read.
-- Promote a lesson to a durable rule when it prevents a likely repeat mistake. Use `AGENTS.md` only for repository-wide must/never/always behavior; use `gotchas.md` for bug roots and false assumptions, architecture or cross-cutting notes for system invariants, and runbooks for commands or environment steps.
-- Never commit secrets, tokens, real credentials, private customer data, or unredacted production logs.
-
-## Validation
-
-Use project-specific commands from `zettelkasten/01-overview/quick-reference.md` and `zettelkasten/05-reference/e2e-test.md`.
-
-As a default:
-
-- Documentation-only changes: run `git diff --check`.
-- Workflow-state changes: run `python3 scripts/workflow_doctor.py`.
-- Backend/API changes: run unit or integration tests for the affected package.
-- Frontend changes: run lint/build and browser verification for user-visible flows.
-- Database or migration changes: verify schema changes against a realistic database.
-- Installer, desktop, mobile, hardware, or third-party integration changes: run the closest real-environment smoke test before review.
-
-If required validation cannot be run, record the blocker and residual risk in the review handoff. Do not imply coverage you did not perform.
-
-## Git Hygiene
-
-- Stage only files related to the current task.
-- Do not revert unrelated user or agent changes.
-- Use concise conventional-style commits such as `docs: add checkout requirements` or `fix(api): reject expired session tokens`.
-- Keep generated artifacts, temporary logs, secrets, local databases, and machine-specific files out of commits.
+- `AGENTS.md` is canonical shared instruction; `CLAUDE.md` is an adapter.
+- Vendor-specific tools may assist execution but must not own required project state.
+- External Skills must map durable output into the active work item, knowledge notes, runbooks, or project Skills.
+- Before yielding, persist the current state, validation, commit, risks, unresolved decisions, and next allowed action.

@@ -21,12 +21,14 @@ This repository develops and distributes the AI Collaboration Workflow Template.
 ## Development Workflow
 
 1. Inspect the smallest relevant set of files.
-2. Make a scoped change and preserve unrelated user or agent work.
-3. Update every affected distribution surface.
-4. Run focused validation.
-5. Run a Rule Promotion Check for long tasks, fixes, and review corrections: if the lesson would prevent a likely repeat mistake, record durable maintainer guidance in `AGENTS.md`, `CONTRIBUTING.md`, or `docs/`.
+2. Use a task branch for non-trivial work. Use a dedicated Git worktree for each concurrently active task or agent.
+3. Make a scoped change and preserve unrelated user or agent work.
+4. Update every affected distribution surface.
+5. Run focused validation.
+6. End each agent context or coherent slice with a task-scoped commit. Keep incomplete checkpoints off `main`.
+7. Run a Rule Promotion Check for long tasks, fixes, and review corrections: if the lesson would prevent a likely repeat mistake, record durable maintainer guidance in `AGENTS.md`, `CONTRIBUTING.md`, or `docs/`.
 
-The REQ, TECH, and REVIEW workflow is the product being distributed. It is not required for routine maintenance of this template repository itself.
+The Direct/Tracked/Governed routing model, stable WORK artifacts, optional TECH/PLAN/REVIEW gates, project-Skill promotion, and Git isolation policy are the product being distributed. Downstream WORK artifacts are not required for routine maintenance of this template repository itself.
 
 ## Review Rules
 
@@ -46,7 +48,10 @@ At minimum:
 
 ## Git Hygiene
 
+- Treat `main` as an integration branch for non-trivial work.
+- One branch and worktree must not be shared by concurrent agents.
 - Stage only files related to the current task.
 - Do not revert unrelated user or agent changes.
 - Keep generated artifacts, temporary clones, caches, secrets, and machine-specific files out of commits.
+- Use `checkpoint:` or `wip:` only on task branches, and do not merge broken checkpoints.
 - Use concise conventional-style commits.

@@ -1,88 +1,54 @@
-# Practical Scenario Snippets
+# Practical Scenarios
 
-These snippets show how to keep the workflow light while preserving state that a future agent can use. They are not a full initialized knowledge base.
+## Direct Documentation Fix
 
-## Tiny Documentation Fix
-
-Use this when the change is non-behavioral, local, and easy to validate.
+Broken internal link, local and reversible:
 
 ```text
-Task: fix a broken internal wiki link in an architecture note.
-Path: tiny waiver.
-Artifacts: no REQ, no REVIEW.
-Validation: git diff --check; python3 scripts/workflow_doctor.py.
-Writeback: final response mentions the fixed link and validation.
-Rule Promotion Check: not applicable unless the broken link reveals a repeatable authoring mistake.
-CURRENT.md: unchanged unless this was part of active work.
+route Direct -> edit -> link check -> git diff --check -> context commit
 ```
 
-Do not stretch tiny mode to cover API, schema, permission, persistence, deployment, billing, provider, or cross-module behavior.
+No WORK, TECH, PLAN, or REVIEW is created. If the failure reveals a repeatable authoring procedure, record it in the final context and consider a runbook or project Skill separately.
 
-## Bounded Bug Fix
+## Tracked Bounded Bug
 
-Use this when the root cause is known, impact is local, and one focused validation path proves the fix.
+Known local root cause with focused regression test:
 
 ```text
-REQ -> inline technical readiness -> implementation -> REVIEW -> Rule Promotion Check -> writeback
+create one WORK -> task branch -> implement one slice -> test -> inline review
+-> checkpoint commit -> experience decision -> done
 ```
 
-Minimum state:
+The WORK contains the root cause, affected paths, acceptance, validation, commit, and next action. No separate artifact is needed.
 
-- REQ records task weight `bounded`, root cause, affected paths, non-goals, and focused validation plan.
-- REVIEW records fix summary, command output, worktree status, next allowed action, and Rule Promotion Check.
-- `CURRENT.md` points to the active REQ and open REVIEW until the review closes.
-- `gotchas.md` gets a prevention rule if the root cause is likely to recur.
+## Governed Data Migration
 
-Example promotion:
+Schema migration with rollback and release ordering:
 
 ```text
-Candidate lesson: API handlers must reject expired invitation tokens before workspace membership lookup.
-Decision: promote.
-Destination: gotchas.md and the auth/invitation architecture note.
-Do not put in root AGENTS.md because it is a domain invariant, not a repository-wide agent behavior rule.
+WORK -> independent TECH approval -> PLAN coordination -> dedicated worktree
+-> per-slice commits and validation -> independent REVIEW -> experience promotion
 ```
 
-## Long Task Resume
+All artifacts remain in `zettelkasten/06-work/`; their status changes in frontmatter.
 
-Use this when work spans sessions, agents, owners, or multiple slices.
+## Parallel Tasks
+
+Two independent tasks with non-overlapping paths:
 
 ```text
-REQ -> TECH when needed -> PLAN -> per-slice implementation -> REVIEW -> CURRENT.md update
+WORK-A -> task branch A -> worktree A -> Agent A
+WORK-B -> task branch B -> worktree B -> Agent B
 ```
 
-Before pausing:
+Each context commits only its task. Both tasks record experience candidates locally. Shared rules or project Skills are curated during integration, avoiding competing edits to `AGENTS.md`.
 
-- Update the PLAN resume state with current slice, last completed step, blockers, and next allowed action.
-- Update the current REVIEW with exact validation and residual risk.
-- Update `CURRENT.md` so a fresh agent can find the active REQ, controlling TECH/PLAN, open REVIEW, and next action without chat history.
-- Run `python3 scripts/workflow_doctor.py`; resolve errors and treat warnings as routing reminders.
+## Project Skill Promotion
 
-Fresh-agent prompt:
+A third-party sandbox reset procedure repeatedly causes failed tests:
 
-```text
-Read AGENTS.md, zettelkasten/AI.md, and zettelkasten/CURRENT.md. Report the active REQ, controlling TECH/PLAN, open REVIEW, validation status, residual risk, and next allowed action before editing files.
-```
-
-## Review Fix With Rule Promotion
-
-Use this when review feedback exposes a real process gap or repeatable false assumption.
-
-```text
-REVIEW in-review -> verify evidence -> fix confirmed issue -> validate -> Rule Promotion Check -> close REVIEW
-```
-
-Handling rules:
-
-- Evidence-free feedback gets clarification, not code churn.
-- Confirmed feedback gets a fix, validation evidence, and a REVIEW feedback-table update.
-- False feedback gets counter-evidence in the REVIEW.
-- Rule Promotion Check decides where the lesson belongs.
-
-Destination examples:
-
-| Lesson | Destination |
-|---|---|
-| "Always run the workflow doctor before closing a review" | `AGENTS.md` |
-| "Token expiry must be checked before membership lookup" | `gotchas.md` and architecture note |
-| "Sandbox webhook retries require this manual cleanup command" | `05-reference/e2e-test.md` |
-| "This was a one-off reviewer misunderstanding" | REVIEW only |
+1. Record the verified procedure as an experience candidate.
+2. Confirm it is more than a short command and has a safe recovery path.
+3. Create `project-skills/reset-provider-sandbox/SKILL.md`.
+4. Add trigger metadata to `project-skills/INDEX.md`.
+5. Run the doctor and test whether a fresh agent selects it for the next sandbox failure.

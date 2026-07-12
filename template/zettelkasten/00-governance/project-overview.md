@@ -47,10 +47,11 @@
 
 ## AI Collaboration Rules
 
-- Non-trivial work goes through [[06-requirements/README]] and [[08-technical-designs/README]] before implementation.
-- Review handoffs live under [[07-review/README]], and review feedback must be evidence-backed.
-- New architecture facts, validation procedures, gotchas, and promoted project rules must be written back to durable notes.
-- Parallel AI work must declare non-overlapping file ownership in the requirement or review handoff.
+- Route work through Direct, Tracked, or Governed mode using [[00-governance/ai-workflow]].
+- Keep tracked state in one stable `WORK-*` under [[06-work/README]] unless an independent artifact is justified.
+- Promote repeatable procedures through [[00-governance/skill-lifecycle]].
+- Use task branches and dedicated worktrees for parallel work as defined in [[00-governance/git-collaboration]].
+- Write architecture facts, validation procedures, gotchas, and project rules back to their durable destinations.
 
 ## See Also
 

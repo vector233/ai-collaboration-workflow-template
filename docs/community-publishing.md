@@ -80,28 +80,25 @@ I open-sourced a small custom vault template inspired by Zettelkasten and design
 
 The goal is to help AI coding agents and human maintainers keep project context over time without rediscovering everything from scratch.
 
-Instead of one large project document, the template uses small linked notes for:
+Instead of one large project document or a mandatory document chain, the template uses small linked notes for:
 
-- requirements
-- technical designs
-- implementation plans when coordination requires them
-- review handoffs
-- active-state snapshots
+- stable work items
+- technical designs, implementation plans, and review handoffs only when independently required
 - architecture notes
 - validation runbooks
 - gotchas / lessons learned
+- on-demand project Skills promoted from verified experience
 
 The basic workflow is:
 
 ```text
 Task
-  -> REQ       define scope, non-goals, and acceptance criteria
-  -> [TECH]    resolve technical decisions when needed
-  -> [PLAN]    coordinate detailed execution when needed
-  -> Build     implement and validate one bounded change
-  -> REVIEW    hand off evidence, feedback, risk, and rule-promotion decisions
-  -> Doctor    check workflow state, links, and handoffs
-  -> Writeback promote recurring lessons and update architecture, gotchas, or runbooks
+  -> Route     Direct, Tracked, or Governed
+  -> [WORK]    keep stable task state when tracking is useful
+  -> Build     implement, validate, and commit one bounded context
+  -> [Gates]   add TECH, PLAN, or REVIEW only when triggered
+  -> Doctor    check workflow state, links, branches, and project Skills
+  -> Promote   write recurring lessons to rules, notes, runbooks, or project Skills
 ```
 
 It uses Obsidian-style wiki links like `[[00-governance/ai-workflow]]` for note-to-note navigation, while keeping standard Markdown links and images for GitHub compatibility.
@@ -139,7 +136,7 @@ Use this flow for a short public announcement on X.
 ```text
 Open-sourced AI Collaboration Workflow Template: a Zettelkasten-style, Obsidian-compatible vault for AI coding agents.
 
-It keeps requirements, designs, reviews, validation notes, and lessons linked over time.
+It keeps stable work items, validation, project knowledge, and on-demand skills linked over time.
 
 https://github.com/vector233/ai-collaboration-workflow-template
 ```

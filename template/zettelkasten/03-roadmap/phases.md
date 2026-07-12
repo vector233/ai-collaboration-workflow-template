@@ -36,4 +36,4 @@ Suggested status markers:
 ## See Also
 
 - [[00-governance/project-overview]] — project goals
-- [[06-requirements/README]] — requirement workflow
+- [[06-work/README]] — stable work-item workflow

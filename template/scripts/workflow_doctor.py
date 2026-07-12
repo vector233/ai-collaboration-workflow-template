@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Check AI Collaboration Workflow repository state for common drift."""
+"""Validate stable workflow artifacts and project-Skill routing."""
 
 from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,49 +15,56 @@ CORE_FILES = (
     Path("AGENTS.md"),
     Path("CLAUDE.md"),
     Path("scripts/workflow_doctor.py"),
+    Path("scripts/task_worktree.py"),
     Path("zettelkasten/AI.md"),
-    Path("zettelkasten/CURRENT.md"),
     Path("zettelkasten/00-governance/ai-workflow.md"),
-    Path("zettelkasten/00-governance/templates/review.md"),
-    Path("zettelkasten/06-requirements/README.md"),
-    Path("zettelkasten/07-review/README.md"),
-    Path("zettelkasten/08-technical-designs/README.md"),
-    Path("zettelkasten/09-implementation-plans/README.md"),
+    Path("zettelkasten/00-governance/skill-lifecycle.md"),
+    Path("zettelkasten/00-governance/git-collaboration.md"),
+    Path("zettelkasten/00-governance/templates/work-item.md"),
+    Path("zettelkasten/06-work/README.md"),
+    Path("project-skills/INDEX.md"),
 )
 
-CORE_DIRECTORIES = (
-    Path("zettelkasten/06-requirements/backlog"),
-    Path("zettelkasten/06-requirements/in-progress"),
-    Path("zettelkasten/06-requirements/done"),
-    Path("zettelkasten/07-review/pending"),
-    Path("zettelkasten/07-review/in-review"),
-    Path("zettelkasten/07-review/done"),
-    Path("zettelkasten/08-technical-designs/pending"),
-    Path("zettelkasten/08-technical-designs/approved"),
-    Path("zettelkasten/08-technical-designs/implemented"),
+CORE_DIRECTORIES = (Path("zettelkasten/06-work"), Path("project-skills"))
+
+LEGACY_PATHS = (
+    Path("zettelkasten/CURRENT.md"),
+    Path("zettelkasten/06-requirements"),
+    Path("zettelkasten/07-review"),
+    Path("zettelkasten/08-technical-designs"),
     Path("zettelkasten/09-implementation-plans"),
 )
 
-STATE_DIRECTORIES = {
-    Path("zettelkasten/06-requirements/backlog"): ("REQ-", "backlog"),
-    Path("zettelkasten/06-requirements/in-progress"): ("REQ-", "in-progress"),
-    Path("zettelkasten/06-requirements/done"): ("REQ-", "done"),
-    Path("zettelkasten/07-review/pending"): ("REVIEW-", "pending"),
-    Path("zettelkasten/07-review/in-review"): ("REVIEW-", "in-review"),
-    Path("zettelkasten/07-review/done"): ("REVIEW-", "done"),
-    Path("zettelkasten/08-technical-designs/pending"): ("TECH-", "pending"),
-    Path("zettelkasten/08-technical-designs/approved"): ("TECH-", "approved"),
-    Path("zettelkasten/08-technical-designs/implemented"): ("TECH-", "implemented"),
+ARTIFACT_STATES = {
+    "WORK-": {"backlog", "active", "blocked", "review", "done", "cancelled"},
+    "TECH-": {"pending", "approved", "implemented", "superseded"},
+    "PLAN-": {"draft", "ready", "executing", "completed", "superseded"},
+    "REVIEW-": {"pending", "in-review", "done", "waived"},
 }
 
-PLAN_ALLOWED_STATES = {"draft", "ready", "executing", "completed", "superseded"}
-PLACEHOLDER_RE = re.compile(r"\{\{[A-Z_]+\}\}")
-STATUS_RE = re.compile(r"^status:\s*([^\n#]+)", re.MULTILINE)
-WIKI_LINK_RE = re.compile(r"(?<!!)\[\[([^\]|#]+)")
-PROMOTION_DECISION_RE = re.compile(
-    r"^-\s*Promote to durable rule:\s*(.*?)\s*$",
-    re.MULTILINE,
+ACTIVE_WORK_STATES = {"active", "blocked", "review"}
+WORK_REQUIRED_SECTIONS = (
+    "## Goal And Acceptance",
+    "## Route Decision",
+    "## Context Pack",
+    "## Scope And Ownership",
+    "## Validation",
+    "## Experience Candidates",
+    "## Context Checkpoint",
 )
+SKILL_REQUIRED_SECTIONS = (
+    "## Use",
+    "## Do Not Use",
+    "## Procedure",
+    "## Validation",
+    "## Recovery",
+    "## Provenance",
+)
+
+PLACEHOLDER_RE = re.compile(r"\{\{[A-Z_]+\}\}")
+WIKI_LINK_RE = re.compile(r"(?<!!)\[\[([^\]|#]+)")
+FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+FIELD_RE_TEMPLATE = r"^{}:\s*(.*?)\s*$"
 
 
 @dataclass(frozen=True)
@@ -67,20 +75,10 @@ class Finding:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Validate AI Collaboration Workflow state in a target repository."
-    )
-    parser.add_argument(
-        "--root",
-        type=Path,
-        default=Path.cwd(),
-        help="Repository root to check (default: current directory).",
-    )
-    parser.add_argument(
-        "--strict",
-        action="store_true",
-        help="Exit non-zero on warnings as well as errors.",
-    )
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path.cwd())
+    parser.add_argument("--strict", action="store_true", help="fail on warnings")
+    parser.add_argument("--status", action="store_true", help="show active work without validation")
     return parser.parse_args()
 
 
@@ -88,96 +86,74 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def markdown_files(root: Path) -> list[Path]:
-    files: list[Path] = []
-    for relative in (Path("AGENTS.md"), Path("CLAUDE.md")):
-        path = root / relative
-        if path.is_file():
-            files.append(path)
-    vault = root / "zettelkasten"
-    if vault.is_dir():
-        files.extend(sorted(vault.rglob("*.md")))
-    return files
-
-
-def relative_to_root(root: Path, path: Path) -> Path:
+def relative(root: Path, path: Path) -> Path:
     try:
         return path.relative_to(root)
     except ValueError:
         return path
 
 
-def artifact_files(directory: Path) -> list[Path]:
+def add(findings: list[Finding], severity: str, message: str, path: Path | None = None) -> None:
+    findings.append(Finding(severity, message, path))
+
+
+def field_value(text: str, field: str) -> str | None:
+    frontmatter = FRONTMATTER_RE.search(text)
+    if not frontmatter:
+        return None
+    match = re.search(FIELD_RE_TEMPLATE.format(re.escape(field)), frontmatter.group(1), re.MULTILINE)
+    if not match:
+        return None
+    value = match.group(1).strip().strip('"').strip("'")
+    return value or None
+
+
+def workflow_artifacts(root: Path) -> list[Path]:
+    directory = root / "zettelkasten/06-work"
     if not directory.is_dir():
         return []
     return [
         path
         for path in sorted(directory.iterdir())
-        if path.is_file() and path.name != ".gitkeep"
+        if path.is_file() and path.name not in {"README.md", ".gitkeep"}
     ]
 
 
-def status_value(text: str) -> str | None:
-    match = STATUS_RE.search(text)
-    if not match:
-        return None
-    return match.group(1).strip().strip('"').strip("'")
+def current_branch(root: Path) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(root), "branch", "--show-current"],
+        text=True,
+        capture_output=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else ""
 
 
-def wiki_index(vault: Path) -> dict[str, Path]:
-    index: dict[str, Path] = {}
-    for path in vault.rglob("*.md"):
-        relative = path.relative_to(vault).with_suffix("").as_posix()
-        index[relative] = path
-        index.setdefault(path.stem, path)
-    return index
-
-
-def normalize_wiki_target(target: str) -> str:
-    normalized = target.strip()
-    if normalized.endswith(".md"):
-        normalized = normalized[:-3]
-    return normalized
-
-
-def add(
-    finding_list: list[Finding],
-    severity: str,
-    message: str,
-    path: Path | None = None,
-) -> None:
-    finding_list.append(Finding(severity=severity, message=message, path=path))
-
-
-def promotion_decision(text: str) -> str | None:
-    match = PROMOTION_DECISION_RE.search(text)
-    if not match:
-        return None
-    return match.group(1).strip().lower()
+def markdown_files(root: Path) -> list[Path]:
+    files: list[Path] = []
+    for relative_path in (Path("AGENTS.md"), Path("CLAUDE.md")):
+        path = root / relative_path
+        if path.is_file():
+            files.append(path)
+    for directory in (root / "zettelkasten", root / "project-skills"):
+        if directory.is_dir():
+            files.extend(sorted(directory.rglob("*.md")))
+    return files
 
 
 def check_core(root: Path, findings: list[Finding]) -> None:
-    for relative in CORE_FILES:
-        if not (root / relative).is_file():
-            add(findings, "ERROR", "missing required file", relative)
-    for relative in CORE_DIRECTORIES:
-        if not (root / relative).is_dir():
-            add(findings, "ERROR", "missing required directory", relative)
-
+    for path in CORE_FILES:
+        if not (root / path).is_file():
+            add(findings, "ERROR", "missing required file", path)
+    for path in CORE_DIRECTORIES:
+        if not (root / path).is_dir():
+            add(findings, "ERROR", "missing required directory", path)
+    for path in LEGACY_PATHS:
+        if (root / path).exists():
+            add(findings, "WARN", "legacy moving-state layout remains; migrate to zettelkasten/06-work", path)
     if (root / "INIT.md").is_file():
-        add(
-            findings,
-            "WARN",
-            "INIT.md is present; initialization is not finished",
-            Path("INIT.md"),
-        )
+        add(findings, "WARN", "INIT.md is present; initialization is not finished", Path("INIT.md"))
     if (root / ".ai-collaboration-workflow-template").is_file():
-        add(
-            findings,
-            "WARN",
-            "payload marker is present; remove it after initialization",
-            Path(".ai-collaboration-workflow-template"),
-        )
+        add(findings, "WARN", "payload marker is present; initialization is not finished", Path(".ai-collaboration-workflow-template"))
 
 
 def check_placeholders(root: Path, findings: list[Finding]) -> None:
@@ -185,118 +161,138 @@ def check_placeholders(root: Path, findings: list[Finding]) -> None:
         text = read_text(path)
         matches = sorted(set(PLACEHOLDER_RE.findall(text)))
         if matches:
-            add(
-                findings,
-                "ERROR",
-                "unresolved template placeholders: " + ", ".join(matches),
-                relative_to_root(root, path),
-            )
+            add(findings, "ERROR", "unresolved placeholders: " + ", ".join(matches), relative(root, path))
         if "UMBRELLA-ONLY" in text:
-            add(
-                findings,
-                "ERROR",
-                "umbrella-mode marker remains after initialization",
-                relative_to_root(root, path),
-            )
+            add(findings, "ERROR", "umbrella-mode marker remains", relative(root, path))
 
 
 def check_wiki_links(root: Path, findings: list[Finding]) -> None:
     vault = root / "zettelkasten"
     if not vault.is_dir():
         return
-    index = wiki_index(vault)
+    index: dict[str, Path] = {}
+    for path in vault.rglob("*.md"):
+        index[path.relative_to(vault).with_suffix("").as_posix()] = path
+        index.setdefault(path.stem, path)
     for path in sorted(vault.rglob("*.md")):
-        text = read_text(path)
-        for raw_target in WIKI_LINK_RE.findall(text):
-            target = normalize_wiki_target(raw_target)
+        for raw_target in WIKI_LINK_RE.findall(read_text(path)):
+            target = raw_target.strip().removesuffix(".md")
             if any(marker in target for marker in ("YYYY", "<", "{{")):
                 continue
             if target not in index:
-                add(
-                    findings,
-                    "ERROR",
-                    f"broken wiki link: [[{target}]]",
-                    relative_to_root(root, path),
-                )
+                add(findings, "ERROR", f"broken wiki link: [[{target}]]", relative(root, path))
 
 
-def check_state_directories(root: Path, findings: list[Finding]) -> None:
-    for relative, (prefix, expected_status) in STATE_DIRECTORIES.items():
-        for path in artifact_files(root / relative):
-            rel_path = relative_to_root(root, path)
-            if not path.name.startswith(prefix) or path.suffix != ".md":
-                add(findings, "ERROR", f"unexpected file in state directory; expected {prefix}*.md", rel_path)
-                continue
-
-            text = read_text(path)
-            actual_status = status_value(text)
-            if actual_status is None:
-                add(findings, "ERROR", "missing status frontmatter", rel_path)
-            elif actual_status != expected_status:
-                add(
-                    findings,
-                    "ERROR",
-                    f"status {actual_status!r} does not match directory state {expected_status!r}",
-                    rel_path,
-                )
-
-            if prefix == "REVIEW-" and "## Rule Promotion Check" not in text:
-                add(findings, "ERROR", "review handoff is missing Rule Promotion Check", rel_path)
-            elif prefix == "REVIEW-" and expected_status == "done":
-                decision = promotion_decision(text)
-                if decision in (None, "", "yes / no"):
-                    add(
-                        findings,
-                        "ERROR",
-                        "closed review has incomplete Rule Promotion Check decision",
-                        rel_path,
-                    )
+def artifact_prefix(path: Path) -> str | None:
+    return next((prefix for prefix in ARTIFACT_STATES if path.name.startswith(prefix)), None)
 
 
-def check_plans(root: Path, findings: list[Finding]) -> None:
-    plans = root / "zettelkasten/09-implementation-plans"
-    for path in artifact_files(plans):
-        rel_path = relative_to_root(root, path)
-        if path.name in {"README.md", ".gitkeep"}:
+def check_artifacts(root: Path, findings: list[Finding]) -> None:
+    active_branches: dict[str, Path] = {}
+    for path in workflow_artifacts(root):
+        rel_path = relative(root, path)
+        prefix = artifact_prefix(path)
+        if prefix is None or path.suffix != ".md":
+            add(findings, "ERROR", "unexpected work artifact name", rel_path)
             continue
-        if not path.name.startswith("PLAN-") or path.suffix != ".md":
-            add(findings, "ERROR", "unexpected implementation-plan file; expected PLAN-*.md", rel_path)
+        text = read_text(path)
+        status = field_value(text, "status")
+        if status not in ARTIFACT_STATES[prefix]:
+            add(findings, "ERROR", f"invalid {prefix[:-1]} status {status!r}", rel_path)
+        if prefix != "WORK-":
+            if not field_value(text, "related_work"):
+                add(findings, "ERROR", "independent artifact is missing related_work", rel_path)
             continue
-        actual_status = status_value(read_text(path))
-        if actual_status is None:
-            add(findings, "ERROR", "missing status frontmatter", rel_path)
-        elif actual_status not in PLAN_ALLOWED_STATES:
-            add(findings, "ERROR", f"unknown PLAN status {actual_status!r}", rel_path)
+
+        for section in WORK_REQUIRED_SECTIONS:
+            if section not in text:
+                add(findings, "ERROR", f"work item is missing {section}", rel_path)
+        if status in ACTIVE_WORK_STATES:
+            branch = field_value(text, "branch")
+            next_action = field_value(text, "next_action")
+            if not branch:
+                add(findings, "ERROR", "active work is missing branch", rel_path)
+            elif branch in {"main", "master"}:
+                add(findings, "ERROR", "tracked work must not use the default branch", rel_path)
+            elif branch in active_branches:
+                add(findings, "ERROR", f"active branch is shared with {active_branches[branch]}", rel_path)
+            else:
+                active_branches[branch] = rel_path
+            if not next_action:
+                add(findings, "ERROR", "active work is missing next_action", rel_path)
+            add(findings, "INFO", f"active work: status={status}, branch={branch or 'unknown'}", rel_path)
+        if status == "done":
+            if "- Experience Promotion complete: yes" not in text:
+                add(findings, "ERROR", "closed work has incomplete Experience Promotion", rel_path)
+            experience_section = text.split("## Experience Candidates", 1)[-1].split("\n## ", 1)[0]
+            if re.search(r"\|[^\n|]+\|[^\n|]+\|\s*pending\s*\|", experience_section):
+                add(findings, "ERROR", "closed work has a pending experience candidate", rel_path)
 
 
-def check_activity(root: Path, findings: list[Finding]) -> None:
-    active_requirements = artifact_files(root / "zettelkasten/06-requirements/in-progress")
-    open_reviews = [
-        *artifact_files(root / "zettelkasten/07-review/pending"),
-        *artifact_files(root / "zettelkasten/07-review/in-review"),
-    ]
-    current_state = root / "zettelkasten/CURRENT.md"
-    current_text = read_text(current_state) if current_state.is_file() else ""
-    for path in active_requirements:
-        rel_path = relative_to_root(root, path)
-        add(
-            findings,
-            "INFO",
-            "active requirement; verify its delivery path before editing business code",
-            rel_path,
-        )
-        if path.stem not in current_text:
-            add(findings, "WARN", "active requirement is not referenced in CURRENT.md", rel_path)
-    for path in open_reviews:
-        rel_path = relative_to_root(root, path)
-        add(
-            findings,
-            "INFO",
-            "open review blocks the next implementation slice unless explicitly waived",
-            rel_path,
-        )
-        if path.stem not in current_text:
-            add(findings, "WARN", "open review is not referenced in CURRENT.md", rel_path)
+def skill_frontmatter(text: str) -> dict[str, str] | None:
+    match = FRONTMATTER_RE.search(text)
+    if not match:
+        return None
+    values: dict[str, str] = {}
+    for line in match.group(1).splitlines():
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        values[key.strip()] = value.strip().strip('"').strip("'")
+    return values
+
+
+def check_project_skills(root: Path, findings: list[Finding]) -> None:
+    skills_root = root / "project-skills"
+    index_path = skills_root / "INDEX.md"
+    index_text = read_text(index_path) if index_path.is_file() else ""
+    skill_dirs = [path for path in sorted(skills_root.iterdir()) if path.is_dir() and not path.name.startswith(".")] if skills_root.is_dir() else []
+    if skill_dirs and "| None |" in index_text:
+        add(findings, "WARN", "project Skill index still contains the empty None row", relative(root, index_path))
+    for directory in skill_dirs:
+        skill_file = directory / "SKILL.md"
+        rel_path = relative(root, skill_file)
+        if not skill_file.is_file():
+            add(findings, "ERROR", "project Skill directory is missing SKILL.md", relative(root, directory))
+            continue
+        text = read_text(skill_file)
+        metadata = skill_frontmatter(text)
+        if metadata is None:
+            add(findings, "ERROR", "project Skill is missing YAML frontmatter", rel_path)
+            continue
+        if set(metadata) != {"name", "description"}:
+            add(findings, "ERROR", "project Skill frontmatter must contain only name and description", rel_path)
+        if metadata.get("name") != directory.name:
+            add(findings, "ERROR", "project Skill name must match its directory", rel_path)
+        if len(metadata.get("description", "")) < 24:
+            add(findings, "ERROR", "project Skill description must include concrete triggers", rel_path)
+        for section in SKILL_REQUIRED_SECTIONS:
+            if section not in text:
+                add(findings, "ERROR", f"project Skill is missing {section}", rel_path)
+        if directory.name not in index_text:
+            add(findings, "ERROR", "project Skill is not routed from INDEX.md", rel_path)
+        if (directory / "README.md").exists():
+            add(findings, "WARN", "project Skill should not include an auxiliary README.md", relative(root, directory / "README.md"))
+
+
+def print_status(root: Path) -> None:
+    branch = current_branch(root) or "unknown"
+    print(f"Workflow Status: {root}")
+    print(f"Branch: {branch}")
+    active = []
+    for path in workflow_artifacts(root):
+        if not path.name.startswith("WORK-"):
+            continue
+        text = read_text(path)
+        status = field_value(text, "status")
+        if status in ACTIVE_WORK_STATES:
+            active.append((path, status, field_value(text, "branch"), field_value(text, "next_action")))
+    if not active:
+        print("Active work: none")
+        return
+    for path, status, task_branch, next_action in active:
+        marker = "*" if task_branch == branch else "-"
+        print(f"{marker} {path.name}: {status}; branch={task_branch or 'unknown'}; next={next_action or 'unspecified'}")
 
 
 def print_findings(root: Path, findings: list[Finding]) -> None:
@@ -307,38 +303,32 @@ def print_findings(root: Path, findings: list[Finding]) -> None:
     for finding in findings:
         location = f"{finding.path}: " if finding.path else ""
         print(f"{finding.severity}: {location}{finding.message}")
-
-    error_count = sum(1 for finding in findings if finding.severity == "ERROR")
-    warning_count = sum(1 for finding in findings if finding.severity == "WARN")
-    info_count = sum(1 for finding in findings if finding.severity == "INFO")
-    print(
-        "Summary: "
-        f"{error_count} error(s), {warning_count} warning(s), {info_count} info item(s)"
-    )
+    errors = sum(item.severity == "ERROR" for item in findings)
+    warnings = sum(item.severity == "WARN" for item in findings)
+    infos = sum(item.severity == "INFO" for item in findings)
+    print(f"Summary: {errors} error(s), {warnings} warning(s), {infos} info item(s)")
 
 
 def main() -> int:
     args = parse_args()
     root = args.root.expanduser().resolve()
-    findings: list[Finding] = []
-
     if not root.is_dir():
         print(f"ERROR: root is not a directory: {root}", file=sys.stderr)
         return 2
+    if args.status:
+        print_status(root)
+        return 0
 
+    findings: list[Finding] = []
     check_core(root, findings)
     check_placeholders(root, findings)
     check_wiki_links(root, findings)
-    check_state_directories(root, findings)
-    check_plans(root, findings)
-    check_activity(root, findings)
+    check_artifacts(root, findings)
+    check_project_skills(root, findings)
     print_findings(root, findings)
-
-    has_errors = any(finding.severity == "ERROR" for finding in findings)
-    has_warnings = any(finding.severity == "WARN" for finding in findings)
-    if has_errors or (args.strict and has_warnings):
-        return 1
-    return 0
+    has_errors = any(item.severity == "ERROR" for item in findings)
+    has_warnings = any(item.severity == "WARN" for item in findings)
+    return 1 if has_errors or (args.strict and has_warnings) else 0
 
 
 if __name__ == "__main__":

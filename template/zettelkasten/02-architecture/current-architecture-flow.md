@@ -7,7 +7,7 @@ source_of_truth: mixed
 related:
   - "[[00-governance/project-overview]]"
   - "[[00-governance/ai-workflow]]"
-  - "[[08-technical-designs/README]]"
+  - "[[06-work/README]]"
 ---
 
 # Current Architecture Flow
@@ -16,7 +16,7 @@ related:
 
 This note should describe how the current system actually works today. It is the architecture fact base that agents read before changing behavior.
 
-Keep it current. After an implemented change alters system flow, write the still-true conclusions back here or into a more specific architecture note, whether the change used a standalone TECH or inline REQ readiness.
+Keep it current. After an implemented change alters system flow, write the still-true conclusions back here or into a more specific architecture note, whether the change used a standalone TECH or an inline WORK approach.
 
 ## System Components
 
@@ -57,12 +57,12 @@ Keep it current. After an implemented change alters system flow, write the still
 
 ## Open Questions
 
-| Question | Owner | Related REQ / TECH / PLAN | Status |
+| Question | Owner | Related WORK / TECH / PLAN | Status |
 |---|---|---|---|
 |  |  |  |  |
 
 ## Writeback Log
 
-| Date | Source REQ / TECH / PLAN / review | Change |
+| Date | Source WORK / TECH / PLAN / review | Change |
 |---|---|---|
 | YYYY-MM-DD |  | Initial placeholder |

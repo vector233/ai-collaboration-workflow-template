@@ -5,7 +5,7 @@ Contributions are welcome when they improve the template as a reusable AI projec
 ## Good Contributions
 
 - clearer agent workflow rules;
-- better requirement, TECH, PLAN, review, or assignment templates;
+- better WORK, optional TECH/PLAN/REVIEW, project-Skill, or routing templates;
 - generic examples that do not depend on a private project;
 - validation or link-check scripts;
 - documentation that helps users initialize the template in real repositories.
@@ -24,10 +24,13 @@ This repository does not initialize a second root knowledge base. Keep the produ
 ## Change Checklist
 
 - Keep naming rules consistent:
-  - `REQ-YYYYMMDDHHMMSS-short-name.md`
+  - `WORK-YYYYMMDDHHMMSS-short-name.md`
   - `TECH-YYYYMMDDHHMMSS-short-name.md`
   - `PLAN-YYYYMMDDHHMMSS-short-name.md`
   - `REVIEW-YYYYMMDDHHMMSS-short-name.md`
+- Keep workflow artifacts at stable paths under `template/zettelkasten/06-work/`; represent state in frontmatter.
+- Use a task branch for non-trivial work and a dedicated worktree for concurrent work.
+- End each agent context or coherent slice with a task-scoped commit.
 - Run `git diff --check`.
 - Search for private project terms before submitting.
 - Make sure non-placeholder wiki links resolve to files in `template/zettelkasten/`.
@@ -37,5 +40,5 @@ This repository does not initialize a second root knowledge base. Keep the produ
 Use concise conventional-style commits:
 
 - `docs: clarify review evidence rules`
-- `docs: add assignment card example`
+- `docs: add project Skill example`
 - `fix: align technical design naming`

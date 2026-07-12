@@ -3,96 +3,37 @@ title: Review Handoff Title
 status: pending
 project: {{PROJECT_NAME}}
 review_id: REVIEW-YYYYMMDDHHMMSS-short-name
-created: YYYY-MM-DD
+related_work: "[[06-work/WORK-YYYYMMDDHHMMSS-short-name]]"
 reviewer:
-target:
-  - "[[06-requirements/in-progress/REQ-YYYYMMDDHHMMSS-short-name]]"
-controlling_technical_design:
-controlling_implementation_plan:
-related:
-  - "[[07-review/README]]"
+last_verified_at: YYYY-MM-DD
 ---
 
 # Review Handoff Title
 
-## What This Review Answers
+## Independent Review Need
 
-This handoff tells the next AI agent or human reviewer what changed, what was validated, what remains risky, and which points deserve review attention.
+- Related work:
+- Why review is separate from the work item:
+- Scope and non-scope:
 
-## Task Goal And Scope
+## Evidence
 
-- Goal:
-- This slice covers:
-- This slice does not cover:
+- Commits:
+- Validation:
+- Worktree status:
+- Known risks:
+- Suggested focus:
 
-## Completed Changes
+## Findings And Judgment
 
-- Change 1:
-- Change 2:
+| Finding | Evidence | Judgment | Resolution | Commit or counter-evidence |
+|---|---|---|---|---|
+|  |  | pending | pending |  |
 
-## Latest Commit
+## Resume And Closure
 
-- Commit SHA / branch:
-- PR / MR:
-
-## Validation Results
-
-- Build:
-- Unit / integration tests:
-- Manual validation:
-- Browser / E2E:
-- Realistic environment smoke:
-
-## Current Worktree Status
-
-<!-- Paste or summarize `git status --short` so reviewers know whether there are uncommitted changes. -->
-
-## Resume Context
-
-- Previous agent / tool (optional; informational only):
 - Last completed step:
 - Next allowed action:
-- Must-read files for the next agent:
-- Unresolved decisions or assumptions:
-- Environment or setup needed to continue:
-- Controlling TECH or inline readiness:
-- Controlling PLAN or inline slices:
-
-## Known Risks / Blockers
-
-- Risk:
-- Blocker:
-
-## Next Steps
-
-- Next:
-- Work that should wait until review closes:
-
-## Suggested Review Focus
-
-- Focus 1:
-- Focus 2:
-
-## Rule Promotion Check
-
-- Candidate lesson:
-- Promote to durable rule: yes / no
-- Reason:
-- Destination:
-- Rule or summary written:
-- Follow-up if not written:
-
-## Reviewer Feedback
-
-| Round | Feedback summary | Evidence | Judgment | Status |
-|---|---|---|---|---|
-| Round 1 |  |  | pending | pending |
-
-## Close Conditions
-
-- Important feedback has evidence.
-- The implementation owner has verified each item.
-- Confirmed or partial issues are fixed, validated, and committed.
-- Rejected issues have counter-evidence.
-- Rule Promotion Check is complete, or explicitly marked not applicable.
-- This review round is explicitly closed.
+- Blocking decisions:
+- Review closed: yes / no
+- Work item updated: yes / no

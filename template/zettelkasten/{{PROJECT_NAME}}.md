@@ -2,13 +2,13 @@
 
 > {{PROJECT_DESCRIPTION}}
 
-This note is the human-readable project index. The AI-facing entry point is [[AI]].
+The AI-facing entry point is [[AI]].
 
 ## Quick Positioning
 
 - **What it is**: {{PROJECT_DESCRIPTION}}
 - **Tech stack**: {{TECH_STACK}}
-- **Domains and ports**: see [[01-overview/quick-reference]]
+- **Domains and ports**: [[01-overview/quick-reference]]
 
 <!-- UMBRELLA-ONLY: keep this block only if {{REPO_TYPE}} == umbrella -->
 
@@ -16,7 +16,7 @@ This note is the human-readable project index. The AI-facing entry point is [[AI
 
 {{SUB_PROJECTS}}
 
-Each subproject should keep implementation-specific details in its own `AGENTS.md`, `CLAUDE.md`, or `zettelkasten/`.
+Each subproject should keep implementation-specific rules in its own instruction or knowledge files.
 
 <!-- /UMBRELLA-ONLY -->
 
@@ -24,30 +24,21 @@ Each subproject should keep implementation-specific details in its own `AGENTS.m
 
 {{REPOS}}
 
-## Must-Read Notes
+## Main Entries
 
-| Note | Purpose |
+| Entry | Purpose |
 |---|---|
-| [[AI]] | AI entry point: method, routing, standard task flow |
-| [[CURRENT]] | Active work, open reviews, validation snapshot, and next allowed action |
-| [[00-governance/project-overview]] | Project purpose, stack, and constraints |
-| [[00-governance/ai-workflow]] | Adaptive REQ/TECH/PLAN workflow, review, validation, rule promotion, memory writeback |
-| [[00-governance/validation-discipline]] | Realistic validation readiness policy |
-| [[01-overview/quick-reference]] | Commands, domains, ports, endpoints |
-| [[01-overview/product-vision]] | Product direction and audience |
-| [[00-governance/decisions]] | Architecture decision records |
-| [[00-governance/gotchas]] | Known bugs, root causes, and fixes |
-| [[03-roadmap/phases]] | Roadmap and phase status |
-| [[06-requirements/README]] | Requirement workflow |
-| [[07-review/README]] | Review handoff workflow |
-| [[08-technical-designs/README]] | Technical design workflow |
+| [[AI]] | minimal AI context and task routing |
+| [[00-governance/project-overview]] | purpose, stack, constraints |
+| [[00-governance/ai-workflow]] | Direct, Tracked, and Governed routes |
+| [[06-work/README]] | stable work artifacts and status model |
+| [[00-governance/skill-lifecycle]] | experience-to-Skill promotion |
+| [[00-governance/git-collaboration]] | branch, worktree, and commit policy |
+| [[01-overview/quick-reference]] | commands, domains, ports, endpoints |
+| [[02-architecture/current-architecture-flow]] | current system flow |
+| [[00-governance/gotchas]] | failure modes and prevention |
+| `project-skills/INDEX.md` | on-demand project procedures |
 
 ## External Documents
 
-<!-- List external documents that are strongly related to this knowledge base.
-
-Example:
-
-- Source: `../PROJECT_PRD.md`
-- Summary: `05-reference/prd.md`
--->
+<!-- Link only external documents that materially improve project retrieval. -->

@@ -7,7 +7,7 @@ source_of_truth: mixed
 related:
   - "[[00-governance/ai-workflow]]"
   - "[[00-governance/validation-discipline]]"
-  - "[[07-review/README]]"
+  - "[[06-work/README]]"
 ---
 
 # E2E Test Runbook

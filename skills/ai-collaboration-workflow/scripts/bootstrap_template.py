@@ -22,28 +22,23 @@ PAYLOAD_REQUIRED_FILES = (
     Path("CLAUDE.md"),
     Path("INIT.md"),
     Path("scripts/workflow_doctor.py"),
+    Path("scripts/task_worktree.py"),
     Path("zettelkasten/AI.md"),
-    Path("zettelkasten/CURRENT.md"),
     Path("zettelkasten/00-governance/ai-workflow.md"),
-    Path("zettelkasten/06-requirements/README.md"),
-    Path("zettelkasten/07-review/README.md"),
-    Path("zettelkasten/08-technical-designs/README.md"),
+    Path("zettelkasten/00-governance/skill-lifecycle.md"),
+    Path("zettelkasten/00-governance/git-collaboration.md"),
+    Path("zettelkasten/00-governance/templates/work-item.md"),
+    Path("zettelkasten/06-work/README.md"),
+    Path("project-skills/INDEX.md"),
 )
 
 INSTALLED_REQUIRED_FILES = tuple(
     path for path in PAYLOAD_REQUIRED_FILES if path != Path("INIT.md")
 )
 
-REQUIRED_STATE_DIRECTORIES = (
-    Path("zettelkasten/06-requirements/backlog"),
-    Path("zettelkasten/06-requirements/in-progress"),
-    Path("zettelkasten/06-requirements/done"),
-    Path("zettelkasten/07-review/pending"),
-    Path("zettelkasten/07-review/in-review"),
-    Path("zettelkasten/07-review/done"),
-    Path("zettelkasten/08-technical-designs/pending"),
-    Path("zettelkasten/08-technical-designs/approved"),
-    Path("zettelkasten/08-technical-designs/implemented"),
+REQUIRED_DIRECTORIES = (
+    Path("zettelkasten/06-work"),
+    Path("project-skills"),
 )
 
 
@@ -118,7 +113,7 @@ def missing_required_paths(root: Path, required: tuple[Path, ...]) -> list[Path]
 def missing_required_directories(root: Path) -> list[Path]:
     return [
         relative
-        for relative in REQUIRED_STATE_DIRECTORIES
+        for relative in REQUIRED_DIRECTORIES
         if not (root / relative).is_dir()
     ]
 
@@ -217,6 +212,13 @@ def template_files(source: Path) -> tuple[Path, ...]:
             raise BootstrapError(f"template source contains a symlink: {candidate}")
         if candidate.is_file():
             files.append(candidate.relative_to(source))
+    project_skills = source / "project-skills"
+    if project_skills.is_dir():
+        for candidate in sorted(project_skills.rglob("*")):
+            if candidate.is_symlink():
+                raise BootstrapError(f"template source contains a symlink: {candidate}")
+            if candidate.is_file():
+                files.append(candidate.relative_to(source))
     return tuple(files)
 
 

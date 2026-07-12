@@ -6,7 +6,7 @@ last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 related:
   - "[[00-governance/ai-workflow]]"
-  - "[[07-review/README]]"
+  - "[[06-work/README]]"
   - "[[05-reference/e2e-test]]"
   - "[[00-governance/gotchas]]"
 ---
@@ -19,7 +19,7 @@ This note defines when a change needs realistic validation before review. Projec
 
 ## Rule
 
-Before moving a slice into `07-review/pending/`, the owner should run the most realistic smoke test available for the changed behavior, or clearly record why that validation could not be run.
+Before a slice enters review or is committed as complete, run the most realistic smoke test available for the changed behavior, or clearly record why it could not run.
 
 The review handoff should include:
 
@@ -31,13 +31,13 @@ The review handoff should include:
 - redacted sensitive values;
 - known gaps that remain untested.
 
-When workflow files, requirements, technical designs, implementation plans, review handoffs, wiki links, or initialization state changed, run:
+When work items, project Skills, workflow files, wiki links, or initialization state changed, run:
 
 ```bash
 python3 scripts/workflow_doctor.py
 ```
 
-Fix reported errors before handoff. Informational open-review or active-requirement messages are routing constraints, not validation failures.
+Fix reported errors before handoff. Active-work and review messages are routing context, not validation failures.
 
 ## When Realistic Validation Matters
 
@@ -82,4 +82,4 @@ Prefer:
 
 ## Relationship To Review
 
-[[07-review/README]] owns the review workflow. This note is a review readiness policy. A slice can still be handed off with a blocker, but the review document must clearly say that validation is incomplete and why.
+[[06-work/README]] owns workflow state. A slice can still be handed off with a blocker, but the work item or independent review must clearly say that validation is incomplete and why.
