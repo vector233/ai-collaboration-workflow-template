@@ -5,13 +5,13 @@ The human-readable project index is [[{{PROJECT_NAME_SAFE}}]]. Repository rules 
 ## Resume With Minimal Context
 
 1. Read `AGENTS.md`.
-2. Run `python3 scripts/workflow_doctor.py --status`.
-3. Read the active `WORK-*` matching the current branch or assigned task.
+2. Inspect the current Git branch and `06-work/` index.
+3. Read the active `WORK-*` matching the branch or assigned task, when one exists.
 4. Read only its linked architecture notes, runbooks, and matching entry from `project-skills/INDEX.md`.
 
 Do not load the whole vault by default. Workflow state lives in stable files under [[06-work/README]], not in chat history or a manually duplicated current-state note.
 
-For parallel coordination or tool integration, use `python3 scripts/workflow_doctor.py --status --all-worktrees --json`.
+For parallel coordination, compare active WORK branch and owned-path fields with registered Git worktrees. Optional companion-Skill tools may automate this inspection.
 
 ## Cross-Agent Entry Points
 

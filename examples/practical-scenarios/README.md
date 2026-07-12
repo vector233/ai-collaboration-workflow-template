@@ -51,4 +51,4 @@ A third-party sandbox reset procedure repeatedly causes failed tests:
 2. Confirm it is more than a short command and has a safe recovery path.
 3. Create `project-skills/reset-provider-sandbox/SKILL.md`.
 4. Add trigger metadata to `project-skills/INDEX.md`.
-5. Run the doctor and test whether a fresh agent selects it for the next sandbox failure.
+5. Check the index entry and test whether a fresh agent selects it for the next sandbox failure; use the optional Doctor when installed.

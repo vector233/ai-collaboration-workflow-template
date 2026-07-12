@@ -16,9 +16,6 @@ from pathlib import Path
 CORE_FILES = (
     Path("AGENTS.md"),
     Path("CLAUDE.md"),
-    Path("scripts/workflow_doctor.py"),
-    Path("scripts/workflow_task.py"),
-    Path("scripts/task_worktree.py"),
     Path("zettelkasten/AI.md"),
     Path("zettelkasten/00-governance/ai-workflow.md"),
     Path("zettelkasten/00-governance/skill-lifecycle.md"),

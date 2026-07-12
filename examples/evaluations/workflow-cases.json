@@ -8,7 +8,8 @@
       "artifacts": [],
       "isolation": "current-branch",
       "project_skills": [],
-      "promote_project_skill": false
+      "promote_project_skill": false,
+      "requires_helper": false
     }
   },
   {
@@ -20,7 +21,8 @@
       "artifacts": ["WORK"],
       "isolation": "task-branch",
       "project_skills": [],
-      "promote_project_skill": false
+      "promote_project_skill": false,
+      "requires_helper": false
     }
   },
   {
@@ -32,7 +34,8 @@
       "artifacts": ["WORK", "REVIEW"],
       "isolation": "task-branch",
       "project_skills": [],
-      "promote_project_skill": false
+      "promote_project_skill": false,
+      "requires_helper": false
     }
   },
   {
@@ -44,7 +47,8 @@
       "artifacts": ["WORK"],
       "isolation": "dedicated-worktree",
       "project_skills": [],
-      "promote_project_skill": false
+      "promote_project_skill": false,
+      "requires_helper": false
     }
   },
   {
@@ -56,7 +60,8 @@
       "artifacts": ["WORK"],
       "isolation": "task-branch",
       "project_skills": ["reset-provider-sandbox"],
-      "promote_project_skill": false
+      "promote_project_skill": false,
+      "requires_helper": false
     }
   },
   {
@@ -68,7 +73,8 @@
       "artifacts": [],
       "isolation": "current-branch",
       "project_skills": [],
-      "promote_project_skill": false
+      "promote_project_skill": false,
+      "requires_helper": false
     }
   }
 ]

@@ -11,7 +11,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASES = ROOT / "examples/evaluations/workflow-cases.json"
-FIELDS = ("route", "artifacts", "isolation", "project_skills", "promote_project_skill")
+FIELDS = (
+    "route",
+    "artifacts",
+    "isolation",
+    "project_skills",
+    "promote_project_skill",
+    "requires_helper",
+)
 
 
 class EvaluationError(RuntimeError):

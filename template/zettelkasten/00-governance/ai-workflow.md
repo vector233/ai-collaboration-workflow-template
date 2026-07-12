@@ -19,13 +19,7 @@ This workflow keeps AI-assisted development resumable without forcing every task
 
 ## Minimal Context
 
-Start with `AGENTS.md`, [[AI]], and:
-
-```bash
-python3 scripts/workflow_doctor.py --status
-```
-
-For active work, read its stable `WORK-*` document. Load only linked notes, runbooks, and matching project Skills. Do not scan the whole vault by default.
+Start with `AGENTS.md` and [[AI]]. For active work, inspect the current branch and read its stable `WORK-*` document. Load only linked notes, runbooks, and matching project Skills. Do not scan the whole vault by default.
 
 ## Route Decision
 
@@ -67,7 +61,7 @@ Create a separate artifact only when it is reused, independently approved, indep
 
 ## Tracked Work Loop
 
-1. Create a `WORK-*` with `python3 scripts/workflow_task.py new`; use [[00-governance/templates/work-item]] manually only if the helper is unavailable.
+1. Create a `WORK-*` from [[00-governance/templates/work-item]].
 2. Record the route, acceptance criteria, context pack, task branch, worktree, affected paths, and next action.
 3. Resolve any governed TECH or PLAN gate.
 4. Implement one bounded slice.
@@ -77,15 +71,7 @@ Create a separate artifact only when it is reused, independently approved, indep
 8. Record experience candidates.
 9. Repeat until acceptance and validation pass, then run Experience Promotion and close the work item.
 
-Prefer the deterministic helper for state changes:
-
-```bash
-python3 scripts/workflow_task.py new <slug> --route tracked
-python3 scripts/workflow_task.py checkpoint <WORK-ID> --completed-step <text> --validation <evidence> --next-action <text>
-python3 scripts/workflow_task.py close <WORK-ID> --acceptance-complete --gates-closed --promotion-complete --writeback-complete --integration-result <text>
-```
-
-Repeat `--owned-path <repository-relative-path>` on `new` or `checkpoint` when task ownership is created or changes. Supplying owned paths to `checkpoint` replaces the previous set.
+Edit the Markdown state directly. If the companion Skill is installed, its optional helpers may create or update the same file. The helper is never the source of truth.
 
 ## Project Skill Routing
 

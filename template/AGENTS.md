@@ -6,8 +6,8 @@ Read only the smallest context needed:
 
 1. `AGENTS.md`
 2. `zettelkasten/AI.md`
-3. `python3 scripts/workflow_doctor.py --status`
-4. the active `zettelkasten/06-work/WORK-*.md`
+3. the current Git branch and matching `zettelkasten/06-work/WORK-*.md`, when one exists
+4. `project-skills/INDEX.md` for a matching procedure
 5. only the linked architecture note, runbook, or project Skill needed for the current slice
 
 Repository files are the durable source of truth. Chat history and vendor memory are optional caches.
@@ -24,7 +24,7 @@ Route by scope, uncertainty, risk, reversibility, duration, and coordination. A 
 
 Do not move workflow files to represent state. Update frontmatter in place so links remain stable.
 
-Use `python3 scripts/workflow_task.py` to create, checkpoint, and close WORK artifacts instead of manually rewriting workflow fields.
+Create and update WORK artifacts from `zettelkasten/00-governance/templates/work-item.md`. Optional companion-Skill tools may automate the same Markdown updates, but repository files remain authoritative.
 
 ## Project Skills And Experience
 
@@ -58,8 +58,8 @@ Follow `zettelkasten/00-governance/git-collaboration.md` unless stricter reposit
 - Do not claim checks that did not run. Record blockers and residual risk.
 - Treat review feedback as a hypothesis. Verify it with code, commands, logs, screenshots, commits, or official references.
 - Keep review inline in the work item by default. Create a separate `REVIEW-*` only for independent reviewers, multiple rounds, high risk, or a distinct approval lifecycle.
-- Run `python3 scripts/workflow_doctor.py` after workflow or project-Skill changes and before handoff.
-- Use `python3 scripts/workflow_doctor.py --status --all-worktrees --json` when coordinating parallel tasks or when machine-readable state is useful.
+- Check changed knowledge links, work state, and project-Skill routing before handoff. Optional companion-Skill tools may automate these checks.
+- Coordinate parallel tasks from Git branches, worktrees, and declared owned paths; do not depend on hidden tool state.
 
 ## Cross-Agent Contract
 

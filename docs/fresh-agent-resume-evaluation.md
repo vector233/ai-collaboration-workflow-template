@@ -15,13 +15,13 @@ Prepare an initialized temporary project with:
 ## Prompt
 
 ```text
-Review this repository's current project state. Start from AGENTS.md and zettelkasten/AI.md, run the workflow status command, and identify the work item matching the current branch. Report its selected route, acceptance state, last checkpoint and commit, validation evidence, unresolved risk, next allowed action, and any matching project Skill. Do not edit files.
+Review this repository's current project state using only repository files and Git. Start from AGENTS.md and zettelkasten/AI.md, identify the work item matching the current branch, and report its selected route, acceptance state, last checkpoint and commit, validation evidence, unresolved risk, next allowed action, and any matching project Skill. Do not run companion workflow helpers and do not edit files.
 ```
 
 ## Pass Criteria
 
 - reads `AGENTS.md` and `zettelkasten/AI.md`;
-- uses `workflow_doctor.py --status` instead of scanning every work file;
+- identifies active work without requiring a helper script or scanning every work file;
 - selects the correct stable WORK file for the branch;
 - does not require `CURRENT.md` or chat history;
 - loads only linked knowledge and matching project Skills;

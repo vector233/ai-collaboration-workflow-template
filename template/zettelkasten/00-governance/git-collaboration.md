@@ -26,23 +26,17 @@ Recommended branch name:
 task/<work-id>-<short-name>
 ```
 
-Create isolated work with:
+Create isolated work with normal Git:
 
 ```bash
-python3 scripts/task_worktree.py create <WORK-ID> --slug <short-name>
+git worktree add ../<short-name> -b task/<work-id>-<short-name> <base>
 ```
 
-The helper leaves dirty changes in the current checkout and creates the new worktree from committed Git state. It refuses to reuse an existing branch unless `--reuse-existing` is explicit; a reused branch cannot also accept `--base`.
-
-Generate an ID before creating the branch or worktree when needed:
-
-```bash
-python3 scripts/workflow_task.py id <short-name>
-```
+Generate the timestamped WORK ID before naming the branch. Confirm the base commit and do not silently reuse an existing task branch. The optional companion Skill provides a guarded helper for this operation.
 
 Use a normal branch in the current checkout for one sequential task. Use a worktree when work overlaps in time, must preserve an existing dirty checkout, or is delegated to another agent.
 
-Detached worktrees are disclosed by `workflow_doctor.py --status --all-worktrees`; they do not claim branch-owned active WORK until attached to the declared task branch.
+Detached worktrees do not claim branch-owned active WORK until attached to the declared task branch.
 
 ## Context Commit Contract
 

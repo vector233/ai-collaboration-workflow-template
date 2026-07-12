@@ -17,15 +17,15 @@ ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
 MARKER = PAYLOAD / ".ai-collaboration-workflow-template"
 BOOTSTRAP = ROOT / "skills/ai-collaboration-workflow/scripts/bootstrap_template.py"
+WORKFLOW_DOCTOR = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_doctor.py"
+WORKFLOW_TASK = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_task.py"
+TASK_WORKTREE = ROOT / "skills/ai-collaboration-workflow/scripts/task_worktree.py"
 BEHAVIOR_EVALUATOR = ROOT / "scripts/evaluate_workflow_behavior.py"
 
 REQUIRED_FILES = (
     Path("AGENTS.md"),
     Path("CLAUDE.md"),
     Path("INIT.md"),
-    Path("scripts/workflow_doctor.py"),
-    Path("scripts/workflow_task.py"),
-    Path("scripts/task_worktree.py"),
     Path("zettelkasten/AI.md"),
     Path("zettelkasten/00-governance/ai-workflow.md"),
     Path("zettelkasten/00-governance/skill-lifecycle.md"),
@@ -37,7 +37,6 @@ REQUIRED_FILES = (
 )
 
 REQUIRED_DIRECTORIES = (
-    Path("scripts"),
     Path("zettelkasten/06-work"),
     Path("project-skills"),
 )
@@ -95,7 +94,7 @@ def run(
 def validate_payload() -> None:
     require(MARKER.is_file(), "payload marker is missing")
     require(
-        MARKER.read_text().strip() == "canonical-payload-v2",
+        MARKER.read_text().strip() == "canonical-payload-v3",
         "payload marker version is incorrect",
     )
     for path in REQUIRED_FILES:
@@ -104,6 +103,7 @@ def validate_payload() -> None:
         require((PAYLOAD / path).is_dir(), f"payload directory is missing: {path}")
     for path in V1_ONLY_PATHS:
         require(not (PAYLOAD / path).exists(), f"v1-only path remains: {path}")
+    require(not (PAYLOAD / "scripts").exists(), "optional tooling leaked into the core payload")
 
     agents = (PAYLOAD / "AGENTS.md").read_text()
     for section in (
@@ -126,7 +126,6 @@ def validate_payload() -> None:
         "Governed",
         "## Stable Work Artifacts",
         "## Experience Promotion Check",
-        "workflow_task.py",
     ):
         require(expected in workflow, f"workflow is missing {expected}")
 
@@ -143,12 +142,21 @@ def validate_payload() -> None:
     ):
         require(section in skill_template, f"project Skill template is missing {section}")
 
-    doctor = (PAYLOAD / "scripts/workflow_doctor.py").read_text()
+    doctor = WORKFLOW_DOCTOR.read_text()
     for expected in ("--all-worktrees", "--json", "scope_overlaps", "review_after_days"):
         require(expected in doctor, f"doctor is missing {expected}")
 
     for path in PAYLOAD.rglob("*.md"):
         text = path.read_text()
+        for required_tool in (
+            "scripts/workflow_doctor.py",
+            "scripts/workflow_task.py",
+            "scripts/task_worktree.py",
+        ):
+            require(
+                required_tool not in text,
+                f"optional helper is required by core payload documentation: {path}: {required_tool}",
+            )
         for forbidden in FORBIDDEN_PAYLOAD_TEXT:
             require(
                 forbidden not in text,
@@ -217,6 +225,26 @@ def copy_artifact(
         text = text.replace(old, new)
     destination.write_text(text)
     return destination
+
+
+def validate_tool_free_core(target: Path) -> None:
+    require(not (target / "scripts").exists(), "bootstrap installed optional tools into the project")
+    work_id = "WORK-20260712115000-manual-core"
+    work = copy_artifact(
+        target,
+        "work-item.md",
+        f"{work_id}.md",
+        {
+            "WORK-YYYYMMDDHHMMSS-short-name": work_id,
+            "status: backlog": "status: active",
+            "branch: task/work-id-short-name": "branch: task/manual-core",
+            "next_action: clarify acceptance criteria": "next_action: define acceptance",
+        },
+    )
+    text = work.read_text()
+    require(f"work_id: {work_id}" in text, "manual core path did not create stable WORK state")
+    require("## Experience Candidates" in text, "manual core path lost knowledge writeback")
+    work.unlink()
 
 
 def create_governed_and_done_state(target: Path) -> None:
@@ -320,7 +348,7 @@ def create_tracked_work_with_cli(target: Path) -> str:
     result = run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "new",
             "tracked-bug",
             "--id",
@@ -350,7 +378,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "checkpoint",
             work_id,
             "--completed-step",
@@ -372,7 +400,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         'owned_paths: ["src/shared/module", "docs/runbooks"]' in text,
         "checkpoint did not replace owned paths",
     )
-    status = run([sys.executable, "scripts/workflow_doctor.py", "--status"], cwd=target)
+    status = run([sys.executable, str(WORKFLOW_DOCTOR), "--status"], cwd=target)
     require('next=inspect "r\u00e9sum\u00e9" before implementing fix' in status.stdout, "status did not decode YAML string escapes")
     require("\\u00e9" not in status.stdout and '\\"' not in status.stdout, "status leaked serialized YAML escapes")
 
@@ -380,7 +408,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "new",
             "governed-cli",
             "--id",
@@ -400,7 +428,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     invalid_path = run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "new",
             "invalid-path",
             "--id",
@@ -417,7 +445,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "new",
             "close-cli",
             "--id",
@@ -429,7 +457,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     pending_close = run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "close",
             close_id,
             "--acceptance-complete",
@@ -452,7 +480,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "close",
             close_id,
             "--acceptance-complete",
@@ -472,7 +500,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     original = work.read_text()
     work.write_text(original.replace('branch: "task/tracked-bug"', "branch:"))
     blank_branch = run(
-        [sys.executable, "scripts/workflow_doctor.py"],
+        [sys.executable, str(WORKFLOW_DOCTOR)],
         cwd=target,
         expected=1,
     )
@@ -485,7 +513,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     )
     work.write_text(block_list)
     list_status = run(
-        [sys.executable, "scripts/workflow_doctor.py", "--status", "--json"],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--status", "--json"],
         cwd=target,
     )
     listed_work = next(
@@ -498,7 +526,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "checkpoint",
             work_id,
             "--completed-step",
@@ -520,7 +548,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     ambiguous = target / "zettelkasten/ambiguous-link-test.md"
     ambiguous.write_text("# Ambiguous\n\n[[README]]\n")
     ambiguity = run(
-        [sys.executable, "scripts/workflow_doctor.py"],
+        [sys.executable, str(WORKFLOW_DOCTOR)],
         cwd=target,
         expected=1,
     )
@@ -532,7 +560,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
         "---\ntitle: Stale Test\nstatus: active\nlast_verified_at: 2000-01-01\n"
         "review_after_days: 1\n---\n\n# Stale Test\n"
     )
-    stale_result = run([sys.executable, "scripts/workflow_doctor.py"], cwd=target)
+    stale_result = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target)
     require("knowledge is stale" in stale_result.stdout, "stale knowledge was not reported")
     stale.unlink()
 
@@ -542,7 +570,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
         "review_after_days: 0\n---\n\n# Invalid Interval\n"
     )
     interval_result = run(
-        [sys.executable, "scripts/workflow_doctor.py"],
+        [sys.executable, str(WORKFLOW_DOCTOR)],
         cwd=target,
         expected=1,
     )
@@ -570,7 +598,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     existing = run(
         [
             sys.executable,
-            "scripts/task_worktree.py",
+            str(TASK_WORKTREE),
             "create",
             "WORK-existing",
             "--branch",
@@ -588,7 +616,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     reused_with_base = run(
         [
             sys.executable,
-            "scripts/task_worktree.py",
+            str(TASK_WORKTREE),
             "create",
             "WORK-existing",
             "--branch",
@@ -611,7 +639,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     created = run(
         [
             sys.executable,
-            "scripts/task_worktree.py",
+            str(TASK_WORKTREE),
             "create",
             "WORK-20260712123000-helper",
             "--slug",
@@ -632,7 +660,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     helper_new = run(
         [
             sys.executable,
-            "scripts/workflow_task.py",
+            str(WORKFLOW_TASK),
             "new",
             "helper",
             "--id",
@@ -648,7 +676,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     status = run(
         [
             sys.executable,
-            "scripts/workflow_doctor.py",
+            str(WORKFLOW_DOCTOR),
             "--status",
             "--all-worktrees",
             "--json",
@@ -665,7 +693,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     detached_status = run(
         [
             sys.executable,
-            "scripts/workflow_doctor.py",
+            str(WORKFLOW_DOCTOR),
             "--status",
             "--all-worktrees",
             "--json",
@@ -733,7 +761,8 @@ def validate_bootstrap_lifecycle() -> None:
 
         run([sys.executable, str(BOOTSTRAP), "--target", str(target), "--inspect"])
         initialize_target(target)
-        clean = run([sys.executable, "scripts/workflow_doctor.py", "--strict"], cwd=target)
+        validate_tool_free_core(target)
+        clean = run([sys.executable, str(WORKFLOW_DOCTOR), "--strict"], cwd=target)
         require("PASS: workflow state looks consistent" in clean.stdout, "clean doctor failed")
 
         initialize_git(target)
@@ -743,7 +772,7 @@ def validate_bootstrap_lifecycle() -> None:
         create_project_skill(target)
         validate_doctor_regressions(target, tracked_id)
         validate_wiki_links(target / "zettelkasten")
-        active = run([sys.executable, "scripts/workflow_doctor.py", "--strict"], cwd=target)
+        active = run([sys.executable, str(WORKFLOW_DOCTOR), "--strict"], cwd=target)
         require("active work:" in active.stdout, "doctor did not report active WORK")
         validate_worktree_helper(target, tracked_id)
 
@@ -842,6 +871,9 @@ def validate_repository_layout() -> None:
     require(not (ROOT / "zettelkasten").exists(), "root zettelkasten must not exist")
     require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
     require("## License" in (ROOT / "README.md").read_text(), "README License section is missing")
+    for helper in (WORKFLOW_DOCTOR, WORKFLOW_TASK, TASK_WORKTREE):
+        require(helper.is_file(), f"optional Skill helper is missing: {helper.relative_to(ROOT)}")
+        require(helper.stat().st_mode & 0o111, f"optional Skill helper is not executable: {helper.relative_to(ROOT)}")
     require(
         not (ROOT / "skills/ai-collaboration-workflow/references/migration.md").exists(),
         "unsupported migration reference remains",

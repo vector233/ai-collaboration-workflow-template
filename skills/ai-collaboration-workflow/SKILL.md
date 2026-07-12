@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Initialize and operate the AI Collaboration Workflow knowledge layer for new projects. Use when an agent needs to install the template; route a task into Direct, Tracked, or Governed work; create, checkpoint, close, or resume stable WORK/TECH/PLAN/REVIEW artifacts; discover or promote repository experience into an on-demand project Skill; isolate parallel tasks with branches or Git worktrees; validate cross-worktree state; enforce commits for contexts that produce persistent changes; or hand off durable project knowledge across agents.
+description: Initialize and operate the AI Collaboration Workflow knowledge network for new projects. Use when an agent needs to install the knowledge-first template; route work into Direct, Tracked, or Governed delivery; resume or update stable WORK/TECH/PLAN/REVIEW knowledge; discover or promote repository experience into an on-demand project Skill; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # AI Collaboration Workflow
@@ -32,20 +32,32 @@ python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root>
 
 Use `--source <checkout-or-template>` for local or offline installation. The bootstrap copies missing files, skips identical files, and never overwrites differing repository files.
 
-If `INIT.md` exists, follow it completely. Preserve stricter local rules, replace all placeholders, initialize only verified project facts, remove initialization files, and run the doctor in strict mode.
+If `INIT.md` exists, follow it completely. Preserve stricter local rules, replace all placeholders, initialize only verified project facts, remove initialization files, and verify the knowledge links and required fields.
 
 ## Load Minimal Context
 
 For initialized projects:
 
 1. Read `AGENTS.md` and `zettelkasten/AI.md`.
-2. Run `python3 scripts/workflow_doctor.py --status`.
-3. Read the active `WORK-*` matching the assigned task or current branch.
+2. Inspect the current Git branch and `zettelkasten/06-work/`.
+3. Read the active `WORK-*` matching the assigned task or current branch, when one exists.
 4. Read only linked knowledge, runbooks, and matching rows from `project-skills/INDEX.md`.
 
 Do not scan all workflow artifacts or project Skills by default.
 
-Use `python3 scripts/workflow_task.py` for deterministic WORK creation, checkpoints, and closure. Use `workflow_doctor.py --status --all-worktrees --json` for parallel coordination or machine-readable state.
+Repository Markdown and Git are sufficient. Do not require helper execution to understand or operate the workflow.
+
+## Use Optional Helpers
+
+Resolve this Skill directory as `SKILL_ROOT`. Use bundled helpers only when deterministic automation materially helps:
+
+```bash
+python3 "$SKILL_ROOT/scripts/workflow_doctor.py" --root <repo-root> --status
+python3 "$SKILL_ROOT/scripts/workflow_task.py" new <slug> --root <repo-root>
+(cd <repo-root> && python3 "$SKILL_ROOT/scripts/task_worktree.py" create <WORK-ID>)
+```
+
+The helpers read and write the same repository files and Git state. They are optional, own no hidden state, and must not become project requirements.
 
 ## Route The Task
 
@@ -55,7 +67,7 @@ Read [routing.md](references/routing.md) when classifying new work or reconsider
 - **Tracked**: create one stable `WORK-*` under `zettelkasten/06-work/`.
 - **Governed**: use a `WORK-*` and add only independently justified TECH, PLAN, or REVIEW artifacts.
 
-Use repository templates. Keep artifact paths stable and update frontmatter status in place.
+Use repository templates or the optional WORK helper. Keep artifact paths stable and update frontmatter status in place.
 
 ## Isolate And Commit
 
@@ -71,14 +83,12 @@ Record candidates in the active work item first. Promote each candidate to the s
 
 ## Validate And Hand Off
 
-Run relevant project checks, then:
+Run relevant project checks and `git diff --check`. When workflow knowledge or project Skills changed, optionally run:
 
 ```bash
-python3 scripts/workflow_doctor.py
-git diff --check
-git status --short
+python3 "$SKILL_ROOT/scripts/workflow_doctor.py" --root <repo-root> --strict
 ```
 
-Use `--strict` after initialization, workflow changes, or project-Skill changes. Update the active work checkpoint with the commit reference, exact validation, risks, worktree status, and next allowed action before yielding.
+Update the active work checkpoint with the commit reference, exact validation, risks, worktree status, and next allowed action before yielding.
 
 Do not claim validation that did not run. Do not stage unrelated user changes. Do not close work while experience candidates remain undecided.

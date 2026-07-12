@@ -34,9 +34,8 @@ The TECH owns token hashing, expiry, compatibility, migration, and rollback deci
 ## Git Isolation
 
 ```bash
-python3 scripts/task_worktree.py create \
-  WORK-20260601103000-team-invitation-links \
-  --slug team-invitation-links
+git worktree add ../team-invitation-links \
+  -b task/WORK-20260601103000-team-invitation-links <base>
 ```
 
 Each implementation context updates the WORK checkpoint and commits its task-scoped changes. Broken checkpoints remain on the task branch.
@@ -55,4 +54,4 @@ project-skills/reset-invite-sandbox/SKILL.md
 
 ## Resume
 
-A fresh agent reads `AGENTS.md`, `zettelkasten/AI.md`, runs `workflow_doctor.py --status`, opens the branch-matched WORK, and then reads only the linked TECH, PLAN, REVIEW, security note, validation runbook, and matching project Skill.
+A fresh agent reads `AGENTS.md` and `zettelkasten/AI.md`, inspects the current branch, opens the matching WORK, and then reads only the linked TECH, PLAN, REVIEW, security note, validation runbook, and matching project Skill. No companion helper is required.

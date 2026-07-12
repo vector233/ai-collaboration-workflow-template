@@ -12,13 +12,13 @@ Before posting anywhere:
 - Re-read the README first line, repository description, and topics so the external copy matches the current project positioning.
 - Run a quick private/source-project information scan before broad promotion.
 - Prepare one canonical short description and one platform-specific draft.
-- Keep the project positioning precise: this is a vendor-neutral project knowledge layer and adaptive workflow template; its Markdown vault remains Obsidian-compatible, but it is not an Obsidian plugin.
+- Keep the project positioning precise: this is a vendor-neutral project knowledge network and lightweight delivery contract; its Markdown vault remains Obsidian-compatible, but it is not an Obsidian plugin.
 - If an AI assistant controls a browser, have it fill drafts only. The human owner should confirm or perform the final publish action.
 
 Canonical short description:
 
 ```text
-AI Collaboration Workflow Template is a vendor-neutral project knowledge layer and adaptive workflow template for AI-assisted software development.
+AI Collaboration Workflow Template is a vendor-neutral project knowledge network and lightweight delivery contract for AI-assisted software development.
 ```
 
 ## Obsidian Forum: Share And Showcase
@@ -58,7 +58,7 @@ a third-party app for Obsidian
 ### Recommended Title
 
 ```text
-AI Collaboration Workflow Template: project knowledge layer for coding agents
+AI Collaboration Workflow Template: trusted project knowledge for coding agents
 ```
 
 ### Required Disclaimer
@@ -76,7 +76,7 @@ Community Directory: N/A - this is a custom vault / workflow showcase, not a plu
 ````text
 Hi everyone,
 
-I open-sourced a vendor-neutral project knowledge layer and adaptive workflow template for AI-assisted software development. Its linked Markdown knowledge base can also be opened as an Obsidian-compatible vault.
+I open-sourced a vendor-neutral project knowledge network and lightweight delivery contract for AI-assisted software development. Its linked Markdown knowledge base can also be opened as an Obsidian-compatible vault.
 
 The goal is to help AI coding agents and human maintainers keep project context over time without rediscovering everything from scratch.
 
@@ -134,7 +134,7 @@ Use this flow for a short public announcement on X.
 ### Recommended Text
 
 ```text
-Open-sourced AI Collaboration Workflow Template: a vendor-neutral project knowledge layer and adaptive workflow for AI coding agents.
+Open-sourced AI Collaboration Workflow Template: a vendor-neutral project knowledge network and lightweight delivery contract for AI coding agents.
 
 It keeps stable work items, validation, project knowledge, and on-demand skills linked over time.
 

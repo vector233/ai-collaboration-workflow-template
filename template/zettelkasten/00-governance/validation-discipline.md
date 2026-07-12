@@ -32,13 +32,7 @@ The review handoff should include:
 - redacted sensitive values;
 - known gaps that remain untested.
 
-When work items, project Skills, workflow files, wiki links, or initialization state changed, run:
-
-```bash
-python3 scripts/workflow_doctor.py
-```
-
-Fix reported errors before handoff. Active-work and review messages are routing context, not validation failures.
+When work items, project Skills, workflow files, wiki links, or initialization state change, inspect their links, required fields, and routing entries before handoff. The optional companion Skill can automate this check, but validation evidence remains in repository files.
 
 ## When Realistic Validation Matters
 

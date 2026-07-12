@@ -1,6 +1,6 @@
 # Templates
 
-Create WORK with `python3 scripts/workflow_task.py new`. Copy only an independently triggered optional artifact from this directory. Keep every workflow file in `zettelkasten/06-work/` for its full lifecycle and update frontmatter in place.
+Copy the artifact triggered by [[00-governance/ai-workflow]]. Keep every workflow file in `zettelkasten/06-work/` for its full lifecycle and update frontmatter in place.
 
 | Template | Use | Output |
 |---|---|---|
@@ -10,7 +10,7 @@ Create WORK with `python3 scripts/workflow_task.py new`. Copy only an independen
 | `review.md` | independent review or approval lifecycle | `06-work/REVIEW-<timestamp>-<slug>.md` |
 | `project-skill.md` | promoted repeatable repository procedure | `project-skills/<skill-name>/SKILL.md` |
 
-Manual WORK fallback when the helper is unavailable:
+Create a WORK:
 
 ```bash
 cp zettelkasten/00-governance/templates/work-item.md \

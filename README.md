@@ -1,8 +1,8 @@
 # AI Collaboration Workflow Template
 
-A vendor-neutral project knowledge layer for AI-assisted software development.
+A vendor-neutral project knowledge network and lightweight delivery contract for AI-assisted software development.
 
-The template keeps project facts, active work, validation evidence, reusable procedures, and handoff state in the repository so a fresh agent can continue without chat history. It is not an autonomous runtime and does not require every task to create a chain of process documents.
+The template gives capable but context-temporary, vendor-diverse, and potentially parallel agents the same trusted project knowledge, then makes durable writeback part of delivery. It is not an autonomous runtime and requires no helper tool to remain usable.
 
 This version is intended for new projects. It does not migrate or emulate the previous moving-state layout.
 
@@ -25,14 +25,25 @@ Task
 
 Routing considers scope, uncertainty, risk, reversibility, duration, coordination, and verification. A small security or data change can be Governed even when its diff is tiny.
 
+## Product Boundary
+
+The core product is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
+
+- **Core**: `AGENTS.md`, the `zettelkasten/` entry and links, stable work intent when needed, validation evidence, and durable experience writeback.
+- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation.
+- **Non-goals**: autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
+
+A project must remain understandable and operable after removing the companion Skill.
+
 ## Why It Is Lighter
 
 - Workflow files never move between status directories; frontmatter is the state.
 - Ordinary tracked work keeps requirement, approach, slices, validation, review, checkpoint, and experience candidates in one `WORK-*`.
 - TECH, PLAN, and REVIEW are optional independent artifacts, not mandatory stages.
-- There is no manually duplicated `CURRENT.md`; `workflow_doctor.py --status` resolves active work.
+- There is no manually duplicated `CURRENT.md`; the current branch and stable WORK files expose active state.
 - Project Skills load on demand from a compact trigger index instead of expanding `AGENTS.md`.
 - Knowledge categories remain separate where they improve retrieval, but active workflow state is consolidated under one directory.
+- Optional companion-Skill helpers automate checks and edits without adding runtime state to downstream projects.
 
 The knowledge base uses plain Markdown and wiki links and can be opened as an Obsidian-compatible vault. Obsidian is an optional editor, not a runtime dependency or plugin requirement.
 
@@ -52,10 +63,10 @@ Project Skills include concrete triggers, exclusions, procedure, validation, rec
 
 ## Parallel Development
 
-Tracked and Governed tasks use dedicated task branches. Concurrent tasks or agents use separate Git worktrees:
+Tracked and Governed tasks use dedicated task branches. Concurrent tasks or agents use separate Git worktrees using normal Git:
 
 ```bash
-python3 scripts/task_worktree.py create WORK-20260712120000-example --slug example
+git worktree add ../example -b task/work-example <base>
 ```
 
 The default branch is integration-only. Shared knowledge updates are normally promoted near task closeout to reduce conflicts between parallel worktrees.
@@ -76,31 +87,20 @@ Or copy the canonical payload:
 cp -R /path/to/ai-collaboration-workflow-template/template/. /path/to/your-project/
 ```
 
-Then ask the agent to follow `INIT.md`. Initialization discovers repository facts, merges local instructions, records Git defaults, removes placeholders, and validates the knowledge layer.
+Then ask the agent to follow `INIT.md`. Initialization discovers repository facts, merges local instructions, records Git defaults, removes placeholders, and validates the knowledge network.
 
 ## Daily Use
 
-Start with:
+The agent starts with `AGENTS.md` and `zettelkasten/AI.md`, then reads a branch-matched `WORK-*` only when durable task state exists. It loads only linked notes or a matched project Skill, not the entire vault.
+
+Create tracked work from the repository template:
 
 ```bash
-python3 scripts/workflow_doctor.py --status
+cp zettelkasten/00-governance/templates/work-item.md \
+  zettelkasten/06-work/WORK-<timestamp>-<slug>.md
 ```
 
-The agent reads `AGENTS.md`, `zettelkasten/AI.md`, the active `WORK-*`, and only the linked notes or matched project Skill. It does not scan the entire vault.
-
-Create tracked work from:
-
-```bash
-python3 scripts/workflow_task.py new <slug> --route tracked --owned-path <path>
-```
-
-Use `workflow_task.py checkpoint` and `workflow_task.py close` for later state changes. Repeat `--owned-path` on a checkpoint to replace task ownership when scope changes. All WORK, TECH, PLAN, and REVIEW files remain directly under `zettelkasten/06-work/` for their full lifecycle.
-
-For parallel coordination or machine consumers:
-
-```bash
-python3 scripts/workflow_doctor.py --status --all-worktrees --json
-```
+Update frontmatter and checkpoint fields directly. All WORK, TECH, PLAN, and REVIEW files remain under `zettelkasten/06-work/` for their full lifecycle. The companion Skill offers optional Doctor, WORK, and worktree helpers for teams that want deterministic automation.
 
 ## Structure
 
@@ -109,10 +109,6 @@ template/
   AGENTS.md
   CLAUDE.md
   INIT.md
-  scripts/
-    workflow_doctor.py
-    workflow_task.py
-    task_worktree.py
   project-skills/
     INDEX.md
   zettelkasten/
@@ -130,7 +126,7 @@ template/
 
 ## Companion Skill
 
-The Agent Skills-compatible companion is under `skills/ai-collaboration-workflow/`. It handles installation, task routing, stable work-item updates, minimal context loading, experience promotion, Git isolation, and validation.
+The Agent Skills-compatible companion is under `skills/ai-collaboration-workflow/`. It handles installation and routing, and optionally provides deterministic work-item, knowledge-check, and worktree helpers.
 
 Install with:
 
@@ -143,17 +139,11 @@ npx skills add vector233/ai-collaboration-workflow-template \
 
 For Codex, copy it to `~/.codex/skills/`; for Claude Code, copy it to `~/.claude/skills/` or the repository's project-Skill location supported by the tool.
 
-The initialized repository remains usable without the companion Skill. `AGENTS.md` and repository knowledge stay canonical.
+The initialized repository remains fully usable without the companion Skill. `AGENTS.md`, linked Markdown, Git, and project validation remain canonical.
 
 ## Validation
 
-For a downstream project:
-
-```bash
-python3 scripts/workflow_doctor.py --strict
-```
-
-The doctor checks required knowledge files, stable artifact names and statuses, active task branches, ambiguous or broken wiki links, knowledge review dates, Experience Promotion closure, and project-Skill structure and routing. Its all-worktree status reports dirty state and possible owned-path overlap.
+For a downstream project, validate the changed behavior with project commands and inspect changed knowledge links, work state, review dates, and project-Skill routing. When the companion Skill is installed, its optional Doctor automates these checks and can report cross-worktree state.
 
 For this distribution repository:
 

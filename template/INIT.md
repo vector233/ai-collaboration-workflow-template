@@ -87,13 +87,12 @@ fi
 git diff --check
 ```
 
-Remove initialization files, then run strict validation:
+Remove initialization files after checking links, required fields, project-Skill routing, concrete review dates, and the diff:
 
 ```bash
 rm -f .ai-collaboration-workflow-template INIT.md
-python3 scripts/workflow_doctor.py --strict
 ```
 
-Fix all failures. If repository policy requires a commit, commit only initialization changes with a concise conventional message. Otherwise leave the verified changes for the user.
+The optional companion Skill may automate the knowledge checks. Fix all failures. If repository policy requires a commit, commit only initialization changes with a concise conventional message. Otherwise leave the verified changes for the user.
 
-After initialization, daily work starts from `AGENTS.md`, `zettelkasten/AI.md`, and `python3 scripts/workflow_doctor.py --status`. Use `scripts/workflow_task.py` to create, checkpoint, and close stable WORK artifacts.
+After initialization, daily work starts from `AGENTS.md` and `zettelkasten/AI.md`. Read the branch-matched WORK only when the task needs durable state, and update it directly from the templates.

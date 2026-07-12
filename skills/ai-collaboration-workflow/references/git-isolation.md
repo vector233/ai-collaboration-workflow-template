@@ -7,16 +7,16 @@
 - Concurrent tasks, delegated agents, long-lived tasks, or work that must preserve another dirty checkout use separate Git worktrees.
 - Dependent tasks or materially overlapping owned paths should run serially or define an explicit integration plan.
 
-Use the repository helper when available:
+Use normal Git or the bundled guarded helper:
 
 ```bash
-python3 scripts/task_worktree.py create <WORK-ID> --slug <short-name>
-python3 scripts/task_worktree.py list
+git worktree add ../<short-name> -b task/<work-id>-<short-name> <base>
+(cd <repo-root> && python3 "$SKILL_ROOT/scripts/task_worktree.py" create <WORK-ID> --slug <short-name>)
 ```
 
 The helper may create a new worktree while the current checkout is dirty; it warns that uncommitted changes stay in the original checkout. It refuses to reuse an existing task branch unless `--reuse-existing` is explicit, and `--base` is never applied to a reused branch.
 
-Use `python3 scripts/workflow_doctor.py --status --all-worktrees --json` to aggregate active work and possible owned-path overlap.
+When machine-readable coordination helps, use `python3 "$SKILL_ROOT/scripts/workflow_doctor.py" --root <repo-root> --status --all-worktrees --json` to aggregate active work and possible owned-path overlap.
 
 ## Commit Contract
 

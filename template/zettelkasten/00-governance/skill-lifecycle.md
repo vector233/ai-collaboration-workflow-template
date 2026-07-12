@@ -37,7 +37,7 @@ Do not promote story-specific implementation detail, temporary incidents, guesse
 4. Keep Skill frontmatter limited to `name` and `description`; the description must contain concrete triggers.
 5. Add use, non-use, procedure, validation, recovery, and provenance sections.
 6. Add or update the compact routing row in `project-skills/INDEX.md`, including status, verification date, and review interval.
-7. Run `python3 scripts/workflow_doctor.py --strict`.
+7. Check the Skill structure, index routing, trigger uniqueness, links, and verification date; use the optional companion validator when available.
 8. Retrieval-test with a fresh agent or a realistic prompt when the procedure is important or easy to misroute.
 9. Mark stale Skills `needs-verification` in the index. Deprecate superseded Skills and point to the replacement.
 

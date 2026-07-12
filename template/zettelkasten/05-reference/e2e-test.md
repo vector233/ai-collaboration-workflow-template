@@ -24,7 +24,6 @@ This note records the project-specific commands and evidence rules for realistic
 | Area | Command | Notes |
 |---|---|---|
 | Docs | `git diff --check` | No trailing whitespace or patch formatting issues |
-| Workflow | `python3 scripts/workflow_doctor.py` | Checks stable work state, wiki links, knowledge freshness, project Skills, and Experience Promotion |
 | Backend |  |  |
 | Frontend |  |  |
 | Database |  |  |

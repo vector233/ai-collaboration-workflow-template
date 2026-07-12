@@ -15,6 +15,7 @@ This repository develops and distributes the AI Collaboration Workflow Template.
 - `AGENTS.md` is the canonical shared instruction file. Codex reads it directly; `CLAUDE.md` imports it for Claude Code.
 - Shared behavior belongs in repository files, not chat history, vendor memory, or tool-local state.
 - Vendor-specific files are adapters only. Keep requirements, workflow semantics, validation, and handoff rules vendor-neutral.
+- The downstream core must remain usable with Markdown and Git alone. Companion-Skill scripts are optional automation and must not be copied into or required by `template/`.
 - When workflow behavior changes, align the canonical payload, Skill, documentation, examples, and validation as applicable.
 - Never put repository-specific release, publishing, or maintenance material in `template/`.
 
