@@ -94,7 +94,7 @@ Create tracked work from:
 python3 scripts/workflow_task.py new <slug> --route tracked --owned-path <path>
 ```
 
-Use `workflow_task.py checkpoint` and `workflow_task.py close` for later state changes. All WORK, TECH, PLAN, and REVIEW files remain directly under `zettelkasten/06-work/` for their full lifecycle.
+Use `workflow_task.py checkpoint` and `workflow_task.py close` for later state changes. Repeat `--owned-path` on a checkpoint to replace task ownership when scope changes. All WORK, TECH, PLAN, and REVIEW files remain directly under `zettelkasten/06-work/` for their full lifecycle.
 
 For parallel coordination or machine consumers:
 

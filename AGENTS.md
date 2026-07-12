@@ -34,6 +34,7 @@ The Direct/Tracked/Governed routing model, stable WORK artifacts, optional TECH/
 
 - Treat review findings as hypotheses and verify them with code, commands, temporary-project output, or official references.
 - Reproduce distribution behavior in a temporary target, not only in the source tree.
+- Keep harness self-tests separate from Agent behavior evidence. A bundled or synthetically derived response fixture may test the evaluator, but must not be reported as a fresh-Agent workflow result.
 - Check payload changes for repository-specific content leakage.
 - Do not claim validation that did not run.
 

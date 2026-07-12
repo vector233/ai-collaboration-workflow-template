@@ -42,6 +42,8 @@ python3 scripts/workflow_task.py id <short-name>
 
 Use a normal branch in the current checkout for one sequential task. Use a worktree when work overlaps in time, must preserve an existing dirty checkout, or is delegated to another agent.
 
+Detached worktrees are disclosed by `workflow_doctor.py --status --all-worktrees`; they do not claim branch-owned active WORK until attached to the declared task branch.
+
 ## Context Commit Contract
 
 Every agent context that produces persistent changes, or each coherent implementation slice, ends with a commit containing only current-task changes. Read-only analysis does not create an empty commit.

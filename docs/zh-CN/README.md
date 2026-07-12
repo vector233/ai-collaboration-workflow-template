@@ -62,7 +62,7 @@ zettelkasten/AI.md             最小上下文入口
 zettelkasten/06-work/          路径稳定的 WORK/TECH/PLAN/REVIEW
 project-skills/INDEX.md        项目 Skill 触发索引
 scripts/workflow_doctor.py     状态和一致性检查
-scripts/workflow_task.py       WORK 创建、checkpoint 和关闭
+scripts/workflow_task.py       WORK 创建、范围更新、checkpoint 和关闭
 scripts/task_worktree.py       安全创建并行任务 worktree
 ```
 
@@ -111,4 +111,4 @@ python3 scripts/validate_distribution.py
 
 检查范围包括稳定工件、状态字段、分支隔离、wiki 链接、占位符、经验升级完成度、项目 Skill 结构、bootstrap 和临时 worktree 行为。
 
-并行协调或工具集成使用 `python3 scripts/workflow_doctor.py --status --all-worktrees --json`，它会聚合已注册 worktree、脏状态、最后提交和 owned paths 重叠提示。
+并行协调或工具集成使用 `python3 scripts/workflow_doctor.py --status --all-worktrees --json`，它会聚合已注册 worktree、脏状态、最后提交和 owned paths 重叠提示，并单独披露 detached worktree，避免重复认领活跃 WORK。任务范围变化时，在 `workflow_task.py checkpoint` 中重复传入 `--owned-path` 以替换原范围。

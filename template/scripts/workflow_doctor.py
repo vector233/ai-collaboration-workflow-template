@@ -121,20 +121,29 @@ def add(findings: list[Finding], severity: str, message: str, path: Path | None 
     findings.append(Finding(severity, message, path))
 
 
-def strip_scalar_quotes(value: str) -> str:
+FrontmatterValue = str | tuple[str, ...]
+
+
+def decode_scalar(value: str) -> str:
     value = value.strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
-        return value[1:-1]
+    if len(value) >= 2 and value[0] == value[-1] == '"':
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError:
+            return value[1:-1]
+        return decoded if isinstance(decoded, str) else str(decoded)
+    if len(value) >= 2 and value[0] == value[-1] == "'":
+        return value[1:-1].replace("''", "'")
     return value
 
 
-def parse_frontmatter(text: str) -> dict[str, str] | None:
-    """Parse top-level scalar fields needed by the workflow without a YAML dependency."""
+def parse_frontmatter(text: str) -> dict[str, FrontmatterValue] | None:
+    """Parse top-level scalar and sequence fields without a YAML dependency."""
     match = FRONTMATTER_RE.search(text)
     if not match:
         return None
     lines = match.group(1).splitlines()
-    values: dict[str, str] = {}
+    values: dict[str, FrontmatterValue] = {}
     index = 0
     while index < len(lines):
         line = lines[index]
@@ -158,7 +167,24 @@ def parse_frontmatter(text: str) -> dict[str, str] | None:
             else:
                 values[key] = "\n".join(block_lines).strip()
             continue
-        values[key] = strip_scalar_quotes(raw_value)
+        if not block_style:
+            sequence_index = index + 1
+            items: list[str] = []
+            while sequence_index < len(lines):
+                candidate = lines[sequence_index]
+                if candidate and not candidate[0].isspace():
+                    break
+                stripped = candidate.strip()
+                if stripped:
+                    if not stripped.startswith("- "):
+                        break
+                    items.append(decode_scalar(stripped[2:]))
+                sequence_index += 1
+            if items:
+                values[key] = tuple(items)
+                index = sequence_index
+                continue
+        values[key] = decode_scalar(raw_value)
         index += 1
     return values
 
@@ -167,7 +193,10 @@ def field_value(text: str, field: str) -> str | None:
     values = parse_frontmatter(text)
     if values is None:
         return None
-    value = values.get(field, "").strip()
+    raw_value = values.get(field, "")
+    if not isinstance(raw_value, str):
+        return None
+    value = raw_value.strip()
     return value or None
 
 
@@ -185,6 +214,16 @@ def parse_inline_list(value: str | None) -> tuple[str, ...]:
     if not isinstance(parsed, list):
         return ()
     return tuple(str(part).strip().strip('"').strip("'") for part in parsed if str(part).strip())
+
+
+def field_list(text: str, field: str) -> tuple[str, ...]:
+    values = parse_frontmatter(text)
+    if values is None:
+        return ()
+    value = values.get(field, "")
+    if isinstance(value, tuple):
+        return value
+    return parse_inline_list(value)
 
 
 def workflow_artifacts(root: Path) -> list[Path]:
@@ -300,6 +339,43 @@ def experience_section(text: str) -> str:
     return text.split("## Experience Candidates", 1)[1].split("\n## ", 1)[0]
 
 
+def split_markdown_table_row(line: str) -> list[str]:
+    stripped = line.strip()
+    if not stripped.startswith("|"):
+        return []
+    cells: list[str] = []
+    current: list[str] = []
+    escaped = False
+    for character in stripped[1:]:
+        if escaped and character == "|":
+            current.append(character)
+            escaped = False
+        elif escaped:
+            current.extend(("\\", character))
+            escaped = False
+        elif character == "\\":
+            escaped = True
+        elif character == "|":
+            cells.append("".join(current).strip())
+            current = []
+        else:
+            current.append(character)
+    if escaped:
+        current.append("\\")
+    if current or not stripped.endswith("|"):
+        cells.append("".join(current).strip())
+    return cells
+
+
+def has_pending_experience_decision(text: str) -> bool:
+    for line in experience_section(text).splitlines():
+        cells = split_markdown_table_row(line)
+        if len(cells) >= 5 and cells[0] not in {"Candidate", "---"}:
+            if cells[2].strip().lower() == "pending":
+                return True
+    return False
+
+
 def check_artifacts(root: Path, findings: list[Finding]) -> None:
     active_branches: dict[str, Path] = {}
     for path in workflow_artifacts(root):
@@ -339,7 +415,7 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
                 active_branches[branch] = rel_path
             if not next_action:
                 add(findings, "ERROR", "active work is missing next_action", rel_path)
-            if not parse_inline_list(field_value(text, "owned_paths")):
+            if not field_list(text, "owned_paths"):
                 add(
                     findings,
                     "WARN",
@@ -350,7 +426,7 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
         if status == "done":
             if not PROMOTION_COMPLETE_RE.search(text):
                 add(findings, "ERROR", "closed work has incomplete Experience Promotion", rel_path)
-            if re.search(r"\|[^\n|]+\|[^\n|]+\|\s*pending\s*\|", experience_section(text), re.IGNORECASE):
+            if has_pending_experience_decision(text):
                 add(findings, "ERROR", "closed work has a pending experience candidate", rel_path)
 
 
@@ -365,15 +441,18 @@ def check_note_freshness(root: Path, findings: list[Finding]) -> None:
     today = date.today()
     for path in markdown_files(root):
         metadata = parse_frontmatter(read_text(path))
-        if not metadata or not metadata.get("review_after_days"):
+        if not metadata or "review_after_days" not in metadata:
             continue
         rel_path = relative(root, path)
         try:
-            interval = int(metadata["review_after_days"])
-        except ValueError:
+            interval = int(str(metadata["review_after_days"]))
+        except (TypeError, ValueError):
             add(findings, "ERROR", "review_after_days must be an integer", rel_path)
             continue
-        verified = parse_iso_date(metadata.get("last_verified_at", ""))
+        if interval <= 0:
+            add(findings, "ERROR", "review_after_days must be positive", rel_path)
+            continue
+        verified = parse_iso_date(str(metadata.get("last_verified_at", "")))
         if verified is None:
             add(findings, "WARN", "reviewed knowledge is missing a concrete last_verified_at date", rel_path)
         elif (today - verified).days > interval:
@@ -385,7 +464,7 @@ def skill_index_rows(index_text: str) -> list[dict[str, str]]:
     for line in index_text.splitlines():
         if not line.startswith("|"):
             continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        cells = split_markdown_table_row(line)
         if len(cells) < 6 or cells[0] in {"Skill", "---", "None"} or set(cells[0]) == {"-"}:
             continue
         rows.append(
@@ -425,9 +504,11 @@ def check_project_skills(root: Path, findings: list[Finding]) -> None:
             continue
         if set(metadata) != {"name", "description"}:
             add(findings, "ERROR", "project Skill frontmatter must contain only name and description", rel_path)
-        if metadata.get("name") != directory.name:
+        name = metadata.get("name", "")
+        description = metadata.get("description", "")
+        if name != directory.name:
             add(findings, "ERROR", "project Skill name must match its directory", rel_path)
-        if len(metadata.get("description", "")) < 24:
+        if not isinstance(description, str) or len(description) < 24:
             add(findings, "ERROR", "project Skill description must include concrete triggers", rel_path)
         for section in SKILL_REQUIRED_SECTIONS:
             if section not in text:
@@ -462,6 +543,8 @@ def check_project_skills(root: Path, findings: list[Finding]) -> None:
 
 def collect_work_records(root: Path) -> list[WorkRecord]:
     actual_branch = current_branch(root)
+    if not actual_branch:
+        return []
     dirty = worktree_is_dirty(root)
     commit = last_commit(root)
     records: list[WorkRecord] = []
@@ -485,7 +568,7 @@ def collect_work_records(root: Path) -> list[WorkRecord]:
                 worktree=str(root),
                 file=str(path),
                 next_action=field_value(text, "next_action") or "",
-                owned_paths=parse_inline_list(field_value(text, "owned_paths")),
+                owned_paths=field_list(text, "owned_paths"),
                 dirty=dirty,
                 last_commit=commit,
             )
@@ -530,8 +613,12 @@ def find_scope_overlaps(records: list[WorkRecord]) -> list[dict[str, object]]:
 def status_payload(root: Path, all_worktrees: bool) -> dict[str, object]:
     roots = registered_worktrees(root) if all_worktrees else [root]
     records: list[WorkRecord] = []
+    detached_worktrees: list[str] = []
     for candidate in roots:
         if candidate.is_dir():
+            if not current_branch(candidate):
+                detached_worktrees.append(str(candidate))
+                continue
             records.extend(collect_work_records(candidate))
     return {
         "repository": str(root),
@@ -539,13 +626,14 @@ def status_payload(root: Path, all_worktrees: bool) -> dict[str, object]:
         "active_work": [asdict(record) for record in records],
         "scope_overlaps": find_scope_overlaps(records),
         "unscoped_work": [record.work_id for record in records if not record.owned_paths],
+        "detached_worktrees": detached_worktrees,
     }
 
 
 def print_status(root: Path, all_worktrees: bool, as_json: bool) -> None:
     payload = status_payload(root, all_worktrees)
     if as_json:
-        print(json.dumps(payload, indent=2, ensure_ascii=True))
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
         return
     print(f"Workflow Status: {root}")
     records = payload["active_work"]
@@ -561,6 +649,8 @@ def print_status(root: Path, all_worktrees: bool, as_json: bool) -> None:
         print(f"WARN: scope overlap {overlap['left']} / {overlap['right']}: {', '.join(overlap['paths'])}")
     if payload["unscoped_work"]:
         print("WARN: active work without owned paths: " + ", ".join(payload["unscoped_work"]))
+    for worktree in payload["detached_worktrees"]:
+        print(f"WARN: detached worktree has no branch-matched active work: {worktree}")
 
 
 def print_findings(root: Path, findings: list[Finding]) -> None:

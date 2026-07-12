@@ -67,7 +67,7 @@ Create a separate artifact only when it is reused, independently approved, indep
 
 ## Tracked Work Loop
 
-1. Create a `WORK-*` from [[00-governance/templates/work-item]].
+1. Create a `WORK-*` with `python3 scripts/workflow_task.py new`; use [[00-governance/templates/work-item]] manually only if the helper is unavailable.
 2. Record the route, acceptance criteria, context pack, task branch, worktree, affected paths, and next action.
 3. Resolve any governed TECH or PLAN gate.
 4. Implement one bounded slice.
@@ -84,6 +84,8 @@ python3 scripts/workflow_task.py new <slug> --route tracked
 python3 scripts/workflow_task.py checkpoint <WORK-ID> --completed-step <text> --validation <evidence> --next-action <text>
 python3 scripts/workflow_task.py close <WORK-ID> --acceptance-complete --gates-closed --promotion-complete --writeback-complete --integration-result <text>
 ```
+
+Repeat `--owned-path <repository-relative-path>` on `new` or `checkpoint` when task ownership is created or changes. Supplying owned paths to `checkpoint` replaces the previous set.
 
 ## Project Skill Routing
 

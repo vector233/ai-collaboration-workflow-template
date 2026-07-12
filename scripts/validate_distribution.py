@@ -307,7 +307,7 @@ def create_project_skill(target: Path) -> None:
         index.read_text().replace(
             "| None |  |  |  |  |  |",
             (
-                f"| {skill_name} | stale provider state or old resend token | "
+                f"| {skill_name} | stale provider state or old resend token \\| code | "
                 f"local unit tests | active | {date.today().isoformat()} | 180 |"
             ),
         )
@@ -358,12 +358,60 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
             "--validation",
             "focused regression test failed before fix",
             "--next-action",
-            "implement fix",
+            "inspect \"r\u00e9sum\u00e9\" before implementing fix",
+            "--owned-path",
+            "src/shared/module",
+            "--owned-path",
+            "docs/runbooks",
         ],
         cwd=target,
     )
     text = (target / f"zettelkasten/06-work/{work_id}.md").read_text()
     require("- Last completed step: confirmed root cause" in text, "checkpoint was not written")
+    require(
+        'owned_paths: ["src/shared/module", "docs/runbooks"]' in text,
+        "checkpoint did not replace owned paths",
+    )
+    status = run([sys.executable, "scripts/workflow_doctor.py", "--status"], cwd=target)
+    require('next=inspect "r\u00e9sum\u00e9" before implementing fix' in status.stdout, "status did not decode YAML string escapes")
+    require("\\u00e9" not in status.stdout and '\\"' not in status.stdout, "status leaked serialized YAML escapes")
+
+    governed_id = "WORK-20260712122030-governed-cli"
+    run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "new",
+            "governed-cli",
+            "--id",
+            governed_id,
+            "--route",
+            "governed",
+        ],
+        cwd=target,
+    )
+    governed_path = target / f"zettelkasten/06-work/{governed_id}.md"
+    governed_text = governed_path.read_text()
+    require("- Selected route: governed" in governed_text, "governed route bullet was not written")
+    require("governed / governed" not in governed_text, "governed route replacement corrupted the template")
+    governed_path.unlink()
+
+    invalid_id = "WORK-20260712122040-invalid-path"
+    invalid_path = run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "new",
+            "invalid-path",
+            "--id",
+            invalid_id,
+            "--owned-path",
+            r"C:\\repo\\src",
+        ],
+        cwd=target,
+        expected=1,
+    )
+    require("repository-relative" in invalid_path.stderr, "Windows absolute owned path was accepted")
 
     close_id = "WORK-20260712122100-close-cli"
     run(
@@ -378,10 +426,27 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         cwd=target,
     )
     close_path = target / f"zettelkasten/06-work/{close_id}.md"
+    pending_close = run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "close",
+            close_id,
+            "--acceptance-complete",
+            "--gates-closed",
+            "--promotion-complete",
+            "--writeback-complete",
+            "--integration-result",
+            "must remain open",
+        ],
+        cwd=target,
+        expected=1,
+    )
+    require("pending decision" in pending_close.stderr, "pending Decision cell was not detected")
     close_path.write_text(
         close_path.read_text().replace(
             "|  | rule / gotcha / fact / runbook / project-skill | pending |  |  |",
-            "| No reusable lesson | fact | not-promoted | work item | one-off sample |",
+            "| No reusable lesson | fact | not-promoted | pending destination | one-off sample |",
         )
     )
     run(
@@ -414,6 +479,44 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     require("active work is missing branch" in blank_branch.stdout, "blank branch bypassed doctor")
     work.write_text(original)
 
+    block_list = original.replace(
+        'owned_paths: ["src/shared/module", "docs/runbooks"]',
+        "owned_paths:\n  - src/shared/module\n  - docs/runbooks",
+    )
+    work.write_text(block_list)
+    list_status = run(
+        [sys.executable, "scripts/workflow_doctor.py", "--status", "--json"],
+        cwd=target,
+    )
+    listed_work = next(
+        item for item in json.loads(list_status.stdout)["active_work"] if item["work_id"] == work_id
+    )
+    require(
+        listed_work["owned_paths"] == ["src/shared/module", "docs/runbooks"],
+        "block-list owned paths were not parsed",
+    )
+    run(
+        [
+            sys.executable,
+            "scripts/workflow_task.py",
+            "checkpoint",
+            work_id,
+            "--completed-step",
+            "expanded task scope",
+            "--validation",
+            "scope review complete",
+            "--next-action",
+            "continue implementation",
+            "--owned-path",
+            "src/replacement",
+        ],
+        cwd=target,
+    )
+    replaced_scope = work.read_text()
+    require('owned_paths: ["src/replacement"]' in replaced_scope, "checkpoint did not replace a block-list scope")
+    require("\n  - src/shared/module" not in replaced_scope, "checkpoint left stale block-list items")
+    work.write_text(original)
+
     ambiguous = target / "zettelkasten/ambiguous-link-test.md"
     ambiguous.write_text("# Ambiguous\n\n[[README]]\n")
     ambiguity = run(
@@ -432,6 +535,19 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     stale_result = run([sys.executable, "scripts/workflow_doctor.py"], cwd=target)
     require("knowledge is stale" in stale_result.stdout, "stale knowledge was not reported")
     stale.unlink()
+
+    invalid_interval = target / "zettelkasten/05-reference/invalid-interval.md"
+    invalid_interval.write_text(
+        "---\ntitle: Invalid Interval\nstatus: active\nlast_verified_at: 2026-07-12\n"
+        "review_after_days: 0\n---\n\n# Invalid Interval\n"
+    )
+    interval_result = run(
+        [sys.executable, "scripts/workflow_doctor.py"],
+        cwd=target,
+        expected=1,
+    )
+    require("review_after_days must be positive" in interval_result.stdout, "non-positive review interval passed")
+    invalid_interval.unlink()
 
 
 def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
@@ -544,6 +660,25 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     require({tracked_work_id, helper_id}.issubset(work_ids), "all-worktree status missed active work")
     require(payload["scope_overlaps"], "owned-path overlap was not reported")
     require(not payload["unscoped_work"], "scoped parallel work was reported as unscoped")
+
+    run(["git", "switch", "--detach"], cwd=destination)
+    detached_status = run(
+        [
+            sys.executable,
+            "scripts/workflow_doctor.py",
+            "--status",
+            "--all-worktrees",
+            "--json",
+        ],
+        cwd=target,
+    )
+    detached_payload = json.loads(detached_status.stdout)
+    detached_ids = [item["work_id"] for item in detached_payload["active_work"]]
+    require(helper_id not in detached_ids, "detached worktree duplicated branch-owned active work")
+    require(
+        str(destination.resolve()) in detached_payload["detached_worktrees"],
+        "detached worktree was not disclosed",
+    )
 
 
 def validate_wiki_links(vault: Path) -> None:
@@ -676,15 +811,31 @@ def validate_remote_source() -> None:
         require((target / "project-skills/INDEX.md").is_file(), "remote omitted Skills")
 
 
-def validate_behavior_contract() -> None:
-    run(
-        [
-            sys.executable,
-            str(BEHAVIOR_EVALUATOR),
-            "--responses",
-            str(ROOT / "examples/evaluations/expected-responses.json"),
-        ]
-    )
+def validate_behavior_evaluator() -> None:
+    cases = json.loads((ROOT / "examples/evaluations/workflow-cases.json").read_text())
+    responses = [dict(id=case["id"], **case["expected"]) for case in cases]
+    fixture = {
+        "run": {
+            "run_id": "distribution-validator-fixture",
+            "agent": "synthetic evaluator regression fixture",
+            "generated_at": "2026-07-12T00:00:00Z",
+        },
+        "responses": responses,
+    }
+    with tempfile.TemporaryDirectory(prefix="workflow-evaluator-") as temp_dir:
+        response_path = Path(temp_dir) / "responses.json"
+        response_path.write_text(json.dumps(fixture))
+        matched = run(
+            [sys.executable, str(BEHAVIOR_EVALUATOR), "--responses", str(response_path)]
+        )
+        require("MATCH:" in matched.stdout, "behavior evaluator rejected a conforming fixture")
+        fixture["responses"][0]["route"] = "governed"
+        response_path.write_text(json.dumps(fixture))
+        mismatch = run(
+            [sys.executable, str(BEHAVIOR_EVALUATOR), "--responses", str(response_path)],
+            expected=1,
+        )
+        require("FAIL: direct-doc-link: route" in mismatch.stdout, "behavior evaluator accepted a known mismatch")
 
 
 def validate_repository_layout() -> None:
@@ -713,7 +864,7 @@ def main() -> int:
         validate_bootstrap_lifecycle()
         validate_symlink_boundary()
         validate_remote_source()
-        validate_behavior_contract()
+        validate_behavior_evaluator()
     except ValidationFailure as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1

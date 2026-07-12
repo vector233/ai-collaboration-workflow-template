@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare fresh-agent routing responses with expected workflow behavior."""
+"""Compare an externally captured agent run with expected workflow behavior."""
 
 from __future__ import annotations
 
@@ -18,14 +18,35 @@ class EvaluationError(RuntimeError):
     pass
 
 
-def load_json(path: Path) -> list[dict[str, object]]:
+def load_json(path: Path) -> object:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise EvaluationError(f"cannot read JSON from {path}: {exc}") from exc
-    if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
-        raise EvaluationError(f"expected a JSON array of objects: {path}")
     return value
+
+
+def load_cases(path: Path) -> list[dict[str, object]]:
+    value = load_json(path)
+    if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
+        raise EvaluationError(f"expected a JSON array of case objects: {path}")
+    return value
+
+
+def load_response_run(path: Path) -> tuple[dict[str, str], list[dict[str, object]]]:
+    value = load_json(path)
+    if not isinstance(value, dict):
+        raise EvaluationError(f"expected a response-run object: {path}")
+    run = value.get("run")
+    responses = value.get("responses")
+    if not isinstance(run, dict) or not all(
+        isinstance(run.get(field), str) and run[field].strip()
+        for field in ("run_id", "agent", "generated_at")
+    ):
+        raise EvaluationError("response run needs non-empty run_id, agent, and generated_at metadata")
+    if not isinstance(responses, list) or not all(isinstance(item, dict) for item in responses):
+        raise EvaluationError("response run needs a responses array of objects")
+    return {str(key): str(item) for key, item in run.items()}, responses
 
 
 def evaluate(cases: list[dict[str, object]], responses: list[dict[str, object]]) -> list[str]:
@@ -64,8 +85,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     try:
-        cases = load_json(args.cases)
-        failures = evaluate(cases, load_json(args.responses))
+        cases = load_cases(args.cases)
+        run, responses = load_response_run(args.responses)
+        failures = evaluate(cases, responses)
     except EvaluationError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
@@ -73,7 +95,10 @@ def main() -> int:
         for failure in failures:
             print(f"FAIL: {failure}")
         return 1
-    print(f"PASS: {len(cases)} workflow behavior case(s) matched")
+    print(
+        f"MATCH: {len(cases)} workflow behavior case(s) matched "
+        f"for run {run['run_id']} ({run['agent']})"
+    )
     return 0
 
 

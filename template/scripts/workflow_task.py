@@ -70,15 +70,25 @@ def work_path(root: Path, work_id: str) -> Path:
     return path
 
 
-def set_frontmatter_field(text: str, field: str, value: str) -> str:
+def set_frontmatter_field(text: str, field: str, value: str | list[str]) -> str:
     match = FRONTMATTER_RE.search(text)
     if not match:
         raise WorkflowTaskError("WORK file is missing YAML frontmatter")
     lines = match.group(1).splitlines()
-    replacement = f"{field}: {json.dumps(single_line(value), ensure_ascii=True)}"
+    normalized: str | list[str]
+    if isinstance(value, str):
+        normalized = single_line(value)
+    else:
+        normalized = value
+    replacement = f"{field}: {json.dumps(normalized, ensure_ascii=False)}"
     for index, line in enumerate(lines):
         if re.match(rf"^{re.escape(field)}:[ \t]*", line):
-            lines[index] = replacement
+            continuation = index + 1
+            while continuation < len(lines) and (
+                not lines[continuation] or lines[continuation][0].isspace()
+            ):
+                continuation += 1
+            lines[index:continuation] = [replacement]
             break
     else:
         lines.append(replacement)
@@ -103,7 +113,7 @@ def set_section_bullet(text: str, section: str, label: str, value: str) -> str:
 
 def write_result(payload: dict[str, object], as_json: bool) -> None:
     if as_json:
-        print(json.dumps(payload, indent=2, ensure_ascii=True))
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
     else:
         for key, value in payload.items():
             print(f"{key}: {value}")
@@ -118,10 +128,56 @@ def validate_owned_paths(paths: list[str]) -> list[str]:
     for raw_path in paths:
         value = raw_path.replace("\\", "/").strip().removeprefix("./").rstrip("/")
         parts = value.split("/")
-        if not value or value.startswith("/") or ".." in parts:
+        if (
+            not value
+            or value.startswith("/")
+            or re.match(r"^[A-Za-z]:", value)
+            or ".." in parts
+        ):
             raise WorkflowTaskError(f"owned path must be repository-relative: {raw_path!r}")
-        validated.append(value)
+        if value not in validated:
+            validated.append(value)
     return validated
+
+
+def split_markdown_table_row(line: str) -> list[str]:
+    stripped = line.strip()
+    if not stripped.startswith("|"):
+        return []
+    cells: list[str] = []
+    current: list[str] = []
+    escaped = False
+    for character in stripped[1:]:
+        if escaped and character == "|":
+            current.append(character)
+            escaped = False
+        elif escaped:
+            current.extend(("\\", character))
+            escaped = False
+        elif character == "\\":
+            escaped = True
+        elif character == "|":
+            cells.append("".join(current).strip())
+            current = []
+        else:
+            current.append(character)
+    if escaped:
+        current.append("\\")
+    if current or not stripped.endswith("|"):
+        cells.append("".join(current).strip())
+    return cells
+
+
+def has_pending_experience_decision(text: str) -> bool:
+    if "## Experience Candidates" not in text:
+        return False
+    section = text.split("## Experience Candidates", 1)[1].split("\n## ", 1)[0]
+    for line in section.splitlines():
+        cells = split_markdown_table_row(line)
+        if len(cells) >= 5 and cells[0] not in {"Candidate", "---"}:
+            if cells[2].strip().lower() == "pending":
+                return True
+    return False
 
 
 def command_id(args: argparse.Namespace) -> int:
@@ -149,22 +205,22 @@ def command_new(args: argparse.Namespace) -> int:
         "# Work Item Title": f"# {title}",
         "WORK-YYYYMMDDHHMMSS-short-name": work_id,
         "status: backlog": "status: active",
-        "route: tracked": f"route: {args.route}",
-        "risk: normal": f"risk: {json.dumps(single_line(args.risk), ensure_ascii=True)}",
+        "risk: normal": f"risk: {json.dumps(single_line(args.risk), ensure_ascii=False)}",
         "branch: task/work-id-short-name": f"branch: {json.dumps(branch)}",
         "worktree: current": f"worktree: {json.dumps(args.worktree)}",
         "owned_paths: []": f"owned_paths: {json.dumps(owned_paths)}",
         "next_action: clarify acceptance criteria": (
-            f"next_action: {json.dumps(single_line(args.next_action), ensure_ascii=True)}"
+            f"next_action: {json.dumps(single_line(args.next_action), ensure_ascii=False)}"
         ),
         "last_verified_at: YYYY-MM-DD": f"last_verified_at: {date.today().isoformat()}",
-        "- Selected route: tracked / governed": f"- Selected route: {args.route}",
         "- Isolation: task branch / dedicated worktree": (
             f"- Isolation: {'dedicated worktree' if args.worktree == 'dedicated' else 'task branch'}"
         ),
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
+    text = set_frontmatter_field(text, "route", args.route)
+    text = set_section_bullet(text, "Route Decision", "Selected route", args.route)
     destination.write_text(text, encoding="utf-8")
     write_result(
         {
@@ -199,6 +255,8 @@ def command_checkpoint(args: argparse.Namespace) -> int:
     text = path.read_text(encoding="utf-8")
     text = set_frontmatter_field(text, "next_action", args.next_action)
     text = set_frontmatter_field(text, "last_verified_at", date.today().isoformat())
+    if args.owned_path is not None:
+        text = set_frontmatter_field(text, "owned_paths", validate_owned_paths(args.owned_path))
     checkpoint_values = {
         "Last completed step": args.completed_step,
         "Commit": args.commit,
@@ -235,8 +293,7 @@ def command_close(args: argparse.Namespace) -> int:
     root = repository_root(args.root)
     path = require_work(root, args.work_id)
     text = path.read_text(encoding="utf-8")
-    experience = text.split("## Experience Candidates", 1)[-1].split("\n## ", 1)[0]
-    if re.search(r"\|[^\n|]+\|[^\n|]+\|\s*pending\s*\|", experience, re.IGNORECASE):
+    if has_pending_experience_decision(text):
         raise WorkflowTaskError("experience candidates still contain a pending decision")
     text = set_frontmatter_field(text, "status", "done")
     text = set_frontmatter_field(text, "next_action", "none")
@@ -287,6 +344,11 @@ def parse_args() -> argparse.Namespace:
     checkpoint_parser.add_argument("--commit", default="this checkpoint commit")
     checkpoint_parser.add_argument("--worktree-status")
     checkpoint_parser.add_argument("--risks", default="none known")
+    checkpoint_parser.add_argument(
+        "--owned-path",
+        action="append",
+        help="replace owned paths; repeat for multiple repository-relative paths",
+    )
     checkpoint_parser.add_argument("--root", type=Path, default=Path.cwd())
     checkpoint_parser.add_argument("--json", action="store_true")
     checkpoint_parser.set_defaults(handler=command_checkpoint)
