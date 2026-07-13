@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Initialize and operate the AI Collaboration Workflow knowledge network for new projects. Use when an agent needs to install the knowledge-first template; route work into Direct, Tracked, or Governed delivery; resume or update stable WORK/TECH/PLAN/REVIEW knowledge; discover or promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize and operate the AI Collaboration Workflow knowledge network for new projects. Use when an agent needs to install the knowledge-first template; route work into Direct, Tracked, or Governed delivery; resume or update a stable WORK record; discover or promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # AI Collaboration Workflow
@@ -11,7 +11,7 @@ Treat the target repository as authoritative after installation:
 
 - read `AGENTS.md` for mandatory rules;
 - enter knowledge through `zettelkasten/AI.md`;
-- use `zettelkasten/00-governance/ai-workflow.md` for routing;
+- use `zettelkasten/workflow.md` for routing;
 - keep repository procedures in `project-skills/`;
 - treat `CLAUDE.md` and other vendor files as adapters.
 
@@ -39,7 +39,7 @@ If `INIT.md` exists, follow it completely. Preserve stricter local rules, replac
 For initialized projects:
 
 1. Read `AGENTS.md` and `zettelkasten/AI.md`.
-2. Inspect the current Git branch and `zettelkasten/06-work/`.
+2. Inspect the current Git branch and `zettelkasten/work/`.
 3. Read the active `WORK-*` matching the assigned task or current branch, when one exists.
 4. Read only linked knowledge, runbooks, and matching rows from `project-skills/INDEX.md`.
 
@@ -64,8 +64,8 @@ The helpers read and write the same repository files and Git state. They are opt
 Read [routing.md](references/routing.md) when classifying new work or reconsidering its route.
 
 - **Direct**: no workflow artifact; validate and commit the current context.
-- **Tracked**: create one stable `WORK-*` under `zettelkasten/06-work/`.
-- **Governed**: use a `WORK-*` and add only independently justified TECH, PLAN, or REVIEW artifacts.
+- **Tracked**: create one stable `WORK-*` under `zettelkasten/work/`.
+- **Governed**: use one `WORK-*` with explicit decisions, approvals, owners, evidence, and gates.
 
 Use repository templates or the optional WORK helper. Keep artifact paths stable and update frontmatter status in place.
 

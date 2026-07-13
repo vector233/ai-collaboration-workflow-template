@@ -84,7 +84,7 @@ The goal is to help AI coding agents and human maintainers keep project context 
 Instead of one large project document or a mandatory document chain, the template uses small linked notes for:
 
 - stable work items
-- technical designs, implementation plans, and review handoffs only when independently required
+- governed decisions, approvals, and release evidence inside the active work item
 - architecture notes
 - validation runbooks
 - gotchas / lessons learned
@@ -97,12 +97,12 @@ Task
   -> Route     Direct, Tracked, or Governed
   -> [WORK]    keep stable task state when tracking is useful
   -> Build     implement, validate, and commit one bounded context
-  -> [Gates]   add TECH, PLAN, or REVIEW only when triggered
+  -> [Gates]   close required decisions and approvals in the WORK
   -> Check     validate behavior and inspect changed knowledge
   -> Promote   write recurring lessons to rules, notes, runbooks, or project Skills
 ```
 
-It uses Obsidian-style wiki links like `[[00-governance/ai-workflow]]` for note-to-note navigation, while keeping standard Markdown links and images for GitHub compatibility.
+It uses Obsidian-style wiki links like `[[workflow]]` for note-to-note navigation, while keeping standard Markdown links and images for GitHub compatibility.
 
 This is not an Obsidian plugin. It is a reusable Markdown vault/workflow template that can be opened in Obsidian, edited in any Markdown editor, and kept in a normal Git repository.
 

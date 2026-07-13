@@ -10,7 +10,7 @@ Prepare an initialized temporary project with:
 - at least one completed context checkpoint and commit;
 - validation evidence and a next action;
 - one experience candidate;
-- optionally one matching project Skill and one independent governed artifact.
+- optionally one matching project Skill and linked project-native approval evidence.
 
 ## Prompt
 
@@ -27,7 +27,7 @@ Review this repository's current project state using only repository files and G
 - loads only linked knowledge and matching project Skills;
 - reports exact validation and commit evidence;
 - distinguishes pending experience candidates from promoted knowledge;
-- recognizes any governed TECH, PLAN, or REVIEW gate;
+- recognizes governed gates and their closing evidence in the WORK;
 - does not begin implementation before reporting the next allowed action.
 
 ## Scorecard

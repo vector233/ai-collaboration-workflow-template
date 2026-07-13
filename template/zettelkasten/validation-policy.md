@@ -6,17 +6,17 @@ last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 review_after_days: 180
 related:
-  - "[[00-governance/ai-workflow]]"
-  - "[[06-work/README]]"
-  - "[[05-reference/e2e-test]]"
-  - "[[00-governance/gotchas]]"
+  - "[[workflow]]"
+  - "[[work/README]]"
+  - "[[validation-runbook]]"
+  - "[[gotchas]]"
 ---
 
 # Validation Discipline
 
 ## Purpose
 
-This note defines when a change needs realistic validation before review. Project-specific commands belong in [[05-reference/e2e-test]]. This note defines the policy.
+This note defines when a change needs realistic validation before review. Project-specific commands belong in [[validation-runbook]]. This note defines the policy.
 
 ## Rule
 
@@ -77,4 +77,4 @@ Prefer:
 
 ## Relationship To Review
 
-[[06-work/README]] owns workflow state. A slice can still be handed off with a blocker, but the work item or independent review must clearly say that validation is incomplete and why.
+[[work/README]] owns workflow state. A slice can still be handed off with a blocker, but the work item or independent review must clearly say that validation is incomplete and why.

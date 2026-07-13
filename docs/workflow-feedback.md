@@ -4,7 +4,7 @@ Use this path to turn downstream evidence into reviewable improvements without a
 
 ## Downstream Collection
 
-The downstream Template Feedback Check creates `zettelkasten/00-governance/workflow-observations.md` only after evidence-backed friction. Normal tasks and one-off model mistakes produce no entry.
+The downstream Template Feedback Check creates `zettelkasten/workflow-observations.md` only after evidence-backed friction. Normal tasks and one-off model mistakes produce no entry.
 
 Useful evidence includes:
 

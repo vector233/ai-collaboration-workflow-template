@@ -6,4 +6,4 @@ This index is the routing surface for repository-specific procedural memory. Sca
 |---|---|---|---|---|---|
 | None |  |  |  |  |  |
 
-Create Skills from `zettelkasten/00-governance/templates/project-skill.md` and follow `zettelkasten/00-governance/skill-lifecycle.md`.
+Create Skills from `zettelkasten/templates/project-skill.md` and follow `zettelkasten/skill-lifecycle.md`.

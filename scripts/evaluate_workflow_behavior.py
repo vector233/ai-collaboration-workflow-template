@@ -14,6 +14,7 @@ DEFAULT_CASES = ROOT / "examples/evaluations/workflow-cases.json"
 FIELDS = (
     "route",
     "artifacts",
+    "gates",
     "isolation",
     "project_skills",
     "promote_project_skill",

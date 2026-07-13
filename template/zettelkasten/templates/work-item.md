@@ -39,10 +39,15 @@ related: []
 
 - Selected route: tracked / governed
 - User override, if any:
-- Separate TECH required: no / yes, because
-- Separate PLAN required: no / yes, because
-- Separate REVIEW required: no / yes, because
 - Isolation: task branch / dedicated worktree
+
+## Governed Gates
+
+Leave this section empty for tracked work. For governed work, each gate needs an owner and verifiable closing evidence.
+
+| Gate or decision | Owner or approver | Required evidence | Status |
+|---|---|---|---|
+|  |  |  | pending |
 
 ## Context Pack
 
@@ -63,11 +68,9 @@ related: []
 
 ## Technical Approach
 
-Keep the approach inline unless an independent TECH is triggered.
-
 - Confirmed cause or approach:
 - Compatibility and rollback:
-- Linked TECH, if any:
+- Durable decision or architecture note updated:
 
 ## Execution Slices
 
@@ -84,13 +87,11 @@ Keep the approach inline unless an independent TECH is triggered.
 
 ## Review
 
-Keep review evidence here unless an independent REVIEW is triggered.
-
 - Review mode: inline / independent / waived
 - Reviewer or source:
 - Evidence and findings:
 - Judgment and fixes:
-- Linked REVIEW, if any:
+- Linked Issue, pull request, or approval record, if any:
 
 ## Experience Candidates
 

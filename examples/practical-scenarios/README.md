@@ -8,7 +8,7 @@ Broken internal link, local and reversible:
 route Direct -> edit -> link check -> git diff --check -> context commit
 ```
 
-No WORK, TECH, PLAN, or REVIEW is created. If the failure reveals a repeatable authoring procedure, record it in the final context and consider a runbook or project Skill separately.
+No WORK is created. If the failure reveals a repeatable authoring procedure, record it in the final context and consider a runbook or project Skill separately.
 
 ## Tracked Bounded Bug
 
@@ -26,11 +26,11 @@ The WORK contains the root cause, affected paths, acceptance, validation, commit
 Schema migration with rollback and release ordering:
 
 ```text
-WORK -> independent TECH approval -> PLAN coordination -> dedicated worktree
--> per-slice commits and validation -> independent REVIEW -> experience promotion
+one WORK with migration, rollback, release, and approval gates -> dedicated worktree
+-> per-slice commits and validation -> approval evidence -> experience promotion
 ```
 
-All artifacts remain in `zettelkasten/06-work/`; their status changes in frontmatter.
+The WORK remains in `zettelkasten/work/`; its status and gate evidence change in place.
 
 ## Parallel Tasks
 

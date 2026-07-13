@@ -64,9 +64,9 @@ def validate_work_id(work_id: str) -> str:
 
 
 def work_path(root: Path, work_id: str) -> Path:
-    path = root / "zettelkasten/06-work" / f"{validate_work_id(work_id)}.md"
+    path = root / "zettelkasten/work" / f"{validate_work_id(work_id)}.md"
     if not path.parent.is_dir():
-        raise WorkflowTaskError("zettelkasten/06-work is missing; initialize the template first")
+        raise WorkflowTaskError("zettelkasten/work is missing; initialize the template first")
     return path
 
 
@@ -194,7 +194,7 @@ def command_new(args: argparse.Namespace) -> int:
     destination = work_path(root, work_id)
     if destination.exists():
         raise WorkflowTaskError(f"WORK already exists: {destination}")
-    template = root / "zettelkasten/00-governance/templates/work-item.md"
+    template = root / "zettelkasten/templates/work-item.md"
     if not template.is_file():
         raise WorkflowTaskError(f"WORK template is missing: {template}")
     title = single_line(args.title or args.slug.replace("-", " ").strip().title())

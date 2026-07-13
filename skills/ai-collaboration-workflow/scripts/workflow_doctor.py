@@ -17,22 +17,19 @@ CORE_FILES = (
     Path("AGENTS.md"),
     Path("CLAUDE.md"),
     Path("zettelkasten/AI.md"),
-    Path("zettelkasten/00-governance/ai-workflow.md"),
-    Path("zettelkasten/00-governance/skill-lifecycle.md"),
-    Path("zettelkasten/00-governance/git-collaboration.md"),
-    Path("zettelkasten/00-governance/templates/work-item.md"),
-    Path("zettelkasten/00-governance/templates/workflow-observations.md"),
-    Path("zettelkasten/06-work/README.md"),
+    Path("zettelkasten/workflow.md"),
+    Path("zettelkasten/skill-lifecycle.md"),
+    Path("zettelkasten/git-collaboration.md"),
+    Path("zettelkasten/templates/work-item.md"),
+    Path("zettelkasten/templates/workflow-observations.md"),
+    Path("zettelkasten/work/README.md"),
     Path("project-skills/INDEX.md"),
 )
 
-CORE_DIRECTORIES = (Path("zettelkasten/06-work"), Path("project-skills"))
+CORE_DIRECTORIES = (Path("zettelkasten/work"), Path("project-skills"))
 
 ARTIFACT_STATES = {
     "WORK-": {"backlog", "active", "blocked", "review", "done", "cancelled"},
-    "TECH-": {"pending", "approved", "implemented", "superseded"},
-    "PLAN-": {"draft", "ready", "executing", "completed", "superseded"},
-    "REVIEW-": {"pending", "in-review", "done", "waived"},
 }
 
 ACTIVE_WORK_STATES = {"active", "blocked", "review"}
@@ -225,7 +222,7 @@ def field_list(text: str, field: str) -> tuple[str, ...]:
 
 
 def workflow_artifacts(root: Path) -> list[Path]:
-    directory = root / "zettelkasten/06-work"
+    directory = root / "zettelkasten/work"
     if not directory.is_dir():
         return []
     return [
@@ -297,8 +294,6 @@ def check_placeholders(root: Path, findings: list[Finding]) -> None:
         matches = sorted(set(PLACEHOLDER_RE.findall(text)))
         if matches:
             add(findings, "ERROR", "unresolved placeholders: " + ", ".join(matches), relative(root, path))
-        if "UMBRELLA-ONLY" in text:
-            add(findings, "ERROR", "umbrella-mode marker remains", relative(root, path))
 
 
 def check_wiki_links(root: Path, findings: list[Finding]) -> None:

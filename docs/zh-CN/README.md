@@ -2,8 +2,6 @@
 
 这是面向 AI coding agents 的项目知识网络和轻量交付契约，不是自主执行 runtime。它让上下文暂时、来源不同、可能并行工作的 Agent 获得同一套可信项目知识，并把开发中新产生的知识写回仓库。
 
-这个版本只面向新项目初始化，不兼容也不迁移旧的移动状态目录架构。
-
 `template/` 是唯一 canonical 下游模板；中文文档只解释设计和使用方式，不复制一套中文模板。
 
 ## 新的轻量模型
@@ -14,7 +12,7 @@
 |---|---|---|
 | Direct | 本地、可逆、低风险、一个上下文 | 无流程文档，验证后提交 |
 | Tracked | 行为改动、调试连续性、多上下文 | 一个稳定 `WORK-*` |
-| Governed | 高风险、重要不确定性、独立审批、迁移、发布、多人协调 | `WORK-*` 加按需 TECH、PLAN、REVIEW |
+| Governed | 高风险、重要不确定性、独立审批、迁移、发布、多人协调 | 一个包含明确门禁和证据的 `WORK-*` |
 
 Router 不只看代码量，还判断影响范围、不确定性、风险与可逆性、持续时间、协作方式和验证要求。小型权限或数据修改也可能直接升级为 Governed。
 
@@ -30,9 +28,9 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 
 ## 为什么更轻
 
-- 所有工作流工件固定保存在 `zettelkasten/06-work/`，状态只更新 frontmatter，不移动文件。
+- 所有工作流工件固定保存在 `zettelkasten/work/`，状态只更新 frontmatter，不移动文件。
 - 普通任务在一个 WORK 中记录目标、方案、切片、验证、Review、上下文 checkpoint 和经验候选。
-- TECH、PLAN、REVIEW 只有在存在独立生命周期时才创建。
+- Governed 的决策、审批、发布条件和回滚证据仍记录在同一个 WORK 中。
 - 不再维护 `CURRENT.md`；通过当前 Git 分支和稳定 WORK 文件定位任务状态。
 - 项目级重复流程存入 `project-skills/`，根据索引触发后再加载，不塞进始终读取的 `AGENTS.md`。
 - 模板不依赖任何脚本；companion Skill 中的工具只做可选自动化。
@@ -45,7 +43,7 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 |---|---|
 | 所有 Agent 必须遵守的规则 | `AGENTS.md` |
 | Bug 根因、错误假设 | `gotchas.md` |
-| 架构事实和不变量 | architecture / cross-cutting note |
+| 架构事实和不变量 | `architecture.md` 或链接的领域知识笔记 |
 | 简单环境或验证步骤 | quick reference / runbook |
 | 有触发条件、验证和恢复步骤的稳定流程 | `project-skills/<name>/SKILL.md` 和 `project-skills/INDEX.md` |
 
@@ -55,7 +53,7 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 
 下游 Agent 只在重要 checkpoint、任务关闭或用户纠正流程行为后，静默判断是否出现有证据的模板摩擦。正常任务不创建反馈文件。
 
-项目特有经验仍写入本项目的规则、架构、gotcha、runbook 或项目 Skill。重复或高影响的模板级问题，以及明确的厂商特有问题，才按需写入 `zettelkasten/00-governance/workflow-observations.md`。
+项目特有经验仍写入本项目的规则、架构、gotcha、runbook 或项目 Skill。重复或高影响的模板级问题，以及明确的厂商特有问题，才按需写入 `zettelkasten/workflow-observations.md`。
 
 Companion Skill 可以在用户要求时对 observation 去重、验证和脱敏，但不得扫描无关项目、发送遥测，或未经用户明确批准创建上游 Issue/PR。
 
@@ -79,11 +77,11 @@ git worktree add ../<short-name> -b "task/${work_id}" <base>
 ```text
 AGENTS.md                      仓库级规则
 zettelkasten/AI.md             最小上下文入口
-zettelkasten/06-work/          路径稳定的 WORK/TECH/PLAN/REVIEW
+zettelkasten/work/             路径稳定的 WORK
 project-skills/INDEX.md        项目 Skill 触发索引
 ```
 
-知识分类如 overview、architecture、gotchas 和 runbook 仍然保留，因为它们有不同检索用途；本次主要合并的是容易产生状态重复和路径联动的执行工件。
+`project.md`、`architecture.md`、`gotchas.md` 和 runbook 等知识入口继续按检索用途保留；流程状态只由 WORK 承载。
 
 ## 初始化
 

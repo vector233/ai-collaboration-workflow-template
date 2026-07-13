@@ -9,7 +9,7 @@ Evidence-backed signals include repeated workflow workarounds, unnecessary artif
 ## Classify
 
 - Project-specific facts, commands, or procedures go to the project's normal Experience Promotion destinations.
-- Template-wide friction goes to `zettelkasten/00-governance/workflow-observations.md`, created on first use from the repository template.
+- Template-wide friction goes to `zettelkasten/workflow-observations.md`, created on first use from the repository template.
 - Vendor-specific behavior uses scope `vendor-specific` and must not change vendor-neutral rules without broader evidence.
 - One-off model mistakes, preferences, and unsupported opinions are not recorded.
 

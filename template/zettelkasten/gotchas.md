@@ -4,7 +4,7 @@ Each entry answers: **what happened, root cause, fix, lesson, and prevention rul
 
 AI agents should search this file before debugging or designing related changes.
 
-Promote a gotcha into `AGENTS.md`, an architecture note, a cross-cutting note, or a runbook when the lesson is a repository-wide rule rather than a local troubleshooting record.
+Promote a gotcha into `AGENTS.md`, an architecture or domain note, or a runbook when the lesson is a repository-wide rule rather than a local troubleshooting record.
 
 ## General
 
@@ -35,10 +35,10 @@ Promote a gotcha into `AGENTS.md`, an architecture note, a cross-cutting note, o
 
 **Prevention rule**: <must/never/prefer/check-before rule if this is likely to recur>
 
-**See also**: [[02-architecture/current-architecture-flow]] or `<path>`
+**See also**: [[architecture]] or `<path>`
 ```
 
 ## See Also
 
-- [[00-governance/decisions]] — architecture decisions
-- [[00-governance/ai-workflow]] — rule promotion and memory writeback rules
+- [[decisions]] — architecture decisions
+- [[workflow]] — rule promotion and memory writeback rules

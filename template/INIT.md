@@ -11,25 +11,16 @@ Required placeholders:
 | Placeholder | Meaning |
 |---|---|
 | `{{PROJECT_NAME}}` | project name |
-| `{{PROJECT_NAME_SAFE}}` | project-index filename without `.md` |
 | `{{PROJECT_DESCRIPTION}}` | one-sentence description |
 | `{{TECH_STACK}}` | short stack summary |
-| `{{REPO_TYPE}}` | `umbrella` or `single` |
-| `{{SUB_PROJECTS}}` | umbrella subproject table |
 | `{{DOMAINS}}` | domains and ports table |
 | `{{REPOS}}` | repository list |
 
 Ask for missing facts one at a time. Distinguish confirmed facts from assumptions.
 
-## 2. Replace And Rename
+## 2. Replace Placeholders
 
-Replace placeholders in Markdown under `zettelkasten/`. Rename:
-
-```bash
-mv 'zettelkasten/{{PROJECT_NAME}}.md' 'zettelkasten/<PROJECT_NAME_SAFE>.md'
-```
-
-For a single repository, remove `zettelkasten/04-cross-cutting/` and all `UMBRELLA-ONLY` blocks. For an umbrella repository, retain the content and remove marker comments.
+Replace placeholders in Markdown under `zettelkasten/`.
 
 Do not replace generic workflow examples with invented project facts.
 
@@ -38,12 +29,11 @@ Do not replace generic workflow examples with invented project facts.
 Rewrite these files with verified repository-specific content:
 
 - `AGENTS.md`: merge existing instructions; keep Direct/Tracked/Governed routing, project-Skill promotion, Git isolation, context commits, validation, and cross-agent rules.
-- `zettelkasten/00-governance/project-overview.md`: purpose, stack, modules, constraints.
-- `zettelkasten/01-overview/quick-reference.md`: commands, ports, URLs, repository locations.
-- `zettelkasten/01-overview/product-vision.md`: current product direction; mark unknowns.
-- `zettelkasten/02-architecture/current-architecture-flow.md`: verified current or planned flow.
-- `zettelkasten/05-reference/e2e-test.md`: known validation commands and realistic-environment gaps.
-- `zettelkasten/00-governance/git-collaboration.md`: preserve stricter local branch, PR, and merge policies.
+- `zettelkasten/project.md`: purpose, stack, modules, constraints.
+- `zettelkasten/quick-reference.md`: commands, ports, URLs, repository locations.
+- `zettelkasten/architecture.md`: verified current or planned flow.
+- `zettelkasten/validation-runbook.md`: known validation commands and realistic-environment gaps.
+- `zettelkasten/git-collaboration.md`: preserve stricter local branch, PR, and merge policies.
 
 Set every maintained note's `last_verified_at` to the initialization date. Notes with `review_after_days` must have a concrete ISO date before strict validation.
 
@@ -54,7 +44,7 @@ Keep `project-skills/INDEX.md` empty unless the repository already has a verifie
 The initialized project uses:
 
 ```text
-zettelkasten/06-work/     stable WORK, TECH, PLAN, and REVIEW files
+zettelkasten/work/        stable WORK files
 project-skills/           on-demand repository procedures
 ```
 
@@ -78,10 +68,6 @@ Do not create a branch, worktree, or commit merely to initialize the template un
 ```bash
 if grep -rE '\{\{[A-Z_]+\}\}' zettelkasten/ 2>/dev/null; then
   echo 'FAIL: placeholders remain'
-fi
-
-if grep -r 'UMBRELLA-ONLY' zettelkasten/ 2>/dev/null; then
-  echo 'FAIL: umbrella markers remain'
 fi
 
 git diff --check

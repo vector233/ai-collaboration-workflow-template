@@ -5,8 +5,8 @@ project: {{PROJECT_NAME}}
 last_verified_at: YYYY-MM-DD
 source_of_truth: project
 related:
-  - "[[00-governance/ai-workflow]]"
-  - "[[00-governance/gotchas]]"
+  - "[[workflow]]"
+  - "[[gotchas]]"
 ---
 
 # Workflow Observations

@@ -4,8 +4,6 @@ A vendor-neutral project knowledge network and lightweight delivery contract for
 
 The template gives capable but context-temporary, vendor-diverse, and potentially parallel agents the same trusted project knowledge, then makes durable writeback part of delivery. It is not an autonomous runtime and requires no helper tool to remain usable.
 
-This version is intended for new projects. It does not migrate or emulate the previous moving-state layout.
-
 ## Core Model
 
 ```text
@@ -21,7 +19,7 @@ Task
 |---|---|---|
 | Direct | local, reversible, low-risk, one context | none; validate and commit |
 | Tracked | behavior change, debugging continuity, multiple contexts | one stable `WORK-*` |
-| Governed | high risk, important uncertainty, independent approval, migration, release, multi-owner coordination | `WORK-*` plus only triggered TECH, PLAN, or REVIEW artifacts |
+| Governed | high risk, important uncertainty, independent approval, migration, release, multi-owner coordination | one `WORK-*` with explicit gates and evidence |
 
 Routing considers scope, uncertainty, risk, reversibility, duration, coordination, and verification. A small security or data change can be Governed even when its diff is tiny.
 
@@ -39,7 +37,7 @@ A project must remain understandable and operable after removing the companion S
 
 - Workflow files never move between status directories; frontmatter is the state.
 - Ordinary tracked work keeps requirement, approach, slices, validation, review, checkpoint, and experience candidates in one `WORK-*`.
-- TECH, PLAN, and REVIEW are optional independent artifacts, not mandatory stages.
+- Governed decisions, approvals, release conditions, and rollback evidence stay in the same WORK record.
 - There is no manually duplicated `CURRENT.md`; the current branch and stable WORK files expose active state.
 - Project Skills load on demand from a compact trigger index instead of expanding `AGENTS.md`.
 - Knowledge categories remain separate where they improve retrieval, but active workflow state is consolidated under one directory.
@@ -54,8 +52,8 @@ Each tracked work item has an Experience Candidates table. At context checkpoint
 | Experience | Destination |
 |---|---|
 | repository-wide mandatory behavior | `AGENTS.md` |
-| bug root or false assumption | `zettelkasten/00-governance/gotchas.md` |
-| architecture fact or invariant | architecture or cross-cutting note |
+| bug root or false assumption | `zettelkasten/gotchas.md` |
+| architecture fact or invariant | `zettelkasten/architecture.md` or a linked domain note |
 | simple setup or validation flow | quick reference or runbook |
 | stable conditional multi-step procedure | `project-skills/<name>/SKILL.md` plus `project-skills/INDEX.md` |
 
@@ -63,7 +61,7 @@ Project Skills include concrete triggers, exclusions, procedure, validation, rec
 
 ## Project-To-Template Feedback
 
-Downstream agents silently check for workflow friction only at meaningful checkpoints or after a user correction. Normal tasks create no feedback artifact. Evidence-backed template-wide or vendor-specific observations are stored locally in `zettelkasten/00-governance/workflow-observations.md`, created only on first use.
+Downstream agents silently check for workflow friction only at meaningful checkpoints or after a user correction. Normal tasks create no feedback artifact. Evidence-backed template-wide or vendor-specific observations are stored locally in `zettelkasten/workflow-observations.md`, created only on first use.
 
 The companion Skill can classify, deduplicate, and sanitize those observations when the user asks to prepare upstream feedback. It never scans unrelated projects, sends telemetry, or creates an Issue or PR without explicit user approval.
 
@@ -102,11 +100,11 @@ The agent starts with `AGENTS.md` and `zettelkasten/AI.md`, then reads a branch-
 Create tracked work from the repository template:
 
 ```bash
-cp zettelkasten/00-governance/templates/work-item.md \
-  zettelkasten/06-work/WORK-<timestamp>-<slug>.md
+cp zettelkasten/templates/work-item.md \
+  zettelkasten/work/WORK-<timestamp>-<slug>.md
 ```
 
-Update frontmatter and checkpoint fields directly. All WORK, TECH, PLAN, and REVIEW files remain under `zettelkasten/06-work/` for their full lifecycle. The companion Skill offers optional Doctor, WORK, and worktree helpers for teams that want deterministic automation.
+Update frontmatter and checkpoint fields directly. A WORK remains under `zettelkasten/work/` for its full lifecycle. The companion Skill offers optional Doctor, WORK, and worktree helpers for teams that want deterministic automation.
 
 ## Structure
 
@@ -119,13 +117,13 @@ template/
     INDEX.md
   zettelkasten/
     AI.md
-    00-governance/
-    01-overview/
-    02-architecture/
-    03-roadmap/
-    04-cross-cutting/
-    05-reference/
-    06-work/
+    project.md
+    architecture.md
+    workflow.md
+    validation-policy.md
+    validation-runbook.md
+    templates/
+    work/
 ```
 
 `template/` is the only downstream payload. This maintenance repository intentionally has no second root `zettelkasten/`.

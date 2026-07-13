@@ -1,17 +1,17 @@
 # {{PROJECT_NAME}} AI Knowledge Entry
 
-The human-readable project index is [[{{PROJECT_NAME_SAFE}}]]. Repository rules are in `AGENTS.md`.
+The project overview is [[project]]. Repository rules are in `AGENTS.md`.
 
-Template baseline: `canonical-payload-v3`. Use a release tag or commit instead when known more precisely.
+Template baseline: `canonical-payload-v4`. Use a release tag or commit instead when known more precisely.
 
 ## Resume With Minimal Context
 
 1. Read `AGENTS.md`.
-2. Inspect the current Git branch and `06-work/` index.
+2. Inspect the current Git branch and `work/` index.
 3. Read the active `WORK-*` matching the branch or assigned task, when one exists.
 4. Read only its linked architecture notes, runbooks, and matching entry from `project-skills/INDEX.md`.
 
-Do not load the whole vault by default. Workflow state lives in stable files under [[06-work/README]], not in chat history or a manually duplicated current-state note.
+Do not load the whole vault by default. Workflow state lives in stable files under [[work/README]], not in chat history or a manually duplicated current-state note.
 
 For parallel coordination, compare active WORK branch and owned-path fields with registered Git worktrees. Optional companion-Skill tools may automate this inspection.
 
@@ -25,27 +25,27 @@ For parallel coordination, compare active WORK branch and owned-path fields with
 
 ## Route Tasks
 
-Use [[00-governance/ai-workflow]] to choose Direct, Tracked, or Governed work. Route by scope, uncertainty, risk, reversibility, duration, coordination, and verification needs.
+Use [[workflow]] to choose Direct, Tracked, or Governed work. Route by scope, uncertainty, risk, reversibility, duration, coordination, and verification needs.
 
 - Direct work creates no workflow artifact.
-- Tracked work creates one `WORK-*` under [[06-work/README]].
-- Governed work adds independent TECH, PLAN, or REVIEW files only when triggered.
+- Tracked work creates one `WORK-*` under [[work/README]].
+- Governed work uses the same `WORK-*`, with explicit decisions, approvals, owners, evidence, and gates.
 
 ## Knowledge Routing
 
 | Need | Read |
 |---|---|
-| Commands, ports, local setup | [[01-overview/quick-reference]] |
-| Project scope and constraints | [[00-governance/project-overview]] |
-| Current architecture | [[02-architecture/current-architecture-flow]] |
-| Decisions and rationale | [[00-governance/decisions]] |
-| Known failure modes | [[00-governance/gotchas]] |
-| Validation policy and flows | [[00-governance/validation-discipline]], [[05-reference/e2e-test]] |
-| Active or historical task state | [[06-work/README]] |
+| Commands, ports, local setup | [[quick-reference]] |
+| Project scope and constraints | [[project]] |
+| Current architecture | [[architecture]] |
+| Decisions and rationale | [[decisions]] |
+| Known failure modes | [[gotchas]] |
+| Validation policy and flows | [[validation-policy]], [[validation-runbook]] |
+| Active or historical task state | [[work/README]] |
 | On-demand project procedures | `project-skills/INDEX.md` |
-| Skill creation and maintenance | [[00-governance/skill-lifecycle]] |
-| Parallel Git work | [[00-governance/git-collaboration]] |
-| Evidence-backed workflow or template friction | [[00-governance/ai-workflow]] Template Feedback Check |
+| Skill creation and maintenance | [[skill-lifecycle]] |
+| Parallel Git work | [[git-collaboration]] |
+| Evidence-backed workflow or template friction | [[workflow]] Template Feedback Check |
 
 ## Writeback
 

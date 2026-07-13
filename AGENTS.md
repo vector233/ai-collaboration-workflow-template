@@ -30,7 +30,7 @@ This repository develops and distributes the AI Collaboration Workflow Template.
 6. End each agent context that produces persistent changes, or each coherent slice, with a task-scoped commit. Do not create empty commits for read-only analysis. Keep incomplete checkpoints off `main`.
 7. Run a Rule Promotion Check for long tasks, fixes, and review corrections: if the lesson would prevent a likely repeat mistake, record durable maintainer guidance in `AGENTS.md`, `CONTRIBUTING.md`, or `docs/`.
 
-The Direct/Tracked/Governed routing model, stable WORK artifacts, optional TECH/PLAN/REVIEW gates, project-Skill promotion, and Git isolation policy are the product being distributed. Downstream WORK artifacts are not required for routine maintenance of this template repository itself.
+The Direct/Tracked/Governed routing model, single stable WORK record, governed gates, project-Skill promotion, and Git isolation policy are the product being distributed. Downstream WORK records are not required for routine maintenance of this template repository itself.
 
 ## Review Rules
 

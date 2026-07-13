@@ -6,9 +6,9 @@ last_verified_at: YYYY-MM-DD
 source_of_truth: project
 review_after_days: 180
 related:
-  - "[[00-governance/ai-workflow]]"
-  - "[[00-governance/gotchas]]"
-  - "[[06-work/README]]"
+  - "[[workflow]]"
+  - "[[gotchas]]"
+  - "[[work/README]]"
 ---
 
 # Project Skill Lifecycle
@@ -33,7 +33,7 @@ Do not promote story-specific implementation detail, temporary incidents, guesse
 
 1. Record a candidate in the active `WORK-*`.
 2. Check existing entries in `project-skills/INDEX.md` and update instead of duplicating.
-3. Copy [[00-governance/templates/project-skill]] to `project-skills/<skill-name>/SKILL.md`.
+3. Copy [[templates/project-skill]] to `project-skills/<skill-name>/SKILL.md`.
 4. Keep Skill frontmatter limited to `name` and `description`; the description must contain concrete triggers.
 5. Add use, non-use, procedure, validation, recovery, and provenance sections.
 6. Add or update the compact routing row in `project-skills/INDEX.md`, including status, verification date, and review interval.

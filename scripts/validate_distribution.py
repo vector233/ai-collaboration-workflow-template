@@ -27,42 +27,34 @@ REQUIRED_FILES = (
     Path("CLAUDE.md"),
     Path("INIT.md"),
     Path("zettelkasten/AI.md"),
-    Path("zettelkasten/00-governance/ai-workflow.md"),
-    Path("zettelkasten/00-governance/skill-lifecycle.md"),
-    Path("zettelkasten/00-governance/git-collaboration.md"),
-    Path("zettelkasten/00-governance/templates/work-item.md"),
-    Path("zettelkasten/00-governance/templates/project-skill.md"),
-    Path("zettelkasten/00-governance/templates/workflow-observations.md"),
-    Path("zettelkasten/06-work/README.md"),
+    Path("zettelkasten/workflow.md"),
+    Path("zettelkasten/skill-lifecycle.md"),
+    Path("zettelkasten/git-collaboration.md"),
+    Path("zettelkasten/templates/work-item.md"),
+    Path("zettelkasten/templates/project-skill.md"),
+    Path("zettelkasten/templates/workflow-observations.md"),
+    Path("zettelkasten/work/README.md"),
     Path("project-skills/INDEX.md"),
 )
 
 REQUIRED_DIRECTORIES = (
-    Path("zettelkasten/06-work"),
+    Path("zettelkasten/work"),
     Path("project-skills"),
-)
-
-V1_ONLY_PATHS = (
-    Path("zettelkasten/CURRENT.md"),
-    Path("zettelkasten/06-requirements"),
-    Path("zettelkasten/07-review"),
-    Path("zettelkasten/08-technical-designs"),
-    Path("zettelkasten/09-implementation-plans"),
 )
 
 FORBIDDEN_PAYLOAD_TEXT = (
     "vector233",
     "community-publishing",
-    "REQ-20260618170000-shareable-workflow-skill",
+    "REQ-",
+    "TECH-",
+    "PLAN-",
+    "REVIEW-",
 )
 
 PLACEHOLDERS = {
     "{{PROJECT_NAME}}": "ExampleSaaS",
-    "{{PROJECT_NAME_SAFE}}": "ExampleSaaS",
     "{{PROJECT_DESCRIPTION}}": "A sample project used to validate distribution",
     "{{TECH_STACK}}": "Python, SQLite, HTML",
-    "{{REPO_TYPE}}": "single",
-    "{{SUB_PROJECTS}}": "Not applicable.",
     "{{DOMAINS}}": "| Environment | Domain / port |\n|---|---|\n| Local | localhost:8000 |",
     "{{REPOS}}": "- example/example-saas",
 }
@@ -95,15 +87,24 @@ def run(
 def validate_payload() -> None:
     require(MARKER.is_file(), "payload marker is missing")
     require(
-        MARKER.read_text().strip() == "canonical-payload-v3",
+        MARKER.read_text().strip() == "canonical-payload-v4",
         "payload marker version is incorrect",
     )
     for path in REQUIRED_FILES:
         require((PAYLOAD / path).is_file(), f"payload file is missing: {path}")
     for path in REQUIRED_DIRECTORIES:
         require((PAYLOAD / path).is_dir(), f"payload directory is missing: {path}")
-    for path in V1_ONLY_PATHS:
-        require(not (PAYLOAD / path).exists(), f"v1-only path remains: {path}")
+    vault_directories = {
+        path.name for path in (PAYLOAD / "zettelkasten").iterdir() if path.is_dir()
+    }
+    require(
+        vault_directories == {"templates", "work"},
+        f"unexpected knowledge directories: {sorted(vault_directories)}",
+    )
+    require(
+        not any(re.match(r"^\d\d-", path.name) for path in PAYLOAD.rglob("*")),
+        "numbered knowledge layout remains in the payload",
+    )
     require(not (PAYLOAD / "scripts").exists(), "optional tooling leaked into the core payload")
 
     agents = (PAYLOAD / "AGENTS.md").read_text()
@@ -120,19 +121,19 @@ def validate_payload() -> None:
         "CLAUDE.md is not an adapter",
     )
 
-    workflow = (PAYLOAD / "zettelkasten/00-governance/ai-workflow.md").read_text()
+    workflow = (PAYLOAD / "zettelkasten/workflow.md").read_text()
     for expected in (
         "## Route Decision",
         "Direct",
         "Tracked",
         "Governed",
-        "## Stable Work Artifacts",
+        "## Stable Work Record",
         "## Experience Promotion Check",
     ):
         require(expected in workflow, f"workflow is missing {expected}")
 
     skill_template = (
-        PAYLOAD / "zettelkasten/00-governance/templates/project-skill.md"
+        PAYLOAD / "zettelkasten/templates/project-skill.md"
     ).read_text()
     for section in (
         "## Use",
@@ -174,25 +175,14 @@ def initialize_target(target: Path) -> None:
         for placeholder, value in PLACEHOLDERS.items():
             text = text.replace(placeholder, value)
         text = text.replace("YYYY-MM-DD", today)
-        text = re.sub(
-            r"<!-- UMBRELLA-ONLY.*?<!-- /UMBRELLA-ONLY -->\n?",
-            "",
-            text,
-            flags=re.DOTALL,
-        )
         path.write_text(text)
 
-    source_index = vault / "{{PROJECT_NAME}}.md"
-    require(source_index.is_file(), "project index placeholder file is missing")
-    source_index.rename(vault / "ExampleSaaS.md")
-    shutil.rmtree(vault / "04-cross-cutting")
     (target / MARKER.name).unlink()
     (target / "INIT.md").unlink()
 
     for path in vault.rglob("*.md"):
         text = path.read_text()
         require(not re.search(r"\{\{[A-Z_]+\}\}", text), f"placeholder remains: {path}")
-        require("UMBRELLA-ONLY" not in text, f"umbrella marker remains: {path}")
 
 
 def initialize_git(target: Path) -> None:
@@ -219,8 +209,8 @@ def copy_artifact(
     output: str,
     replacements: dict[str, str],
 ) -> Path:
-    source = target / f"zettelkasten/00-governance/templates/{template}"
-    destination = target / f"zettelkasten/06-work/{output}"
+    source = target / f"zettelkasten/templates/{template}"
+    destination = target / f"zettelkasten/work/{output}"
     shutil.copy2(source, destination)
     text = destination.read_text()
     for old, new in replacements.items():
@@ -248,8 +238,8 @@ def validate_tool_free_core(target: Path) -> None:
     require("## Experience Candidates" in text, "manual core path lost knowledge writeback")
     work.unlink()
 
-    observation_template = target / "zettelkasten/00-governance/templates/workflow-observations.md"
-    observation = target / "zettelkasten/00-governance/workflow-observations.md"
+    observation_template = target / "zettelkasten/templates/workflow-observations.md"
+    observation = target / "zettelkasten/workflow-observations.md"
     shutil.copy2(observation_template, observation)
     observation_text = observation.read_text()
     for expected in (
@@ -264,7 +254,7 @@ def validate_tool_free_core(target: Path) -> None:
 
 def create_governed_and_done_state(target: Path) -> None:
     governed_id = "WORK-20260712120000-governed-change"
-    copy_artifact(
+    governed = copy_artifact(
         target,
         "work-item.md",
         f"{governed_id}.md",
@@ -273,36 +263,14 @@ def create_governed_and_done_state(target: Path) -> None:
             "route: tracked": "route: governed",
             "branch: task/work-id-short-name": "branch: task/governed-change",
             "next_action: clarify acceptance criteria": "next_action: approve design",
+            "|  |  |  | pending |": (
+                "| Migration and rollback approval | release owner | reviewed decision and rollback rehearsal | approved |"
+            ),
         },
     )
-    copy_artifact(
-        target,
-        "technical-design.md",
-        "TECH-20260712120100-governed-change.md",
-        {
-            "TECH-YYYYMMDDHHMMSS-short-name": "TECH-20260712120100-governed-change",
-            "WORK-YYYYMMDDHHMMSS-short-name": governed_id,
-            "status: pending": "status: approved",
-        },
-    )
-    copy_artifact(
-        target,
-        "implementation-plan.md",
-        "PLAN-20260712120200-governed-change.md",
-        {
-            "PLAN-YYYYMMDDHHMMSS-short-name": "PLAN-20260712120200-governed-change",
-            "WORK-YYYYMMDDHHMMSS-short-name": governed_id,
-            "status: draft": "status: ready",
-        },
-    )
-    copy_artifact(
-        target,
-        "review.md",
-        "REVIEW-20260712120300-governed-change.md",
-        {
-            "REVIEW-YYYYMMDDHHMMSS-short-name": "REVIEW-20260712120300-governed-change",
-            "WORK-YYYYMMDDHHMMSS-short-name": governed_id,
-        },
+    require(
+        "Migration and rollback approval" in governed.read_text(),
+        "governed gate was not recorded in the WORK",
     )
 
     done_id = "WORK-20260712121000-closed-change"
@@ -335,7 +303,7 @@ def create_project_skill(target: Path) -> None:
     directory = target / "project-skills" / skill_name
     directory.mkdir()
     shutil.copy2(
-        target / "zettelkasten/00-governance/templates/project-skill.md",
+        target / "zettelkasten/templates/project-skill.md",
         directory / "SKILL.md",
     )
     skill_file = directory / "SKILL.md"
@@ -379,13 +347,12 @@ def create_tracked_work_with_cli(target: Path) -> str:
         cwd=target,
     )
     require(json.loads(result.stdout)["work_id"] == work_id, "WORK CLI returned wrong ID")
-    work_root = target / "zettelkasten/06-work"
-    related_optional = [
-        path
-        for prefix in ("TECH", "PLAN", "REVIEW")
-        for path in work_root.glob(f"{prefix}-*tracked-bug.md")
-    ]
-    require(not related_optional, "Tracked work created an unnecessary optional artifact")
+    work_root = target / "zettelkasten/work"
+    require(
+        sorted(path.name for path in work_root.glob("*.md") if path.name != "README.md")
+        == [f"{work_id}.md"],
+        "Tracked work created more than one workflow record",
+    )
     return work_id
 
 
@@ -409,7 +376,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         ],
         cwd=target,
     )
-    text = (target / f"zettelkasten/06-work/{work_id}.md").read_text()
+    text = (target / f"zettelkasten/work/{work_id}.md").read_text()
     require("- Last completed step: confirmed root cause" in text, "checkpoint was not written")
     require(
         'owned_paths: ["src/shared/module", "docs/runbooks"]' in text,
@@ -433,7 +400,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         ],
         cwd=target,
     )
-    governed_path = target / f"zettelkasten/06-work/{governed_id}.md"
+    governed_path = target / f"zettelkasten/work/{governed_id}.md"
     governed_text = governed_path.read_text()
     require("- Selected route: governed" in governed_text, "governed route bullet was not written")
     require("governed / governed" not in governed_text, "governed route replacement corrupted the template")
@@ -468,7 +435,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         ],
         cwd=target,
     )
-    close_path = target / f"zettelkasten/06-work/{close_id}.md"
+    close_path = target / f"zettelkasten/work/{close_id}.md"
     pending_close = run(
         [
             sys.executable,
@@ -511,7 +478,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
 
 
 def validate_doctor_regressions(target: Path, work_id: str) -> None:
-    work = target / f"zettelkasten/06-work/{work_id}.md"
+    work = target / f"zettelkasten/work/{work_id}.md"
     original = work.read_text()
     work.write_text(original.replace('branch: "task/tracked-bug"', "branch:"))
     blank_branch = run(
@@ -570,7 +537,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     require("ambiguous wiki link [[README]]" in ambiguity.stdout, "ambiguous wiki link passed")
     ambiguous.unlink()
 
-    stale = target / "zettelkasten/05-reference/stale-test.md"
+    stale = target / "zettelkasten/stale-test.md"
     stale.write_text(
         "---\ntitle: Stale Test\nstatus: active\nlast_verified_at: 2000-01-01\n"
         "review_after_days: 1\n---\n\n# Stale Test\n"
@@ -579,7 +546,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     require("knowledge is stale" in stale_result.stdout, "stale knowledge was not reported")
     stale.unlink()
 
-    invalid_interval = target / "zettelkasten/05-reference/invalid-interval.md"
+    invalid_interval = target / "zettelkasten/invalid-interval.md"
     invalid_interval.write_text(
         "---\ntitle: Invalid Interval\nstatus: active\nlast_verified_at: 2026-07-12\n"
         "review_after_days: 0\n---\n\n# Invalid Interval\n"
@@ -891,7 +858,7 @@ def validate_repository_layout() -> None:
         require(expected in chinese_readme, f"Chinese guide is missing product boundary text: {expected}")
     publishing = (ROOT / "docs/community-publishing.md").read_text()
     require("-> Doctor" not in publishing, "publishing copy makes the optional Doctor a fixed stage")
-    git_collaboration = (PAYLOAD / "zettelkasten/00-governance/git-collaboration.md").read_text()
+    git_collaboration = (PAYLOAD / "zettelkasten/git-collaboration.md").read_text()
     require("date +%Y%m%d%H%M%S" in git_collaboration, "manual WORK ID recipe is not locally discoverable")
     feedback_guide = ROOT / "docs/workflow-feedback.md"
     require(feedback_guide.is_file(), "workflow feedback maintainer guide is missing")

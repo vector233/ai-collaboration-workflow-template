@@ -14,8 +14,8 @@
 | Lesson | Destination |
 |---|---|
 | repository-wide must/never/check-before | `AGENTS.md` |
-| root cause or false assumption | `zettelkasten/00-governance/gotchas.md` |
-| architecture invariant | architecture or cross-cutting note |
+| root cause or false assumption | `zettelkasten/gotchas.md` |
+| architecture invariant | `zettelkasten/architecture.md` or a linked domain note |
 | simple setup or validation sequence | quick reference or runbook |
 | conditional multi-step procedure | `project-skills/<name>/SKILL.md` and `project-skills/INDEX.md` |
 | evidence-backed workflow-template friction | use the template feedback workflow and record a local workflow observation |

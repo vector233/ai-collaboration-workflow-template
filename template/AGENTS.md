@@ -6,7 +6,7 @@ Read only the smallest context needed:
 
 1. `AGENTS.md`
 2. `zettelkasten/AI.md`
-3. the current Git branch and matching `zettelkasten/06-work/WORK-*.md`, when one exists
+3. the current Git branch and matching `zettelkasten/work/WORK-*.md`, when one exists
 4. `project-skills/INDEX.md` for a matching procedure
 5. only the linked architecture note, runbook, or project Skill needed for the current slice
 
@@ -14,17 +14,17 @@ Repository files are the durable source of truth. Chat history and vendor memory
 
 ## Workflow Routing
 
-Before editing, choose the lightest safe route from `zettelkasten/00-governance/ai-workflow.md`:
+Before editing, choose the lightest safe route from `zettelkasten/workflow.md`:
 
 - **Direct**: local, reversible, low-risk work. No workflow artifact is required.
 - **Tracked**: create one stable `WORK-*` document with scope, acceptance, validation, checkpoints, review, and experience candidates.
-- **Governed**: use a `WORK-*` document and create separate `TECH-*`, `PLAN-*`, or `REVIEW-*` documents only when they need an independent lifecycle.
+- **Governed**: create one `WORK-*` and record required decisions, approvals, owners, evidence, and release or rollback gates in that file.
 
 Route by scope, uncertainty, risk, reversibility, duration, and coordination. A small security, permission, billing, migration, production, or destructive change is governed even when its code diff is small.
 
 Do not move workflow files to represent state. Update frontmatter in place so links remain stable.
 
-Create and update WORK artifacts from `zettelkasten/00-governance/templates/work-item.md`. Optional companion-Skill tools may automate the same Markdown updates, but repository files remain authoritative.
+Create and update WORK artifacts from `zettelkasten/templates/work-item.md`. Optional companion-Skill tools may automate the same Markdown updates, but repository files remain authoritative.
 
 ## Project Skills And Experience
 
@@ -33,27 +33,27 @@ Project Skills are durable, on-demand procedures under `project-skills/`. Scan `
 At each context checkpoint, record reusable experience candidates in the active work item. Before closing tracked or governed work, run the Experience Promotion Check:
 
 - repository-wide must/never/check-before behavior -> `AGENTS.md`;
-- bug roots and false assumptions -> `zettelkasten/00-governance/gotchas.md`;
-- architecture facts and invariants -> architecture or cross-cutting notes;
+- bug roots and false assumptions -> `zettelkasten/gotchas.md`;
+- architecture facts and invariants -> `zettelkasten/architecture.md` or a linked domain note;
 - simple commands and environment steps -> runbooks;
 - repeated, stable, multi-step procedures with validation and recovery -> `project-skills/<skill-name>/SKILL.md` plus `project-skills/INDEX.md`.
 
-Do not create a Skill from a one-off incident, an unverified guess, or a procedure that is simpler as a short rule or runbook entry. Follow `zettelkasten/00-governance/skill-lifecycle.md`.
+Do not create a Skill from a one-off incident, an unverified guess, or a procedure that is simpler as a short rule or runbook entry. Follow `zettelkasten/skill-lifecycle.md`.
 
 ## Workflow Feedback
 
 At a tracked or governed checkpoint, at closeout, or after the user corrects workflow behavior, silently check for evidence-backed template friction. Record nothing when the workflow was adequate.
 
 - Project-specific lessons follow the normal Experience Promotion destinations.
-- Repeated or high-impact template-wide friction goes to `zettelkasten/00-governance/workflow-observations.md`, created on first use from the repository template.
+- Repeated or high-impact template-wide friction goes to `zettelkasten/workflow-observations.md`, created on first use from the repository template.
 - Vendor-specific behavior is labeled separately and must not become a vendor-neutral core rule without cross-agent evidence.
 - Never include secrets, customer data, private code, or internal identifiers. Never transmit feedback or create an upstream issue without explicit user approval.
 
-Follow the Template Feedback Check in `zettelkasten/00-governance/ai-workflow.md`.
+Follow the Template Feedback Check in `zettelkasten/workflow.md`.
 
 ## Git Isolation And Commits
 
-Follow `zettelkasten/00-governance/git-collaboration.md` unless stricter repository rules apply.
+Follow `zettelkasten/git-collaboration.md` unless stricter repository rules apply.
 
 - Do not implement tracked or governed work directly on `main` or `master`.
 - Use one task branch per work item. Use one Git worktree per concurrently active task or agent.
@@ -65,10 +65,10 @@ Follow `zettelkasten/00-governance/git-collaboration.md` unless stricter reposit
 
 ## Validation And Review
 
-- Use project commands from `zettelkasten/01-overview/quick-reference.md` and `zettelkasten/05-reference/e2e-test.md`.
+- Use project commands from `zettelkasten/quick-reference.md` and `zettelkasten/validation-runbook.md`.
 - Do not claim checks that did not run. Record blockers and residual risk.
 - Treat review feedback as a hypothesis. Verify it with code, commands, logs, screenshots, commits, or official references.
-- Keep review inline in the work item by default. Create a separate `REVIEW-*` only for independent reviewers, multiple rounds, high risk, or a distinct approval lifecycle.
+- Keep review and approval evidence in the work item. Link project-native Issues, pull requests, or decision records when another system owns the approval.
 - Check changed knowledge links, work state, and project-Skill routing before handoff. Optional companion-Skill tools may automate these checks.
 - Coordinate parallel tasks from Git branches, worktrees, and declared owned paths; do not depend on hidden tool state.
 

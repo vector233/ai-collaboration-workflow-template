@@ -6,16 +6,16 @@ last_verified_at: YYYY-MM-DD
 source_of_truth: mixed
 review_after_days: 90
 related:
-  - "[[00-governance/ai-workflow]]"
-  - "[[00-governance/validation-discipline]]"
-  - "[[06-work/README]]"
+  - "[[workflow]]"
+  - "[[validation-policy]]"
+  - "[[work/README]]"
 ---
 
 # E2E Test Runbook
 
 ## What This Answers
 
-This note records the project-specific commands and evidence rules for realistic validation. [[00-governance/validation-discipline]] defines when realistic validation is required; this runbook defines how to perform it for this project.
+This note records the project-specific commands and evidence rules for realistic validation. [[validation-policy]] defines when realistic validation is required; this runbook defines how to perform it for this project.
 
 ## Local Checks
 

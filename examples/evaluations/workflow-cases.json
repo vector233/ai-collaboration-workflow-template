@@ -6,6 +6,7 @@
     "expected": {
       "route": "direct",
       "artifacts": [],
+      "gates": [],
       "isolation": "current-branch",
       "project_skills": [],
       "promote_project_skill": false,
@@ -21,6 +22,7 @@
     "expected": {
       "route": "tracked",
       "artifacts": ["WORK"],
+      "gates": [],
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,
@@ -35,7 +37,8 @@
     "available_project_skills": [],
     "expected": {
       "route": "governed",
-      "artifacts": ["WORK", "REVIEW"],
+      "artifacts": ["WORK"],
+      "gates": ["independent-authorization-approval"],
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,
@@ -51,6 +54,7 @@
     "expected": {
       "route": "tracked",
       "artifacts": ["WORK"],
+      "gates": [],
       "isolation": "dedicated-worktree",
       "project_skills": [],
       "promote_project_skill": false,
@@ -66,6 +70,7 @@
     "expected": {
       "route": "tracked",
       "artifacts": ["WORK"],
+      "gates": [],
       "isolation": "task-branch",
       "project_skills": ["reset-provider-sandbox"],
       "promote_project_skill": false,
@@ -81,6 +86,7 @@
     "expected": {
       "route": "direct",
       "artifacts": [],
+      "gates": [],
       "isolation": "current-branch",
       "project_skills": [],
       "promote_project_skill": false,
@@ -96,6 +102,7 @@
     "expected": {
       "route": "tracked",
       "artifacts": ["WORK", "WORKFLOW_OBSERVATION"],
+      "gates": [],
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,

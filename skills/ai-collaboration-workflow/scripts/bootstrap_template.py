@@ -22,12 +22,12 @@ PAYLOAD_REQUIRED_FILES = (
     Path("CLAUDE.md"),
     Path("INIT.md"),
     Path("zettelkasten/AI.md"),
-    Path("zettelkasten/00-governance/ai-workflow.md"),
-    Path("zettelkasten/00-governance/skill-lifecycle.md"),
-    Path("zettelkasten/00-governance/git-collaboration.md"),
-    Path("zettelkasten/00-governance/templates/work-item.md"),
-    Path("zettelkasten/00-governance/templates/workflow-observations.md"),
-    Path("zettelkasten/06-work/README.md"),
+    Path("zettelkasten/workflow.md"),
+    Path("zettelkasten/skill-lifecycle.md"),
+    Path("zettelkasten/git-collaboration.md"),
+    Path("zettelkasten/templates/work-item.md"),
+    Path("zettelkasten/templates/workflow-observations.md"),
+    Path("zettelkasten/work/README.md"),
     Path("project-skills/INDEX.md"),
 )
 
@@ -36,7 +36,7 @@ INSTALLED_REQUIRED_FILES = tuple(
 )
 
 REQUIRED_DIRECTORIES = (
-    Path("zettelkasten/06-work"),
+    Path("zettelkasten/work"),
     Path("project-skills"),
 )
 

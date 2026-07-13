@@ -81,6 +81,6 @@ npm run lint
 
 ## See Also
 
-- [[01-overview/product-vision]] — product positioning and audience
-- [[02-architecture/current-architecture-flow]] — current architecture flow
-- [[00-governance/glossary]] — terminology
+- [[project]] — product positioning and audience
+- [[architecture]] — current architecture flow
+- [[glossary]] — terminology

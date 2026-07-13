@@ -12,11 +12,11 @@ Append durable decisions. Supersede historical decisions with a new entry instea
 
 ## AD-002: Keep Work Paths Stable
 
-**Decision**: all WORK, TECH, PLAN, and REVIEW artifacts live directly under [[06-work/README]]. Status is frontmatter, not a directory move.
+**Decision**: every tracked or governed task has at most one workflow-specific `WORK-*` record under [[work/README]]. Status is frontmatter, not a directory move.
 
 **Why**: moving files forces link updates, creates merge churn, and duplicates board state.
 
-**Impact**: ordinary tracked work uses one `WORK-*`; optional artifacts are created only for an independent lifecycle.
+**Impact**: governed decisions and approvals remain in the WORK record. Durable facts go to knowledge notes; project-native Issues, pull requests, and release systems keep their own lifecycle.
 
 ## AD-003: Route Process By Risk Dimensions
 
@@ -32,7 +32,7 @@ Append durable decisions. Supersede historical decisions with a new entry instea
 
 **Why**: project Skills provide progressive disclosure without turning every lesson into always-loaded instructions.
 
-**Impact**: follow [[00-governance/skill-lifecycle]] and update `project-skills/INDEX.md`.
+**Impact**: follow [[skill-lifecycle]] and update `project-skills/INDEX.md`.
 
 ## AD-005: Isolate Parallel Work With Worktrees
 
@@ -40,4 +40,4 @@ Append durable decisions. Supersede historical decisions with a new entry instea
 
 **Why**: branch-only context switching does not isolate simultaneous agents or dirty working trees.
 
-**Impact**: every context commits task-scoped changes; shared knowledge is promoted near integration to reduce conflicts. See [[00-governance/git-collaboration]].
+**Impact**: every context commits task-scoped changes; shared knowledge is promoted near integration to reduce conflicts. See [[git-collaboration]].

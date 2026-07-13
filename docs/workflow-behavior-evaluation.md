@@ -20,6 +20,7 @@ Use this evaluation to test whether a fresh agent applies the workflow policy, n
       "id": "case-id",
       "route": "direct",
       "artifacts": [],
+      "gates": [],
       "isolation": "current-branch",
       "project_skills": [],
       "promote_project_skill": false,
@@ -39,6 +40,6 @@ python3 scripts/evaluate_workflow_behavior.py --responses <responses.json>
 
 The evaluator reports `MATCH`, not a distribution-validation `PASS`. It verifies only that the supplied output matches the case contract; it cannot prove that the output came from a fresh agent. Repository validation tests that the evaluator accepts a conforming fixture and rejects a deliberately wrong one, but does not count that fixture as Agent behavior evidence.
 
-The cases check both positive and negative behavior: Direct work creates no artifacts, Tracked work creates only WORK, governed permission work adds independent review, parallel work chooses a worktree, matching procedural memory wakes, a one-off incident does not create a project Skill, and no route requires a companion helper. Normal work records no template feedback, while repeated evidence-backed helper dependency records one local template-wide observation without upstream transmission.
+The cases check both positive and negative behavior: Direct work creates no WORK, Tracked work creates only one WORK, governed permission work records an independent approval gate in that WORK, parallel work chooses a worktree, matching procedural memory wakes, a one-off incident does not create a project Skill, and no route requires a companion helper. Normal work records no template feedback, while repeated evidence-backed helper dependency records one local template-wide observation without upstream transmission.
 
 Record unnecessary files loaded by the agent separately. Correct routing with excessive context is still a retrieval regression.

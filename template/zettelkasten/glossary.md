@@ -18,7 +18,7 @@ Record project-specific business terms, technical terms, abbreviations, and alia
 
 ## Domains And Ports
 
-<!-- If the project has multiple environments, list them here or link to [[01-overview/quick-reference]].
+<!-- If the project has multiple environments, list them here or link to [[quick-reference]].
 
 | Environment | Domain / port |
 |---|---|
@@ -29,5 +29,5 @@ Record project-specific business terms, technical terms, abbreviations, and alia
 
 ## See Also
 
-- [[00-governance/project-overview]] — project overview
-- [[01-overview/quick-reference]] — commands and endpoints
+- [[project]] — project overview
+- [[quick-reference]] — commands and endpoints

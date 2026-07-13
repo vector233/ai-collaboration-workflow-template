@@ -6,6 +6,15 @@
 
 <!-- Add 2-4 sentences describing the problem, target users, and core value. -->
 
+## Users And Outcomes
+
+<!-- Describe primary users, their current problem, and the observable outcome this project should create. -->
+
+## Scope
+
+- In scope:
+- Out of scope:
+
 ## Naming Rules
 
 <!-- If the project has multiple names, brand migrations, product slugs, or legacy repo names, define them here.
@@ -28,13 +37,11 @@
 | Auth | Session cookies · OAuth |
 -->
 
-<!-- UMBRELLA-ONLY: keep this section only if {{REPO_TYPE}} == umbrella -->
+## Repositories And Domains
 
-## Subprojects
+{{REPOS}}
 
-{{SUB_PROJECTS}}
-
-<!-- /UMBRELLA-ONLY -->
+{{DOMAINS}}
 
 ## Project Constraints
 
@@ -47,16 +54,15 @@
 
 ## AI Collaboration Rules
 
-- Route work through Direct, Tracked, or Governed mode using [[00-governance/ai-workflow]].
-- Keep tracked state in one stable `WORK-*` under [[06-work/README]] unless an independent artifact is justified.
-- Promote repeatable procedures through [[00-governance/skill-lifecycle]].
-- Use task branches and dedicated worktrees for parallel work as defined in [[00-governance/git-collaboration]].
+- Route work through Direct, Tracked, or Governed mode using [[workflow]].
+- Keep tracked and governed state in one stable `WORK-*` under [[work/README]].
+- Promote repeatable procedures through [[skill-lifecycle]].
+- Use task branches and dedicated worktrees for parallel work as defined in [[git-collaboration]].
 - Write architecture facts, validation procedures, gotchas, and project rules back to their durable destinations.
 
 ## See Also
 
-- [[00-governance/ai-workflow]] — AI collaboration workflow
-- [[01-overview/product-vision]] — product direction and audience
-- [[02-architecture/current-architecture-flow]] — current architecture flow
-- [[00-governance/glossary]] — terminology
-- [[00-governance/decisions]] — architecture decisions
+- [[workflow]] — AI collaboration workflow
+- [[architecture]] — current architecture flow
+- [[glossary]] — terminology
+- [[decisions]] — architecture decisions
