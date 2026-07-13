@@ -2,7 +2,7 @@
 
 The project overview is [[project]]. Repository rules are in `AGENTS.md`.
 
-Template baseline: `canonical-payload-v4`. Use a release tag or commit instead when known more precisely.
+Template baseline: `v4.1.0` (`canonical-payload-v4`).
 
 ## Resume With Minimal Context
 

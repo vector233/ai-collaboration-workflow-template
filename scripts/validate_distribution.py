@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
+RELEASE_VERSION = "v4.1.0"
 MARKER = PAYLOAD / ".ai-collaboration-workflow-template"
 BOOTSTRAP = ROOT / "skills/ai-collaboration-workflow/scripts/bootstrap_template.py"
 WORKFLOW_DOCTOR = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_doctor.py"
@@ -89,6 +90,11 @@ def validate_payload() -> None:
     require(
         MARKER.read_text().strip() == "canonical-payload-v4",
         "payload marker version is incorrect",
+    )
+    require(
+        f"Template baseline: `{RELEASE_VERSION}` (`canonical-payload-v4`)."
+        in (PAYLOAD / "zettelkasten/AI.md").read_text(),
+        "payload release baseline is incorrect",
     )
     for path in REQUIRED_FILES:
         require((PAYLOAD / path).is_file(), f"payload file is missing: {path}")
@@ -959,7 +965,7 @@ def validate_repository_layout() -> None:
     readme = (ROOT / "README.md").read_text()
     for expected in (
         "## Quick Start",
-        "tree/v4.0.0/skills/ai-collaboration-workflow",
+        f"tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
         "Use $ai-collaboration-workflow to initialize this repository.",
         "## Initialization Is Complete When",
         "## Daily Use",
@@ -974,7 +980,7 @@ def validate_repository_layout() -> None:
     chinese_readme = (ROOT / "docs/zh-CN/README.md").read_text()
     for expected in (
         "## 快速开始",
-        "tree/v4.0.0/skills/ai-collaboration-workflow",
+        f"tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
         "使用 $ai-collaboration-workflow 初始化当前仓库。",
         "## 初始化完成标准",
         "## 日常使用",

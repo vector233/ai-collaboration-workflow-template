@@ -4,7 +4,7 @@ A vendor-neutral project knowledge network and lightweight delivery contract for
 
 The template gives capable but context-temporary, vendor-diverse, and potentially parallel agents the same trusted project knowledge, then makes durable writeback part of delivery. It is not an autonomous runtime and requires no helper tool to remain usable.
 
-Version `v4.0.0` is a new-project template. It intentionally does not migrate or emulate earlier layouts; see [Why v4 Is Breaking](#why-v4-is-breaking).
+Version `v4.1.0` is the current new-project template. New installations pinned to this release include context-boundary preservation, semantic Fresh-Agent recovery checks, and idempotent knowledge writeback. Existing initialized projects do not update automatically; adopt selected changes manually when useful. The v4 line intentionally does not migrate or emulate earlier layouts; see [Why v4 Is Breaking](#why-v4-is-breaking).
 
 ## Quick Start
 
@@ -14,7 +14,7 @@ Install the pinned release for Claude Code:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.0.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a claude-code \
   -g -y
@@ -24,7 +24,7 @@ Or install it for Codex:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.0.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a codex \
   -g -y
@@ -44,7 +44,7 @@ The Skill previews and bootstraps missing files without overwriting differing re
 The Skill is optional. For a new repository that has no conflicting agent or knowledge files, copy the pinned payload:
 
 ```bash
-git clone --branch v4.0.0 --depth 1 \
+git clone --branch v4.1.0 --depth 1 \
   https://github.com/vector233/ai-collaboration-workflow-template.git
 
 cp -R ai-collaboration-workflow-template/template/. /path/to/your-project/

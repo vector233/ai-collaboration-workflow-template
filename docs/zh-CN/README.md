@@ -2,7 +2,7 @@
 
 这是面向 AI coding agents 的项目知识网络和轻量交付契约。它让上下文暂时、来源不同、可能并行工作的 Agent 获得同一套可信项目知识，并把开发中新产生的知识可靠地写回仓库。
 
-`v4.0.0` 是面向新项目的模板，不迁移或模拟早期目录结构。原因见[为什么 v4 是破坏性更新](#为什么-v4-是破坏性更新)。
+`v4.1.0` 是当前面向新项目的模板。固定安装这个版本的新项目包含上下文边界保存、Fresh-Agent 语义恢复检查和幂等知识写回；已经初始化的项目不会自动更新，可以按需人工采用其中的改进。v4 系列不迁移或模拟早期目录结构，原因见[为什么 v4 是破坏性更新](#为什么-v4-是破坏性更新)。
 
 ## 快速开始
 
@@ -12,7 +12,7 @@
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.0.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a claude-code \
   -g -y
@@ -22,7 +22,7 @@ npx skills add \
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.0.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a codex \
   -g -y
@@ -42,7 +42,7 @@ Skill 会先预览，再复制缺失文件，不会覆盖内容不同的仓库�
 Companion Skill 不是必需项。如果是一个尚不存在 Agent 指令或知识目录冲突的新仓库，可以复制固定版本的 payload：
 
 ```bash
-git clone --branch v4.0.0 --depth 1 \
+git clone --branch v4.1.0 --depth 1 \
   https://github.com/vector233/ai-collaboration-workflow-template.git
 
 cp -R ai-collaboration-workflow-template/template/. /path/to/your-project/
