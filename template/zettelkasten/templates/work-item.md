@@ -95,11 +95,15 @@ Leave this section empty for tracked work. For governed work, each gate needs an
 
 ## Experience Candidates
 
+The active WORK owns each pending candidate. Before editing a shared destination, add its path to `owned_paths` and check overlap with active work. Search first and update the canonical destination; a repeated promotion should record a no-op instead of creating a duplicate.
+
 | Candidate | Reuse shape | Decision | Destination | Content written or reason not promoted |
 |---|---|---|---|---|
 |  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |
 
 ## Context Checkpoint
+
+Update after a bounded slice and before handoff, long pause, agent or session switch, detectable context compaction, or a yield that would otherwise leave chat-only state. These fields must be enough for a fresh agent to resume without prior conversation.
 
 - Last completed step:
 - Commit:

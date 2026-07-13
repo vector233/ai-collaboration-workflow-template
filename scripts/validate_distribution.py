@@ -110,6 +110,7 @@ def validate_payload() -> None:
     agents = (PAYLOAD / "AGENTS.md").read_text()
     for section in (
         "## Workflow Routing",
+        "## Context Preservation",
         "## Project Skills And Experience",
         "## Workflow Feedback",
         "## Git Isolation And Commits",
@@ -128,9 +129,37 @@ def validate_payload() -> None:
         "Tracked",
         "Governed",
         "## Stable Work Record",
+        "## Context Preservation",
         "## Experience Promotion Check",
+        "### Idempotent Writeback",
     ):
         require(expected in workflow, f"workflow is missing {expected}")
+
+    work_template = (PAYLOAD / "zettelkasten/templates/work-item.md").read_text()
+    for expected in (
+        "fresh agent to resume without prior conversation",
+        "The active WORK owns each pending candidate",
+        "a repeated promotion should record a no-op",
+    ):
+        require(expected in work_template, f"WORK template is missing continuity contract: {expected}")
+
+    validation_policy = (PAYLOAD / "zettelkasten/validation-policy.md").read_text()
+    for expected in (
+        "## Knowledge Recoverability",
+        "Structural check",
+        "Semantic Fresh-Agent Resume Probe",
+        "it is not evidence that a fresh agent recovered the work",
+    ):
+        require(expected in validation_policy, f"validation policy is missing recovery contract: {expected}")
+
+    skill = (ROOT / "skills/ai-collaboration-workflow/SKILL.md").read_text()
+    for expected in (
+        "## Preserve Context",
+        "Do not checkpoint every turn",
+        "make repeated promotion a no-op rather than a duplicate",
+        "a synthetic expected response tests only the evaluator",
+    ):
+        require(expected in skill, f"companion Skill is missing continuity contract: {expected}")
 
     skill_template = (
         PAYLOAD / "zettelkasten/templates/project-skill.md"
@@ -236,6 +265,14 @@ def validate_tool_free_core(target: Path) -> None:
     text = work.read_text()
     require(f"work_id: {work_id}" in text, "manual core path did not create stable WORK state")
     require("## Experience Candidates" in text, "manual core path lost knowledge writeback")
+    require(
+        "fresh agent to resume without prior conversation" in text,
+        "manual core path lost context preservation guidance",
+    )
+    require(
+        "a repeated promotion should record a no-op" in text,
+        "manual core path lost idempotent writeback guidance",
+    )
     work.unlink()
 
     observation_template = target / "zettelkasten/templates/workflow-observations.md"
@@ -926,6 +963,9 @@ def validate_repository_layout() -> None:
         "Use $ai-collaboration-workflow to initialize this repository.",
         "## Initialization Is Complete When",
         "## Daily Use",
+        "Checkpoint only at meaningful boundaries",
+        "Promotion is idempotent",
+        "Semantic Fresh-Agent recovery",
         "## Why v4 Is Breaking",
         "Do not use the raw copy command over an existing",
         "## License",
@@ -938,6 +978,9 @@ def validate_repository_layout() -> None:
         "使用 $ai-collaboration-workflow 初始化当前仓库。",
         "## 初始化完成标准",
         "## 日常使用",
+        "只在有意义的边界记录 checkpoint",
+        "经验固化必须是幂等的",
+        "Fresh-Agent 语义恢复",
         "## 为什么 v4 是破坏性更新",
         "不要直接执行覆盖式复制",
         "## 产品边界",
@@ -956,6 +999,17 @@ def validate_repository_layout() -> None:
     require(issue_form.is_file(), "workflow feedback Issue form is missing")
     feedback_reference = ROOT / "skills/ai-collaboration-workflow/references/template-feedback.md"
     require(feedback_reference.is_file(), "companion Skill feedback reference is missing")
+    resume_evaluation = ROOT / "docs/fresh-agent-resume-evaluation.md"
+    for expected in (
+        "## When To Run",
+        "## Evidence Integrity",
+        "It is not a routine per-task gate",
+        "it must never be reported as Fresh-Agent behavior evidence",
+    ):
+        require(
+            expected in resume_evaluation.read_text(),
+            f"Fresh-Agent evaluation is missing evidence contract: {expected}",
+        )
     cases = json.loads((ROOT / "examples/evaluations/workflow-cases.json").read_text())
     feedback_cases = [case for case in cases if case["expected"]["feedback_action"] != "none"]
     require(len(feedback_cases) == 1, "behavior cases need exactly one positive workflow-feedback case")

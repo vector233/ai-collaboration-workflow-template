@@ -96,6 +96,16 @@ Use the current Git branch to find its WORK. Read the checkpoint and next_action
 load only linked knowledge and matching project Skills, then continue.
 ```
 
+Pause or hand off a long-running task:
+
+```text
+Update the existing WORK so a fresh agent can recover the route, acceptance state,
+completed step and commit, exact validation, unresolved risks, next action, and experience candidates.
+Commit the checkpoint; do not create another handoff file.
+```
+
+Checkpoint only at meaningful boundaries: after each bounded Tracked or Governed slice, and before an unfinished task crosses a handoff, long pause, agent or session switch, detectable context compaction, or a yield that would leave decisions only in chat. Direct work that completes, validates, and commits in the current context still needs no WORK; otherwise it becomes Tracked. Runtime context telemetry is optional, never a core dependency.
+
 Start work that must run in parallel:
 
 ```text
@@ -126,6 +136,7 @@ Task
   -> Route: Direct | Tracked | Governed
   -> Load only the active WORK and matched knowledge
   -> Implement, validate, and review as required
+  -> Preserve recoverable state at meaningful context boundaries
   -> Commit every context that produces persistent changes or a coherent slice
   -> Promote reusable experience into rules, notes, runbooks, or project Skills
 ```
@@ -177,6 +188,10 @@ Each WORK records Experience Candidates. At checkpoints and closeout, agents dec
 
 Project Skills include concrete triggers, exclusions, procedure, validation, recovery, and provenance. One-off incidents and unverified guesses do not become Skills.
 
+Promotion is idempotent. Search existing destinations first, update the canonical rule, note, runbook, or Skill in place, and record a no-op when it is already current. For Tracked or Governed work, add shared destinations to `owned_paths`; when another active WORK owns the same destination, coordinate one writer or defer the promotion.
+
+Knowledge health has two levels. Normal handoff checks structure: branch-to-WORK mapping, checkpoint fields, links, ownership, and Skill routing. For important multi-context handoffs or changes to resume semantics, a real fresh agent with no chat history performs a semantic resume probe and reports the route, acceptance state, checkpoint, validation, risk, and next action before editing. Synthetic expected responses test only the evaluator, not Agent recovery; see [docs/fresh-agent-resume-evaluation.md](docs/fresh-agent-resume-evaluation.md).
+
 ## Project-To-Template Feedback
 
 Downstream agents silently check for workflow friction only at meaningful checkpoints or after a user correction. Normal tasks create no feedback artifact. Evidence-backed template-wide or vendor-specific observations are stored locally in `zettelkasten/workflow-observations.md`, created only on first use.
@@ -192,7 +207,7 @@ work_id="WORK-$(date +%Y%m%d%H%M%S)-<short-name>"
 git worktree add ../<short-name> -b "task/${work_id}" <base>
 ```
 
-The default branch is integration-only. Dependent or overlapping tasks need an explicit integration plan. Every context that produces persistent changes, or each coherent slice, ends with a task-scoped commit; read-only analysis creates no empty commit.
+The default branch is integration-only. Dependent or overlapping tasks need an explicit integration plan. Shared knowledge promotion uses `owned_paths` to establish one writer. Every context that produces persistent changes, or each coherent slice, ends with a task-scoped commit; read-only analysis creates no empty commit.
 
 ## Structure
 
@@ -220,7 +235,7 @@ template/
 
 ## Validation
 
-Downstream projects use their own build, test, and review commands. When the companion Skill is installed, its optional Doctor can inspect knowledge links, WORK state, project-Skill routing, and cross-worktree overlap.
+Downstream projects use their own build, test, and review commands. When the companion Skill is installed, its optional Doctor can inspect structural knowledge health such as links, WORK state, project-Skill routing, and cross-worktree overlap. Semantic Fresh-Agent recovery remains a separate, evidence-backed evaluation.
 
 For this distribution repository:
 

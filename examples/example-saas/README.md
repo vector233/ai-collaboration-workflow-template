@@ -35,7 +35,7 @@ git worktree add ../team-invitation-links \
   -b task/WORK-20260601103000-team-invitation-links <base>
 ```
 
-Each implementation context updates the WORK checkpoint and commits its task-scoped changes. Broken checkpoints remain on the task branch.
+Each implementation context updates the WORK checkpoint after a bounded slice or before a handoff, long pause, session switch, or detectable context compaction, then commits its task-scoped changes. Broken checkpoints remain on the task branch.
 
 ## Experience Promotion
 
@@ -47,8 +47,10 @@ If the sequence is verified, recurring, conditional, and needs validation and re
 project-skills/reset-invite-sandbox/SKILL.md
 ```
 
+Before writing, the task searches rules, runbooks, Skills, and the index. It claims the selected shared paths in `owned_paths`, updates an existing canonical procedure when present, and otherwise creates one Skill and one index row. Repeating promotion records a no-op rather than another copy.
+
 `project-skills/INDEX.md` receives a trigger such as "invite email sandbox returns stale token or resend tests reuse previous state." A simple invariant such as "store only invitation token hashes" belongs in architecture or security rules instead of another Skill.
 
 ## Resume
 
-A fresh agent reads `AGENTS.md` and `zettelkasten/AI.md`, inspects the current branch, opens the matching WORK, and then reads only its linked security note, architecture decision, validation runbook, and matching project Skill. No companion helper is required.
+A fresh agent reads `AGENTS.md` and `zettelkasten/AI.md`, inspects the current branch, opens the matching WORK, and then reads only its linked security note, architecture decision, validation runbook, and matching project Skill. Before editing, it reports the route, acceptance state, checkpoint commit, validation, unresolved risk, and next allowed action. No companion helper is required.

@@ -33,4 +33,4 @@ Use conventional commits for validated slices. Use `checkpoint:` or `wip:` only 
 
 Do not create an empty commit for a read-only analysis or review context.
 
-Delay shared `AGENTS.md`, runbook, and project-Skill edits until closeout when practical. This lets parallel branches record candidates without competing over shared knowledge files.
+Delay shared `AGENTS.md`, runbook, and project-Skill edits until closeout when practical. Before promotion, add the selected destination to `owned_paths`, check active overlap, and coordinate one writer. Other tasks defer the write or consume the integrated result instead of creating a competing copy.

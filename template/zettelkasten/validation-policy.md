@@ -34,6 +34,17 @@ The review handoff should include:
 
 When work items, project Skills, workflow files, wiki links, or initialization state change, inspect their links, required fields, and routing entries before handoff. The optional companion Skill can automate this check, but validation evidence remains in repository files.
 
+## Knowledge Recoverability
+
+Treat knowledge health as two separate checks:
+
+- **Structural check**: the branch maps to one active WORK, required checkpoint fields and links exist, shared destinations are represented in `owned_paths`, and matching project Skills are reachable from the index.
+- **Semantic Fresh-Agent Resume Probe**: an agent with no prior chat starts from `AGENTS.md` and [[AI]], uses the current branch to select the WORK, loads only linked knowledge, and reports the route, acceptance state, checkpoint and commit, validation, unresolved risk, next allowed action, and matching project Skill before implementation.
+
+Run structural checks at normal handoff. Run the semantic probe only for an important multi-context handoff, after changing workflow or resume semantics, or before a release where failed recovery would be costly. Record a concise result and provenance in the WORK or project-native review evidence; retain the unedited prompt, response, agent or model identity, and time there when the full evidence matters. A synthetic or copied expected response can test an evaluator, but it is not evidence that a fresh agent recovered the work.
+
+The probe requires no helper and must not edit the repository. Failure means the checkpoint or knowledge routing is incomplete even when every file exists.
+
 ## When Realistic Validation Matters
 
 Run a realistic smoke test when a slice touches:

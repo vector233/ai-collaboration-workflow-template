@@ -32,7 +32,7 @@ Do not promote story-specific implementation detail, temporary incidents, guesse
 ## Lifecycle
 
 1. Record a candidate in the active `WORK-*`.
-2. Check existing entries in `project-skills/INDEX.md` and update instead of duplicating.
+2. Check existing entries in `project-skills/INDEX.md`, Skill directories, rules, notes, and runbooks; update the canonical destination instead of duplicating it.
 3. Copy [[templates/project-skill]] to `project-skills/<skill-name>/SKILL.md`.
 4. Keep Skill frontmatter limited to `name` and `description`; the description must contain concrete triggers.
 5. Add use, non-use, procedure, validation, recovery, and provenance sections.
@@ -40,6 +40,8 @@ Do not promote story-specific implementation detail, temporary incidents, guesse
 7. Check the Skill structure, index routing, trigger uniqueness, links, and verification date; use the optional companion validator when available.
 8. Retrieval-test with a fresh agent or a realistic prompt when the procedure is important or easy to misroute.
 9. Mark stale Skills `needs-verification` in the index. Deprecate superseded Skills and point to the replacement.
+
+For Tracked or Governed work, the active WORK owns the candidate. Add the Skill path and index to `owned_paths` before editing, and coordinate or defer when another active WORK owns either destination. Re-running the lifecycle must update the same Skill and index row or record that no change was needed.
 
 ## Destination Test
 
