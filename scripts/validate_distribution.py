@@ -919,10 +919,33 @@ def validate_behavior_evaluator() -> None:
 def validate_repository_layout() -> None:
     require(not (ROOT / "zettelkasten").exists(), "root zettelkasten must not exist")
     require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
-    require("## License" in (ROOT / "README.md").read_text(), "README License section is missing")
+    readme = (ROOT / "README.md").read_text()
+    for expected in (
+        "## Quick Start",
+        "tree/v4.0.0/skills/ai-collaboration-workflow",
+        "Use $ai-collaboration-workflow to initialize this repository.",
+        "## Initialization Is Complete When",
+        "## Daily Use",
+        "## Why v4 Is Breaking",
+        "Do not use the raw copy command over an existing",
+        "## License",
+    ):
+        require(expected in readme, f"README is missing onboarding contract: {expected}")
     chinese_readme = (ROOT / "docs/zh-CN/README.md").read_text()
-    for expected in ("## 产品边界", "**核心**", "**可选**", "**非目标**"):
-        require(expected in chinese_readme, f"Chinese guide is missing product boundary text: {expected}")
+    for expected in (
+        "## 快速开始",
+        "tree/v4.0.0/skills/ai-collaboration-workflow",
+        "使用 $ai-collaboration-workflow 初始化当前仓库。",
+        "## 初始化完成标准",
+        "## 日常使用",
+        "## 为什么 v4 是破坏性更新",
+        "不要直接执行覆盖式复制",
+        "## 产品边界",
+        "**核心**",
+        "**可选**",
+        "**非目标**",
+    ):
+        require(expected in chinese_readme, f"Chinese guide is missing documentation contract: {expected}")
     publishing = (ROOT / "docs/community-publishing.md").read_text()
     require("-> Doctor" not in publishing, "publishing copy makes the optional Doctor a fixed stage")
     git_collaboration = (PAYLOAD / "zettelkasten/git-collaboration.md").read_text()
