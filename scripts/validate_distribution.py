@@ -404,6 +404,32 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     governed_text = governed_path.read_text()
     require("- Selected route: governed" in governed_text, "governed route bullet was not written")
     require("governed / governed" not in governed_text, "governed route replacement corrupted the template")
+    governed_path.write_text(
+        governed_text.replace(
+            "|  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |",
+            "| No reusable lesson | fact | not-promoted | work item | one-off sample |",
+        )
+    )
+    pending_gate_close = run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "close",
+            governed_id,
+            "--acceptance-complete",
+            "--gates-closed",
+            "--promotion-complete",
+            "--writeback-complete",
+            "--integration-result",
+            "must remain open",
+        ],
+        cwd=target,
+        expected=1,
+    )
+    require(
+        "governed gates still contain a pending gate" in pending_gate_close.stderr,
+        "WORK CLI closed governed work with a pending gate",
+    )
     governed_path.unlink()
 
     invalid_id = "WORK-20260712122040-invalid-path"
@@ -537,6 +563,19 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     require("ambiguous wiki link [[README]]" in ambiguity.stdout, "ambiguous wiki link passed")
     ambiguous.unlink()
 
+    unexpected_artifact = target / "zettelkasten/work/NOTE-invalid.md"
+    unexpected_artifact.write_text("# Invalid work artifact\n")
+    unexpected_result = run(
+        [sys.executable, str(WORKFLOW_DOCTOR)],
+        cwd=target,
+        expected=1,
+    )
+    require(
+        "unexpected work artifact name" in unexpected_result.stdout,
+        "doctor accepted a non-WORK file in the work directory",
+    )
+    unexpected_artifact.unlink()
+
     stale = target / "zettelkasten/stale-test.md"
     stale.write_text(
         "---\ntitle: Stale Test\nstatus: active\nlast_verified_at: 2000-01-01\n"
@@ -558,6 +597,34 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     )
     require("review_after_days must be positive" in interval_result.stdout, "non-positive review interval passed")
     invalid_interval.unlink()
+
+    pending_gate_id = "WORK-20260712122500-pending-gate"
+    pending_gate = copy_artifact(
+        target,
+        "work-item.md",
+        f"{pending_gate_id}.md",
+        {
+            "WORK-YYYYMMDDHHMMSS-short-name": pending_gate_id,
+            "status: backlog": "status: done",
+            "route: tracked": "route: governed",
+            "branch: task/work-id-short-name": "branch: task/pending-gate",
+            "next_action: clarify acceptance criteria": "next_action: none",
+            "|  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |": (
+                "| No reusable lesson | fact | not-promoted | work item | one-off sample |"
+            ),
+            "- Experience Promotion complete: yes / no": "- Experience Promotion complete: yes",
+        },
+    )
+    pending_gate_result = run(
+        [sys.executable, str(WORKFLOW_DOCTOR)],
+        cwd=target,
+        expected=1,
+    )
+    require(
+        "closed governed work has a pending gate" in pending_gate_result.stdout,
+        "doctor accepted closed governed work with a pending gate",
+    )
+    pending_gate.unlink()
 
 
 def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:

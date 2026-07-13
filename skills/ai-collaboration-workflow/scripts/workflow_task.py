@@ -96,6 +96,26 @@ def set_frontmatter_field(text: str, field: str, value: str | list[str]) -> str:
     return new_frontmatter + text[match.end() :]
 
 
+def frontmatter_field(text: str, field: str) -> str | None:
+    match = FRONTMATTER_RE.search(text)
+    if not match:
+        return None
+    pattern = re.compile(rf"^{re.escape(field)}:[ \t]*(.*)$", re.MULTILINE)
+    field_match = pattern.search(match.group(1))
+    if not field_match:
+        return None
+    value = field_match.group(1).strip()
+    if len(value) >= 2 and value[0] == value[-1] == '"':
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError:
+            return value[1:-1]
+        return decoded if isinstance(decoded, str) else str(decoded)
+    if len(value) >= 2 and value[0] == value[-1] == "'":
+        return value[1:-1].replace("''", "'")
+    return value or None
+
+
 def set_section_bullet(text: str, section: str, label: str, value: str) -> str:
     marker = f"## {section}"
     if marker not in text:
@@ -168,14 +188,27 @@ def split_markdown_table_row(line: str) -> list[str]:
     return cells
 
 
+def section_body(text: str, heading: str) -> str:
+    marker = f"## {heading}"
+    if marker not in text:
+        return ""
+    return text.split(marker, 1)[1].split("\n## ", 1)[0]
+
+
 def has_pending_experience_decision(text: str) -> bool:
-    if "## Experience Candidates" not in text:
-        return False
-    section = text.split("## Experience Candidates", 1)[1].split("\n## ", 1)[0]
-    for line in section.splitlines():
+    for line in section_body(text, "Experience Candidates").splitlines():
         cells = split_markdown_table_row(line)
         if len(cells) >= 5 and cells[0] not in {"Candidate", "---"}:
             if cells[2].strip().lower() == "pending":
+                return True
+    return False
+
+
+def has_pending_governed_gate(text: str) -> bool:
+    for line in section_body(text, "Governed Gates").splitlines():
+        cells = split_markdown_table_row(line)
+        if len(cells) >= 4 and cells[0] not in {"Gate or decision", "---"}:
+            if cells[3].strip().lower() == "pending":
                 return True
     return False
 
@@ -295,6 +328,8 @@ def command_close(args: argparse.Namespace) -> int:
     text = path.read_text(encoding="utf-8")
     if has_pending_experience_decision(text):
         raise WorkflowTaskError("experience candidates still contain a pending decision")
+    if frontmatter_field(text, "route") == "governed" and has_pending_governed_gate(text):
+        raise WorkflowTaskError("governed gates still contain a pending gate")
     text = set_frontmatter_field(text, "status", "done")
     text = set_frontmatter_field(text, "next_action", "none")
     text = set_frontmatter_field(text, "last_verified_at", date.today().isoformat())

@@ -28,9 +28,7 @@ CORE_FILES = (
 
 CORE_DIRECTORIES = (Path("zettelkasten/work"), Path("project-skills"))
 
-ARTIFACT_STATES = {
-    "WORK-": {"backlog", "active", "blocked", "review", "done", "cancelled"},
-}
+WORK_STATES = {"backlog", "active", "blocked", "review", "done", "cancelled"}
 
 ACTIVE_WORK_STATES = {"active", "blocked", "review"}
 WORK_REQUIRED_SECTIONS = (
@@ -322,14 +320,11 @@ def check_wiki_links(root: Path, findings: list[Finding]) -> None:
                 add(findings, "ERROR", f"ambiguous wiki link [[{target}]]; use an explicit path: {choices}", relative(root, path))
 
 
-def artifact_prefix(path: Path) -> str | None:
-    return next((prefix for prefix in ARTIFACT_STATES if path.name.startswith(prefix)), None)
-
-
-def experience_section(text: str) -> str:
-    if "## Experience Candidates" not in text:
+def section_body(text: str, heading: str) -> str:
+    marker = f"## {heading}"
+    if marker not in text:
         return ""
-    return text.split("## Experience Candidates", 1)[1].split("\n## ", 1)[0]
+    return text.split(marker, 1)[1].split("\n## ", 1)[0]
 
 
 def split_markdown_table_row(line: str) -> list[str]:
@@ -361,10 +356,19 @@ def split_markdown_table_row(line: str) -> list[str]:
 
 
 def has_pending_experience_decision(text: str) -> bool:
-    for line in experience_section(text).splitlines():
+    for line in section_body(text, "Experience Candidates").splitlines():
         cells = split_markdown_table_row(line)
         if len(cells) >= 5 and cells[0] not in {"Candidate", "---"}:
             if cells[2].strip().lower() == "pending":
+                return True
+    return False
+
+
+def has_pending_governed_gate(text: str) -> bool:
+    for line in section_body(text, "Governed Gates").splitlines():
+        cells = split_markdown_table_row(line)
+        if len(cells) >= 4 and cells[0] not in {"Gate or decision", "---"}:
+            if cells[3].strip().lower() == "pending":
                 return True
     return False
 
@@ -373,18 +377,13 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
     active_branches: dict[str, Path] = {}
     for path in workflow_artifacts(root):
         rel_path = relative(root, path)
-        prefix = artifact_prefix(path)
-        if prefix is None or path.suffix != ".md":
+        if not path.name.startswith("WORK-") or path.suffix != ".md":
             add(findings, "ERROR", "unexpected work artifact name", rel_path)
             continue
         text = read_text(path)
         status = field_value(text, "status")
-        if status not in ARTIFACT_STATES[prefix]:
-            add(findings, "ERROR", f"invalid {prefix[:-1]} status {status!r}", rel_path)
-        if prefix != "WORK-":
-            if not field_value(text, "related_work"):
-                add(findings, "ERROR", "independent artifact is missing related_work", rel_path)
-            continue
+        if status not in WORK_STATES:
+            add(findings, "ERROR", f"invalid WORK status {status!r}", rel_path)
 
         work_id = field_value(text, "work_id")
         if work_id != path.stem:
@@ -421,6 +420,8 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
                 add(findings, "ERROR", "closed work has incomplete Experience Promotion", rel_path)
             if has_pending_experience_decision(text):
                 add(findings, "ERROR", "closed work has a pending experience candidate", rel_path)
+            if route == "governed" and has_pending_governed_gate(text):
+                add(findings, "ERROR", "closed governed work has a pending gate", rel_path)
 
 
 def parse_iso_date(value: str) -> date | None:
