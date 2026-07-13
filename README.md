@@ -61,6 +61,12 @@ Each tracked work item has an Experience Candidates table. At context checkpoint
 
 Project Skills include concrete triggers, exclusions, procedure, validation, recovery, and provenance. One-off incidents and unverified guesses do not become Skills.
 
+## Project-To-Template Feedback
+
+Downstream agents silently check for workflow friction only at meaningful checkpoints or after a user correction. Normal tasks create no feedback artifact. Evidence-backed template-wide or vendor-specific observations are stored locally in `zettelkasten/00-governance/workflow-observations.md`, created only on first use.
+
+The companion Skill can classify, deduplicate, and sanitize those observations when the user asks to prepare upstream feedback. It never scans unrelated projects, sends telemetry, or creates an Issue or PR without explicit user approval.
+
 ## Parallel Development
 
 Tracked and Governed tasks use dedicated task branches. Concurrent tasks or agents use separate Git worktrees using normal Git:
@@ -154,6 +160,8 @@ python3 scripts/validate_distribution.py
 The distribution validator exercises bootstrap, initialization, stable work artifacts, project-Skill discovery, worktree isolation, wiki links, and doctor behavior in temporary repositories.
 
 Fresh-agent routing behavior can be checked with [docs/workflow-behavior-evaluation.md](docs/workflow-behavior-evaluation.md).
+
+Maintainers and downstream users can follow [docs/workflow-feedback.md](docs/workflow-feedback.md) to prepare a privacy-reviewed report.
 
 Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
 

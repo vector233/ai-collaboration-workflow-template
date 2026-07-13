@@ -51,6 +51,14 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 
 项目 Skill 必须说明何时使用、何时不用、执行步骤、验证、恢复和来源。单次事故、低置信猜测和普通编码常识不升级成 Skill。
 
+## 项目反哺模板
+
+下游 Agent 只在重要 checkpoint、任务关闭或用户纠正流程行为后，静默判断是否出现有证据的模板摩擦。正常任务不创建反馈文件。
+
+项目特有经验仍写入本项目的规则、架构、gotcha、runbook 或项目 Skill。重复或高影响的模板级问题，以及明确的厂商特有问题，才按需写入 `zettelkasten/00-governance/workflow-observations.md`。
+
+Companion Skill 可以在用户要求时对 observation 去重、验证和脱敏，但不得扫描无关项目、发送遥测，或未经用户明确批准创建上游 Issue/PR。
+
 ## 并行开发和提交
 
 Tracked 和 Governed 工作默认使用 task branch；同时进行的任务或 Agent 使用独立 Git worktree：

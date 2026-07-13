@@ -96,7 +96,7 @@ Keep review evidence here unless an independent REVIEW is triggered.
 
 | Candidate | Reuse shape | Decision | Destination | Content written or reason not promoted |
 |---|---|---|---|---|
-|  | rule / gotcha / fact / runbook / project-skill | pending |  |  |
+|  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |
 
 ## Context Checkpoint
 

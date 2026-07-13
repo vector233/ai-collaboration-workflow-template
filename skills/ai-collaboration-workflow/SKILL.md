@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Initialize and operate the AI Collaboration Workflow knowledge network for new projects. Use when an agent needs to install the knowledge-first template; route work into Direct, Tracked, or Governed delivery; resume or update stable WORK/TECH/PLAN/REVIEW knowledge; discover or promote repository experience into an on-demand project Skill; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize and operate the AI Collaboration Workflow knowledge network for new projects. Use when an agent needs to install the knowledge-first template; route work into Direct, Tracked, or Governed delivery; resume or update stable WORK/TECH/PLAN/REVIEW knowledge; discover or promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # AI Collaboration Workflow
@@ -80,6 +80,12 @@ Tracked and governed work must not be implemented directly on the default branch
 Read [experience-promotion.md](references/experience-promotion.md) when a task exposes a repeatable lesson, before closeout, or when creating/updating a project Skill.
 
 Record candidates in the active work item first. Promote each candidate to the smallest durable destination. Create a project Skill only for a stable conditional procedure with concrete triggers, validation, and recovery. Update `project-skills/INDEX.md` so future agents can wake it without loading every Skill.
+
+## Improve The Template
+
+Read [template-feedback.md](references/template-feedback.md) after a user corrects workflow behavior, when repeatable template friction has evidence, or when the user asks to prepare feedback for the upstream template.
+
+Classify project lessons separately from template-wide and vendor-specific observations. Record nothing for normal tasks or one-off model mistakes. Keep observations local until the user explicitly approves a sanitized upstream report, Issue, or PR.
 
 ## Validate And Hand Off
 

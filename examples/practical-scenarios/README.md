@@ -52,3 +52,14 @@ A third-party sandbox reset procedure repeatedly causes failed tests:
 3. Create `project-skills/reset-provider-sandbox/SKILL.md`.
 4. Add trigger metadata to `project-skills/INDEX.md`.
 5. Check the index entry and test whether a fresh agent selects it for the next sandbox failure; use the optional Doctor when installed.
+
+## Template Feedback Without Telemetry
+
+The user corrects a workflow instruction that made an optional helper necessary, and the same workaround recurs in another task:
+
+```text
+verify evidence -> classify template-wide -> create local workflow-observations.md
+-> sanitize -> wait for explicit user approval before any upstream Issue or PR
+```
+
+A normal task, one-off model mistake, or project-specific lesson creates no template feedback entry.

@@ -13,6 +13,7 @@ Before posting anywhere:
 - Run a quick private/source-project information scan before broad promotion.
 - Prepare one canonical short description and one platform-specific draft.
 - Keep the project positioning precise: this is a vendor-neutral project knowledge network and lightweight delivery contract; its Markdown vault remains Obsidian-compatible, but it is not an Obsidian plugin.
+- Route evidence-backed product feedback through the Workflow feedback Issue form only after sanitization and explicit user approval.
 - If an AI assistant controls a browser, have it fill drafts only. The human owner should confirm or perform the final publish action.
 
 Canonical short description:

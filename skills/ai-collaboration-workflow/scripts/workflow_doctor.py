@@ -21,6 +21,7 @@ CORE_FILES = (
     Path("zettelkasten/00-governance/skill-lifecycle.md"),
     Path("zettelkasten/00-governance/git-collaboration.md"),
     Path("zettelkasten/00-governance/templates/work-item.md"),
+    Path("zettelkasten/00-governance/templates/workflow-observations.md"),
     Path("zettelkasten/06-work/README.md"),
     Path("project-skills/INDEX.md"),
 )

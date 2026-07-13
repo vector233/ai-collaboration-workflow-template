@@ -1,4 +1,4 @@
 interface:
   display_name: "AI Collaboration Workflow"
-  short_description: "Route work, preserve knowledge, and isolate AI tasks"
-  default_prompt: "Use $ai-collaboration-workflow to route this task, load only needed project knowledge, isolate its Git work, and preserve reusable experience."
+  short_description: "Route work, preserve knowledge, and improve the workflow"
+  default_prompt: "Use $ai-collaboration-workflow to route this task, load only needed project knowledge, preserve reusable experience, and capture evidence-backed template friction only when it occurs."

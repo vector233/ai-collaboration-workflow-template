@@ -2,6 +2,8 @@
 
 The human-readable project index is [[{{PROJECT_NAME_SAFE}}]]. Repository rules are in `AGENTS.md`.
 
+Template baseline: `canonical-payload-v3`. Use a release tag or commit instead when known more precisely.
+
 ## Resume With Minimal Context
 
 1. Read `AGENTS.md`.
@@ -43,9 +45,12 @@ Use [[00-governance/ai-workflow]] to choose Direct, Tracked, or Governed work. R
 | On-demand project procedures | `project-skills/INDEX.md` |
 | Skill creation and maintenance | [[00-governance/skill-lifecycle]] |
 | Parallel Git work | [[00-governance/git-collaboration]] |
+| Evidence-backed workflow or template friction | [[00-governance/ai-workflow]] Template Feedback Check |
 
 ## Writeback
 
 At every context checkpoint, update the active work item with the commit, validation, risks, next action, and experience candidates. At closeout, promote only durable knowledge to rules, gotchas, architecture notes, runbooks, decisions, or project Skills.
+
+When the workflow itself caused repeatable friction, route a sanitized observation through the Template Feedback Check. Normal work produces no feedback artifact.
 
 Use stable paths and wiki links. New knowledge notes must have an inbound link from an existing entry point or work item.

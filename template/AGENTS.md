@@ -40,6 +40,17 @@ At each context checkpoint, record reusable experience candidates in the active 
 
 Do not create a Skill from a one-off incident, an unverified guess, or a procedure that is simpler as a short rule or runbook entry. Follow `zettelkasten/00-governance/skill-lifecycle.md`.
 
+## Workflow Feedback
+
+At a tracked or governed checkpoint, at closeout, or after the user corrects workflow behavior, silently check for evidence-backed template friction. Record nothing when the workflow was adequate.
+
+- Project-specific lessons follow the normal Experience Promotion destinations.
+- Repeated or high-impact template-wide friction goes to `zettelkasten/00-governance/workflow-observations.md`, created on first use from the repository template.
+- Vendor-specific behavior is labeled separately and must not become a vendor-neutral core rule without cross-agent evidence.
+- Never include secrets, customer data, private code, or internal identifiers. Never transmit feedback or create an upstream issue without explicit user approval.
+
+Follow the Template Feedback Check in `zettelkasten/00-governance/ai-workflow.md`.
+
 ## Git Isolation And Commits
 
 Follow `zettelkasten/00-governance/git-collaboration.md` unless stricter repository rules apply.

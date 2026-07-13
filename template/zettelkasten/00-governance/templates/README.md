@@ -9,6 +9,7 @@ Copy the artifact triggered by [[00-governance/ai-workflow]]. Keep every workflo
 | `implementation-plan.md` | independent sequencing or ownership coordination | `06-work/PLAN-<timestamp>-<slug>.md` |
 | `review.md` | independent review or approval lifecycle | `06-work/REVIEW-<timestamp>-<slug>.md` |
 | `project-skill.md` | promoted repeatable repository procedure | `project-skills/<skill-name>/SKILL.md` |
+| `workflow-observations.md` | created only after evidence-backed template friction | `00-governance/workflow-observations.md` |
 
 Create a WORK:
 

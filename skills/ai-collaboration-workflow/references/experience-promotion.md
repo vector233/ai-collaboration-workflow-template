@@ -18,6 +18,7 @@
 | architecture invariant | architecture or cross-cutting note |
 | simple setup or validation sequence | quick reference or runbook |
 | conditional multi-step procedure | `project-skills/<name>/SKILL.md` and `project-skills/INDEX.md` |
+| evidence-backed workflow-template friction | use the template feedback workflow and record a local workflow observation |
 
 ## Project Skill Gate
 

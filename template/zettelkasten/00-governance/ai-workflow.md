@@ -90,9 +90,34 @@ Run this check at context handoff and before closing tracked or governed work.
 | Architecture or data-flow invariant | `02-architecture/` or `04-cross-cutting/` | changes implementation choices |
 | Simple command, setup order, or validation step | [[01-overview/quick-reference]] or [[05-reference/e2e-test]] | tested and reusable |
 | Multi-step procedure with triggers, validation, and recovery | `project-skills/<name>/SKILL.md` | stable, repeated or high-impact, and retrieval-tested |
+| Evidence-backed workflow-template friction | `00-governance/workflow-observations.md` | repeated, high-impact, or a user correction identified reusable template behavior; sanitized |
 | One-off observation or low-confidence guess | active `WORK-*` only | do not promote |
 
 For every candidate, record the decision, reason, destination, and exact content written. Avoid promoting duplicate or stale instructions.
+
+## Template Feedback Check
+
+Run this as a silent classification at tracked or governed checkpoints, closeout, and after a user corrects workflow behavior. If no trigger is present, create no observation and add no completion ceremony.
+
+Record a local observation only when there is concrete evidence that one of these occurred:
+
+- the workflow required unnecessary artifacts or context;
+- an expected knowledge route was missing, stale, duplicated, or contradictory;
+- the same workflow clarification or workaround recurred;
+- an optional helper became necessary to complete the core path;
+- promoted experience was not discoverable when its documented trigger recurred;
+- the user or reviewer corrected a likely reusable template behavior.
+
+Classify before writing:
+
+| Scope | Destination |
+|---|---|
+| project-specific fact or procedure | normal Experience Promotion destination |
+| template-wide workflow friction | create `00-governance/workflow-observations.md` from [[00-governance/templates/workflow-observations]] on first use |
+| vendor-specific behavior | the same observation file with scope `vendor-specific` |
+| one-off model mistake or unsupported opinion | do not record |
+
+Include expected behavior, observed behavior, reproducible evidence, impact, and a privacy check. Do not include private code, customer data, secrets, internal URLs, or identifying business details. Local observations never authorize network transmission; prepare or submit upstream feedback only after explicit user review and approval.
 
 ## Git Isolation
 

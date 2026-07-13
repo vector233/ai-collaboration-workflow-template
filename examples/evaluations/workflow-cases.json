@@ -9,7 +9,9 @@
       "isolation": "current-branch",
       "project_skills": [],
       "promote_project_skill": false,
-      "requires_helper": false
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none"
     }
   },
   {
@@ -22,7 +24,9 @@
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,
-      "requires_helper": false
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none"
     }
   },
   {
@@ -35,7 +39,9 @@
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,
-      "requires_helper": false
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none"
     }
   },
   {
@@ -48,7 +54,9 @@
       "isolation": "dedicated-worktree",
       "project_skills": [],
       "promote_project_skill": false,
-      "requires_helper": false
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none"
     }
   },
   {
@@ -61,7 +69,9 @@
       "isolation": "task-branch",
       "project_skills": ["reset-provider-sandbox"],
       "promote_project_skill": false,
-      "requires_helper": false
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none"
     }
   },
   {
@@ -74,7 +84,24 @@
       "isolation": "current-branch",
       "project_skills": [],
       "promote_project_skill": false,
-      "requires_helper": false
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none"
+    }
+  },
+  {
+    "id": "record-template-friction",
+    "prompt": "During a tracked task, the repository instructions claimed helpers were optional, but the documented core path failed without one. The user corrected the workflow, and the same workaround was required in a second task. Record the appropriate feedback without sending anything upstream.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "tracked",
+      "artifacts": ["WORK", "WORKFLOW_OBSERVATION"],
+      "isolation": "task-branch",
+      "project_skills": [],
+      "promote_project_skill": false,
+      "requires_helper": false,
+      "feedback_action": "record-local",
+      "feedback_scope": "template-wide"
     }
   }
 ]

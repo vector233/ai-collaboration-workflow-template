@@ -1,0 +1,63 @@
+name: Workflow feedback
+description: Report evidence-backed, privacy-reviewed friction from a downstream project
+title: "[Workflow feedback] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit only sanitized workflow evidence. Do not include private code, customer data, secrets, internal URLs, project names, or identifying business details.
+  - type: input
+    id: template_version
+    attributes:
+      label: Template baseline or release
+      description: Use the downstream baseline, release tag, or upstream commit when known.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Template-wide
+        - Vendor-specific
+        - Uncertain
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent and model
+      description: Include only when relevant to reproduction.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior and evidence
+      description: Provide sanitized reproduction steps, repeated corrections, or other concrete evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and recurrence
+      description: Explain cost, risk, unnecessary process, or retrieval failure and whether it repeated.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested change
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy and consent
+      options:
+        - label: I removed private code, customer data, secrets, internal URLs, project names, and identifying business details.
+          required: true
+        - label: I reviewed and explicitly approved submitting this report upstream.
+          required: true

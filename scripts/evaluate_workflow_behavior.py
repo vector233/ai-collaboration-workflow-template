@@ -18,6 +18,8 @@ FIELDS = (
     "project_skills",
     "promote_project_skill",
     "requires_helper",
+    "feedback_action",
+    "feedback_scope",
 )
 
 

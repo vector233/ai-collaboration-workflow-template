@@ -32,6 +32,7 @@ REQUIRED_FILES = (
     Path("zettelkasten/00-governance/git-collaboration.md"),
     Path("zettelkasten/00-governance/templates/work-item.md"),
     Path("zettelkasten/00-governance/templates/project-skill.md"),
+    Path("zettelkasten/00-governance/templates/workflow-observations.md"),
     Path("zettelkasten/06-work/README.md"),
     Path("project-skills/INDEX.md"),
 )
@@ -109,6 +110,7 @@ def validate_payload() -> None:
     for section in (
         "## Workflow Routing",
         "## Project Skills And Experience",
+        "## Workflow Feedback",
         "## Git Isolation And Commits",
     ):
         require(section in agents, f"AGENTS.md is missing {section}")
@@ -246,6 +248,19 @@ def validate_tool_free_core(target: Path) -> None:
     require("## Experience Candidates" in text, "manual core path lost knowledge writeback")
     work.unlink()
 
+    observation_template = target / "zettelkasten/00-governance/templates/workflow-observations.md"
+    observation = target / "zettelkasten/00-governance/workflow-observations.md"
+    shutil.copy2(observation_template, observation)
+    observation_text = observation.read_text()
+    for expected in (
+        "Scope: template-wide / vendor-specific / uncertain",
+        "Reproducible evidence:",
+        "Privacy reviewed: yes / no",
+        "Status: candidate / repeated / prepared / reported / dismissed",
+    ):
+        require(expected in observation_text, f"workflow observation template is missing {expected}")
+    observation.unlink()
+
 
 def create_governed_and_done_state(target: Path) -> None:
     governed_id = "WORK-20260712120000-governed-change"
@@ -300,7 +315,7 @@ def create_governed_and_done_state(target: Path) -> None:
             "status: backlog": "status: done",
             "branch: task/work-id-short-name": "branch: task/closed-change",
             "next_action: clarify acceptance criteria": "next_action: none",
-            "|  | rule / gotcha / fact / runbook / project-skill | pending |  |  |": (
+            "|  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |": (
                 "| No reusable lesson | fact | not-promoted | work item | one-off sample |"
             ),
             "- Acceptance complete: yes / no": "- Acceptance complete: yes",
@@ -473,7 +488,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     require("pending decision" in pending_close.stderr, "pending Decision cell was not detected")
     close_path.write_text(
         close_path.read_text().replace(
-            "|  | rule / gotcha / fact / runbook / project-skill | pending |  |  |",
+            "|  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |",
             "| No reusable lesson | fact | not-promoted | pending destination | one-off sample |",
         )
     )
@@ -878,6 +893,20 @@ def validate_repository_layout() -> None:
     require("-> Doctor" not in publishing, "publishing copy makes the optional Doctor a fixed stage")
     git_collaboration = (PAYLOAD / "zettelkasten/00-governance/git-collaboration.md").read_text()
     require("date +%Y%m%d%H%M%S" in git_collaboration, "manual WORK ID recipe is not locally discoverable")
+    feedback_guide = ROOT / "docs/workflow-feedback.md"
+    require(feedback_guide.is_file(), "workflow feedback maintainer guide is missing")
+    issue_form = ROOT / ".github/ISSUE_TEMPLATE/workflow-feedback.yml"
+    require(issue_form.is_file(), "workflow feedback Issue form is missing")
+    feedback_reference = ROOT / "skills/ai-collaboration-workflow/references/template-feedback.md"
+    require(feedback_reference.is_file(), "companion Skill feedback reference is missing")
+    cases = json.loads((ROOT / "examples/evaluations/workflow-cases.json").read_text())
+    feedback_cases = [case for case in cases if case["expected"]["feedback_action"] != "none"]
+    require(len(feedback_cases) == 1, "behavior cases need exactly one positive workflow-feedback case")
+    require(
+        feedback_cases[0]["expected"]["feedback_action"] == "record-local"
+        and feedback_cases[0]["expected"]["feedback_scope"] == "template-wide",
+        "positive workflow-feedback case must remain local and template-wide",
+    )
     for helper in (WORKFLOW_DOCTOR, WORKFLOW_TASK, TASK_WORKTREE):
         require(helper.is_file(), f"optional Skill helper is missing: {helper.relative_to(ROOT)}")
         require(helper.stat().st_mode & 0o111, f"optional Skill helper is not executable: {helper.relative_to(ROOT)}")
@@ -888,9 +917,11 @@ def validate_repository_layout() -> None:
     for path in (
         ROOT / "docs/fresh-agent-resume-evaluation.md",
         ROOT / "docs/workflow-behavior-evaluation.md",
+        feedback_guide,
         ROOT / "examples/practical-scenarios/README.md",
         ROOT / "examples/evaluations/workflow-cases.json",
         ROOT / "skills/ai-collaboration-workflow/references/routing.md",
+        feedback_reference,
     ):
         require(path.is_file(), f"repository artifact is missing: {path.relative_to(ROOT)}")
 

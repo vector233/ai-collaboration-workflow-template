@@ -16,6 +16,7 @@ This repository develops and distributes the AI Collaboration Workflow Template.
 - Shared behavior belongs in repository files, not chat history, vendor memory, or tool-local state.
 - Vendor-specific files are adapters only. Keep requirements, workflow semantics, validation, and handoff rules vendor-neutral.
 - The downstream core must remain usable with Markdown and Git alone. Companion-Skill scripts are optional automation and must not be copied into or required by `template/`.
+- Downstream workflow feedback is opt-in, evidence-backed, sanitized, and user-approved before publication. Never add telemetry or automatic cross-project collection.
 - When workflow behavior changes, align the canonical payload, Skill, documentation, examples, and validation as applicable.
 - Never put repository-specific release, publishing, or maintenance material in `template/`.
 
