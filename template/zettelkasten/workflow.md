@@ -56,6 +56,16 @@ Use frontmatter status and update the file in place. Stable paths prevent link c
 
 Write durable architecture facts, decisions, runbooks, and gotchas to their knowledge notes. Link project-native Issues, pull requests, release records, or external approvals instead of duplicating their lifecycle in workflow-specific files.
 
+## Context Preservation
+
+Preserve context at meaningful boundaries, not after every turn. For Tracked or Governed work, update the checkpoint after each bounded implementation slice. For any unfinished task, preserve state before:
+
+- handing work to another agent or reviewer;
+- a long pause, session switch, or detectable context compaction;
+- yielding while a decision, validation result, risk, or next action exists only in chat.
+
+Direct work that completes, validates, and commits in the current context needs no WORK. If it cannot finish before one of these boundaries, re-route it to Tracked and create a WORK. Update the WORK with the selected route, acceptance state, completed step and commit, exact validation, unresolved risks or decisions, next allowed action, and experience candidates. Commit the current-task state after the checkpoint. Vendor-specific context-pressure detection may prompt this step, but it is optional and owns no project state.
+
 ## Tracked Work Loop
 
 1. Create a `WORK-*` from [[templates/work-item]].
@@ -64,7 +74,7 @@ Write durable architecture facts, decisions, runbooks, and gotchas to their know
 4. Implement one bounded slice.
 5. Run the smallest meaningful validation.
 6. Record review evidence and link any project-native review or approval.
-7. Record a context checkpoint and commit all current-task changes.
+7. At a preservation boundary, record a context checkpoint and commit all current-task changes.
 8. Record experience candidates.
 9. Repeat until acceptance and validation pass, then run Experience Promotion and close the work item.
 
@@ -90,7 +100,15 @@ Run this check at context handoff and before closing tracked or governed work.
 | Evidence-backed workflow-template friction | `workflow-observations.md` | repeated, high-impact, or a user correction identified reusable template behavior; sanitized |
 | One-off observation or low-confidence guess | active `WORK-*` only | do not promote |
 
-For every candidate, record the decision, reason, destination, and exact content written. Avoid promoting duplicate or stale instructions.
+For every candidate, record the decision, reason, destination, and exact content written.
+
+### Idempotent Writeback
+
+1. Search existing rules, notes, runbooks, decisions, and `project-skills/INDEX.md` before writing.
+2. Update the smallest canonical destination instead of creating parallel instructions. Mark obsolete content as superseded and link its replacement when deletion would lose useful history.
+3. For Tracked or Governed work, treat the active WORK as the candidate owner. Add any shared destination to `owned_paths` and check active WORK overlap before editing it.
+4. When another active task owns the same destination, coordinate a single writer or defer promotion until integration.
+5. Record a no-op decision when the destination already contains the current verified knowledge. Re-running promotion must not create duplicate notes, Skills, or index rows.
 
 ## Template Feedback Check
 
@@ -118,7 +136,7 @@ Include expected behavior, observed behavior, reproducible evidence, impact, and
 
 ## Git Isolation
 
-Tracked and governed work uses a task branch. Concurrent work uses a dedicated worktree per task. Shared knowledge updates are delayed until Experience Promotion at task close to reduce merge hotspots. See [[git-collaboration]].
+Tracked and governed work uses a task branch. Concurrent work uses a dedicated worktree per task. Shared knowledge updates are delayed until Experience Promotion at task close when practical, then claimed in `owned_paths` before editing to reduce merge hotspots. See [[git-collaboration]].
 
 ## Completion
 
@@ -128,6 +146,7 @@ Tracked or governed work is complete when:
 - required validation ran or residual risk is explicit;
 - required governed gates are closed;
 - every context has a traceable commit;
+- the latest checkpoint is sufficient for a fresh agent to identify the next allowed action without chat history;
 - experience candidates have explicit promotion decisions;
 - durable knowledge and project Skills are updated where required;
 - the work item has `status: done` and the task worktree is clean.

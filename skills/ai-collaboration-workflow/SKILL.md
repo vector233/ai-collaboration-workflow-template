@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Initialize and operate the AI Collaboration Workflow knowledge network for new projects. Use when an agent needs to install the knowledge-first template; route work into Direct, Tracked, or Governed delivery; resume or update a stable WORK record; discover or promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize and operate the AI Collaboration Workflow knowledge network for new projects. Use when an agent needs to install the knowledge-first template; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; discover or idempotently promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # AI Collaboration Workflow
@@ -75,11 +75,17 @@ Read [git-isolation.md](references/git-isolation.md) before starting tracked wor
 
 Tracked and governed work must not be implemented directly on the default branch. Concurrent tasks use separate worktrees. Every context that produces persistent changes, or each coherent slice, ends with a task-scoped commit; incomplete checkpoints stay on the task branch. Read-only contexts do not create empty commits.
 
+## Preserve Context
+
+Do not checkpoint every turn. Update the active WORK after each bounded Tracked or Governed slice and before an unfinished task crosses a handoff, long pause, agent or session switch, detectable context compaction, or any yield that would leave decisions only in chat. Direct work that completes, validates, and commits in the current context needs no WORK; otherwise re-route it to Tracked before yielding.
+
+Persist the route, acceptance state, completed step and commit, exact validation, risks or unresolved decisions, next allowed action, and experience candidates. Optional vendor telemetry may signal context pressure, but never require it and never store project state outside the repository.
+
 ## Promote Experience
 
 Read [experience-promotion.md](references/experience-promotion.md) when a task exposes a repeatable lesson, before closeout, or when creating/updating a project Skill.
 
-Record candidates in the active work item first. Promote each candidate to the smallest durable destination. Create a project Skill only for a stable conditional procedure with concrete triggers, validation, and recovery. Update `project-skills/INDEX.md` so future agents can wake it without loading every Skill.
+Record candidates in the active work item first. Search all likely destinations, update the smallest canonical destination, and make repeated promotion a no-op rather than a duplicate. For tracked or governed work, declare shared destinations in `owned_paths` and coordinate a single writer. Create a project Skill only for a stable conditional procedure with concrete triggers, validation, and recovery. Update the existing `project-skills/INDEX.md` row so future agents can wake it without loading every Skill.
 
 ## Improve The Template
 
@@ -96,5 +102,7 @@ python3 "$SKILL_ROOT/scripts/workflow_doctor.py" --root <repo-root> --strict
 ```
 
 Update the active work checkpoint with the commit reference, exact validation, risks, worktree status, and next allowed action before yielding.
+
+Use a Fresh-Agent Resume Probe only for important multi-context handoffs, after changing resume semantics, or before a release where failed recovery is costly. A real probe uses an agent with no prior chat and records unedited run provenance; a synthetic expected response tests only the evaluator. The core path still requires no helper.
 
 Do not claim validation that did not run. Do not stage unrelated user changes. Do not close work while experience candidates remain undecided.

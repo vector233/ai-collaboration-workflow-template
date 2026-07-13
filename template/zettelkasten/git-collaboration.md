@@ -52,6 +52,6 @@ Every agent context that produces persistent changes, or each coherent implement
 ## Integration
 
 - Rebase or merge the latest default branch before final validation when repository policy requires it.
-- Resolve shared knowledge changes during integration; task branches should normally record experience candidates before editing shared rules.
+- Task branches should normally record experience candidates before editing shared rules. At promotion or integration, add the selected shared destination to `owned_paths`, check active overlap, and coordinate one writer; other tasks defer or consume the integrated result.
 - Preserve per-context commits with a normal or no-fast-forward merge when traceability is required. Squash only when the repository explicitly prefers a compact integration history.
 - Close the work item, validate, and remove the worktree only after integration is confirmed.

@@ -2,7 +2,7 @@
 
 The project overview is [[project]]. Repository rules are in `AGENTS.md`.
 
-Template baseline: `canonical-payload-v4`. Use a release tag or commit instead when known more precisely.
+Template baseline: `v4.1.0` (`canonical-payload-v4`).
 
 ## Resume With Minimal Context
 
@@ -49,7 +49,11 @@ Use [[workflow]] to choose Direct, Tracked, or Governed work. Route by scope, un
 
 ## Writeback
 
-At every context checkpoint, update the active work item with the commit, validation, risks, next action, and experience candidates. At closeout, promote only durable knowledge to rules, gotchas, architecture notes, runbooks, decisions, or project Skills.
+Do not write a checkpoint after every turn. Update the active work item after each bounded Tracked or Governed slice and before an unfinished task crosses a handoff, long pause, agent or session switch, detectable context compaction, or any yield that would otherwise leave decisions only in chat. Direct work that completes, validates, and commits in the current context needs no WORK; otherwise re-route it to Tracked before yielding.
+
+A checkpoint must let a fresh agent recover the route, acceptance state, completed step and commit, exact validation, risks or unresolved decisions, next allowed action, and experience candidates. Optional adapters may detect context pressure, but Markdown and Git remain sufficient.
+
+At closeout, promote only durable knowledge to rules, gotchas, architecture notes, runbooks, decisions, or project Skills. Search first, update the canonical destination in place, and make repeated promotion a no-op when the knowledge is already current. For tracked or governed work, declare a shared destination in `owned_paths` and resolve overlap before editing it.
 
 When the workflow itself caused repeatable friction, route a sanitized observation through the Template Feedback Check. Normal work produces no feedback artifact.
 

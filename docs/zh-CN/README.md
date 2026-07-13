@@ -2,7 +2,7 @@
 
 这是面向 AI coding agents 的项目知识网络和轻量交付契约。它让上下文暂时、来源不同、可能并行工作的 Agent 获得同一套可信项目知识，并把开发中新产生的知识可靠地写回仓库。
 
-`v4.0.0` 是面向新项目的模板，不迁移或模拟早期目录结构。原因见[为什么 v4 是破坏性更新](#为什么-v4-是破坏性更新)。
+`v4.1.0` 是当前面向新项目的模板。固定安装这个版本的新项目包含上下文边界保存、Fresh-Agent 语义恢复检查和幂等知识写回；已经初始化的项目不会自动更新，可以按需人工采用其中的改进。v4 系列不迁移或模拟早期目录结构，原因见[为什么 v4 是破坏性更新](#为什么-v4-是破坏性更新)。
 
 ## 快速开始
 
@@ -12,7 +12,7 @@
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.0.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a claude-code \
   -g -y
@@ -22,7 +22,7 @@ npx skills add \
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.0.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a codex \
   -g -y
@@ -42,7 +42,7 @@ Skill 会先预览，再复制缺失文件，不会覆盖内容不同的仓库�
 Companion Skill 不是必需项。如果是一个尚不存在 Agent 指令或知识目录冲突的新仓库，可以复制固定版本的 payload：
 
 ```bash
-git clone --branch v4.0.0 --depth 1 \
+git clone --branch v4.1.0 --depth 1 \
   https://github.com/vector233/ai-collaboration-workflow-template.git
 
 cp -R ai-collaboration-workflow-template/template/. /path/to/your-project/
@@ -94,6 +94,15 @@ Agent 自行选择：
 只加载其中链接的知识和匹配的项目 Skill，然后继续执行。
 ```
 
+暂停或交接长任务：
+
+```text
+更新现有 WORK，使一个全新的 Agent 能恢复路径、验收状态、已完成步骤和提交、
+准确验证结果、未解决风险、下一步动作和经验候选。提交 checkpoint，不创建新的交接文件。
+```
+
+只在有意义的边界记录 checkpoint：每个 Tracked 或 Governed 有限切片完成后，以及未完成任务将要交接、长时间暂停、切换 Agent 或会话、发生可检测的上下文压缩之前，或者继续依赖聊天会丢失决策时。能在当前上下文完成、验证并提交的 Direct 工作仍然不需要 WORK；否则升级为 Tracked。运行时上下文遥测始终是可选能力，不是核心依赖。
+
 启动并行任务：
 
 ```text
@@ -124,6 +133,7 @@ cp zettelkasten/templates/work-item.md \
   -> 路由：Direct | Tracked | Governed
   -> 只加载当前 WORK 和匹配知识
   -> 按需实现、验证和 Review
+  -> 在有意义的上下文边界保存可恢复状态
   -> 每个产生持久变更的上下文或完整切片形成提交
   -> 将可复用经验升级为规则、知识笔记、runbook 或项目 Skill
 ```
@@ -175,6 +185,10 @@ v4 把仓库知识重新确立为产品，并让流程成本与任务风险匹�
 
 项目 Skill 必须说明何时使用、何时不用、执行步骤、验证、恢复和来源。单次事故、低置信猜测和普通编码常识不升级成 Skill。
 
+经验固化必须是幂等的：先搜索已有目标，原位更新 canonical 规则、笔记、runbook 或 Skill；内容已经是最新时记录 no-op。Tracked 或 Governed 工作先把共享目标加入 `owned_paths`；其他活跃 WORK 已拥有同一目标时，只保留一个写入者，或者延后固化。
+
+知识健康分为两层。普通交接只检查结构：分支与 WORK 的映射、checkpoint 字段、链接、所有权和 Skill 路由。重要的多上下文交接或恢复协议发生变化时，再让一个没有聊天历史的真实 Fresh Agent 执行语义恢复探针，在修改前报告路径、验收状态、checkpoint、验证、风险和下一步。手写预期响应只能测试 evaluator，不能证明 Agent 可以恢复；详见 [Fresh-Agent Resume Evaluation](../fresh-agent-resume-evaluation.md)。
+
 ## 项目反哺模板
 
 下游 Agent 只在重要 checkpoint、任务关闭或用户纠正流程行为后，静默判断是否出现有证据的模板摩擦。正常任务不创建反馈文件。
@@ -190,7 +204,7 @@ work_id="WORK-$(date +%Y%m%d%H%M%S)-<short-name>"
 git worktree add ../<short-name> -b "task/${work_id}" <base>
 ```
 
-默认分支只用于集成。有依赖或路径重叠的任务需要明确集成计划。每个产生持久变更的 Agent 上下文或完整实现切片必须形成当前任务提交；纯分析和只读 Review 不创建空提交。
+默认分支只用于集成。有依赖或路径重叠的任务需要明确集成计划，共享知识固化通过 `owned_paths` 确立唯一写入者。每个产生持久变更的 Agent 上下文或完整实现切片必须形成当前任务提交；纯分析和只读 Review 不创建空提交。
 
 ## 主要结构
 
@@ -209,7 +223,7 @@ project-skills/INDEX.md           项目 Skill 触发索引
 
 ## 验证
 
-下游项目使用自身构建、测试和 Review 命令验证行为。安装 Companion Skill 后，可以用可选 Doctor 检查知识链接、WORK 状态、项目 Skill 路由和跨 worktree 冲突。
+下游项目使用自身构建、测试和 Review 命令验证行为。安装 Companion Skill 后，可以用可选 Doctor 检查链接、WORK 状态、项目 Skill 路由和跨 worktree 冲突等结构健康；Fresh-Agent 语义恢复仍是独立且需要真实证据的评估。
 
 本模板仓库运行：
 
