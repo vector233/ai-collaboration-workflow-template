@@ -18,6 +18,16 @@
 
 Router 不只看代码量，还判断影响范围、不确定性、风险与可逆性、持续时间、协作方式和验证要求。小型权限或数据修改也可能直接升级为 Governed。
 
+## 产品边界
+
+核心产品是可链接、可 Review 的仓库知识，以及面向交付结果的轻量契约。它规定交接时必须保留什么，不规定 Agent 必须如何思考或运行哪个命令。
+
+- **核心**：`AGENTS.md`、`zettelkasten/` 知识入口和链接、按需记录的稳定工作意图、验证证据与经验写回。
+- **可选**：companion Skill 提供的知识检查、WORK 更新和受保护的 worktree 辅助脚本。
+- **非目标**：自主循环、任务调度、隐藏记忆、强制 CLI，以及替代 Git、Issue Tracker、CI 和项目测试系统。
+
+移除 companion Skill 后，项目仍必须可以被理解和正常使用。
+
 ## 为什么更轻
 
 - 所有工作流工件固定保存在 `zettelkasten/06-work/`，状态只更新 frontmatter，不移动文件。
@@ -46,7 +56,8 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 Tracked 和 Governed 工作默认使用 task branch；同时进行的任务或 Agent 使用独立 Git worktree：
 
 ```bash
-git worktree add ../<short-name> -b task/<work-id>-<short-name> <base>
+work_id="WORK-$(date +%Y%m%d%H%M%S)-<short-name>"
+git worktree add ../<short-name> -b "task/${work_id}" <base>
 ```
 
 默认分支只用于集成。存在依赖或明显修改相同路径的任务不应直接并行。

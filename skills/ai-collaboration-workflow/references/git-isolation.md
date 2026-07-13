@@ -10,7 +10,8 @@
 Use normal Git or the bundled guarded helper:
 
 ```bash
-git worktree add ../<short-name> -b task/<work-id>-<short-name> <base>
+work_id="WORK-$(date +%Y%m%d%H%M%S)-<short-name>"
+git worktree add ../<short-name> -b "task/${work_id}" <base>
 (cd <repo-root> && python3 "$SKILL_ROOT/scripts/task_worktree.py" create <WORK-ID> --slug <short-name>)
 ```
 

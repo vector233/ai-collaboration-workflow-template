@@ -23,16 +23,17 @@ related:
 Recommended branch name:
 
 ```text
-task/<work-id>-<short-name>
+task/<work-id>
 ```
 
 Create isolated work with normal Git:
 
 ```bash
-git worktree add ../<short-name> -b task/<work-id>-<short-name> <base>
+work_id="WORK-$(date +%Y%m%d%H%M%S)-<short-name>"
+git worktree add ../<short-name> -b "task/${work_id}" <base>
 ```
 
-Generate the timestamped WORK ID before naming the branch. Confirm the base commit and do not silently reuse an existing task branch. The optional companion Skill provides a guarded helper for this operation.
+Use the same ID for the WORK filename and task branch. Confirm the base commit and do not silently reuse an existing task branch. The optional companion Skill provides a guarded helper for this operation.
 
 Use a normal branch in the current checkout for one sequential task. Use a worktree when work overlaps in time, must preserve an existing dirty checkout, or is delegated to another agent.
 

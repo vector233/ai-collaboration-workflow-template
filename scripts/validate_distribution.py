@@ -871,6 +871,13 @@ def validate_repository_layout() -> None:
     require(not (ROOT / "zettelkasten").exists(), "root zettelkasten must not exist")
     require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
     require("## License" in (ROOT / "README.md").read_text(), "README License section is missing")
+    chinese_readme = (ROOT / "docs/zh-CN/README.md").read_text()
+    for expected in ("## 产品边界", "**核心**", "**可选**", "**非目标**"):
+        require(expected in chinese_readme, f"Chinese guide is missing product boundary text: {expected}")
+    publishing = (ROOT / "docs/community-publishing.md").read_text()
+    require("-> Doctor" not in publishing, "publishing copy makes the optional Doctor a fixed stage")
+    git_collaboration = (PAYLOAD / "zettelkasten/00-governance/git-collaboration.md").read_text()
+    require("date +%Y%m%d%H%M%S" in git_collaboration, "manual WORK ID recipe is not locally discoverable")
     for helper in (WORKFLOW_DOCTOR, WORKFLOW_TASK, TASK_WORKTREE):
         require(helper.is_file(), f"optional Skill helper is missing: {helper.relative_to(ROOT)}")
         require(helper.stat().st_mode & 0o111, f"optional Skill helper is not executable: {helper.relative_to(ROOT)}")

@@ -97,7 +97,7 @@ Task
   -> [WORK]    keep stable task state when tracking is useful
   -> Build     implement, validate, and commit one bounded context
   -> [Gates]   add TECH, PLAN, or REVIEW only when triggered
-  -> Doctor    check workflow state, links, branches, and project Skills
+  -> Check     validate behavior and inspect changed knowledge
   -> Promote   write recurring lessons to rules, notes, runbooks, or project Skills
 ```
 

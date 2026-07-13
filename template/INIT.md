@@ -66,7 +66,7 @@ Determine the repository's default branch and record any project-specific policy
 
 Default behavior when no stricter policy exists:
 
-- tracked and governed tasks use `task/<work-id>-<slug>` branches;
+- tracked and governed tasks use `task/<work-id>` branches;
 - concurrent tasks use separate worktrees;
 - each agent context or coherent slice ends with a task-scoped commit;
 - incomplete checkpoint commits stay off the default branch.
