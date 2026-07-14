@@ -15,7 +15,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
-RELEASE_VERSION = "v4.1.0"
+RELEASE_VERSION = "v4.1.1"
+CANONICAL_REPO_URL = "https://github.com/vector233/repo-continuity"
 MARKER = PAYLOAD / ".ai-collaboration-workflow-template"
 BOOTSTRAP = ROOT / "skills/ai-collaboration-workflow/scripts/bootstrap_template.py"
 WORKFLOW_DOCTOR = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_doctor.py"
@@ -964,30 +965,37 @@ def validate_repository_layout() -> None:
     require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
     readme = (ROOT / "README.md").read_text()
     for expected in (
+        "# Repo Continuity",
+        "One repository. Many coding agents. One durable project memory.",
+        "Resume, do not restart.",
+        "Make the project learn.",
         "## Quick Start",
-        f"tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
+        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
         "Use $ai-collaboration-workflow to initialize this repository.",
         "## Initialization Is Complete When",
         "## Daily Use",
         "Checkpoint only at meaningful boundaries",
         "Promotion is idempotent",
         "Semantic Fresh-Agent recovery",
-        "## Why v4 Is Breaking",
         "Do not use the raw copy command over an existing",
         "## License",
     ):
         require(expected in readme, f"README is missing onboarding contract: {expected}")
+    require("Why v4 Is Breaking" not in readme, "README still leads with breaking-change history")
     chinese_readme = (ROOT / "docs/zh-CN/README.md").read_text()
     for expected in (
+        "# Repo Continuity",
+        "一个仓库，多种 Coding Agent，一套持续演进的项目知识。",
+        "接着做，而不是重新开始。",
+        "让项目从开发中持续学习。",
         "## 快速开始",
-        f"tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
+        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
         "使用 $ai-collaboration-workflow 初始化当前仓库。",
         "## 初始化完成标准",
         "## 日常使用",
         "只在有意义的边界记录 checkpoint",
         "经验固化必须是幂等的",
         "Fresh-Agent 语义恢复",
-        "## 为什么 v4 是破坏性更新",
         "不要直接执行覆盖式复制",
         "## 产品边界",
         "**核心**",
@@ -995,8 +1003,15 @@ def validate_repository_layout() -> None:
         "**非目标**",
     ):
         require(expected in chinese_readme, f"Chinese guide is missing documentation contract: {expected}")
+    require("为什么 v4 是破坏性更新" not in chinese_readme, "Chinese guide still leads with breaking-change history")
     publishing = (ROOT / "docs/community-publishing.md").read_text()
     require("-> Doctor" not in publishing, "publishing copy makes the optional Doctor a fixed stage")
+    require("Repo Continuity" in publishing, "publishing copy is missing the product name")
+    require(CANONICAL_REPO_URL in publishing, "publishing copy uses a stale repository URL")
+    require(
+        f'DEFAULT_REPO_URL = "{CANONICAL_REPO_URL}.git"' in BOOTSTRAP.read_text(),
+        "bootstrap uses a stale canonical repository URL",
+    )
     git_collaboration = (PAYLOAD / "zettelkasten/git-collaboration.md").read_text()
     require("date +%Y%m%d%H%M%S" in git_collaboration, "manual WORK ID recipe is not locally discoverable")
     feedback_guide = ROOT / "docs/workflow-feedback.md"

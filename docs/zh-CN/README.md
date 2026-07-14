@@ -1,10 +1,22 @@
-# AI 协作流程模板
+# Repo Continuity
 
-这是面向 AI coding agents 的项目知识网络和轻量交付契约。它让上下文暂时、来源不同、可能并行工作的 Agent 获得同一套可信项目知识，并把开发中新产生的知识可靠地写回仓库。
+**一个仓库，多种 Coding Agent，一套持续演进的项目知识。**
 
-`v4.1.0` 是当前面向新项目的模板。固定安装这个版本的新项目包含上下文边界保存、Fresh-Agent 语义恢复检查和幂等知识写回；已经初始化的项目不会自动更新，可以按需人工采用其中的改进。v4 系列不迁移或模拟早期目录结构，原因见[为什么 v4 是破坏性更新](#为什么-v4-是破坏性更新)。
+Coding Agent 很强，但它们的上下文是暂时的：会话会结束，上下文会被压缩，执行任务的 Agent 会变化，重要的项目知识也会被反复重新发现。
+
+Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
+
+- **接着做，而不是重新开始。** 新 Agent 不依赖聊天历史，也能恢复当前目标、决策、验证、风险和下一步。
+- **只读取真正需要的知识。** 链接式知识和按需 Project Skills 避免每次加载完整项目历史。
+- **小任务保持轻量。** Direct、Tracked、Governed 只在持续时间、协作或风险需要时增加流程。
+- **让项目从开发中持续学习。** 已验证的修复和重复流程会固化为规则、笔记、runbook 或 Project Skills，而不是遗失在会话里。
+- **让并行 Agent 安全协作。** Task branch、worktree、owned paths 和稳定 WORK 避免不同任务静默覆盖彼此。
+
+所有必要状态都保存在可 Review 的 Markdown 和 Git 中。Companion Skill 可以自动完成初始化与检查，但项目不依赖服务、数据库、隐藏记忆或自主执行 runtime。
 
 ## 快速开始
+
+以下命令固定到当前版本 `v4.1.1`。已经初始化的项目不会被自动修改，可以按需人工采用新版改进。
 
 ### 推荐：安装 Companion Skill
 
@@ -12,7 +24,7 @@
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a claude-code \
   -g -y
@@ -22,7 +34,7 @@ npx skills add \
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a codex \
   -g -y
@@ -42,10 +54,10 @@ Skill 会先预览，再复制缺失文件，不会覆盖内容不同的仓库�
 Companion Skill 不是必需项。如果是一个尚不存在 Agent 指令或知识目录冲突的新仓库，可以复制固定版本的 payload：
 
 ```bash
-git clone --branch v4.1.0 --depth 1 \
-  https://github.com/vector233/ai-collaboration-workflow-template.git
+git clone --branch v4.1.1 --depth 1 \
+  https://github.com/vector233/repo-continuity.git
 
-cp -R ai-collaboration-workflow-template/template/. /path/to/your-project/
+cp -R repo-continuity/template/. /path/to/your-project/
 ```
 
 然后让 Agent 执行：
@@ -139,27 +151,6 @@ cp zettelkasten/templates/work-item.md \
 ```
 
 Router 不只看代码量，还判断影响范围、不确定性、风险与可逆性、持续时间、协作方式和验证要求。小型权限或数据修改也可能直接升级为 Governed。
-
-## 为什么 v4 是破坏性更新
-
-早期版本使用多个编号知识目录，并为需求、技术设计、执行计划和 Review 分别维护工件。这种结构可以显式展示每个阶段，但真实 AI 辅助开发暴露出的成本已经超过收益：
-
-- 小型和中型任务也会产生没有独立决策价值的文档；
-- 范围、状态、计划和验证信息在多个文件中重复；
-- 生命周期文件移动或改名会造成链接波动，恢复入口容易失效；
-- 每次结构调整都必须同步模板、Skill、示例、脚本和文档，容易遗漏；
-- Agent 为重建当前状态需要加载额外层级，增加 token 消耗和过期假设风险；
-- 并行开发会放大共享索引和流程文件上的冲突。
-
-v4 把仓库知识重新确立为产品，并让流程成本与任务风险匹配：
-
-- 长期知识使用 `project.md`、`architecture.md`、`gotchas.md` 等扁平语义入口；
-- Direct 任务不创建流程记录；
-- Tracked 和 Governed 都只使用一个稳定 WORK，Governed 的决策和审批表现为门禁；
-- Git、Issue、Pull Request、CI 和发布系统继续拥有它们本来的生命周期；
-- Companion 工具保持可选，不拥有隐藏的项目状态。
-
-项目不提供自动迁移，是因为旧项目可能同时定制了知识内容和流程工件。通用转换器无法可靠地区分长期事实与过期流程状态；同时保留两套模型也会延续 v4 想消除的复杂度。已有项目可以人工选择采用 v4 的部分原则，但 v4 只定义干净的新项目契约。
 
 ## 产品边界
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safely bootstrap the AI Collaboration Workflow Template into a repository."""
+"""Safely bootstrap Repo Continuity into a repository."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_REPO_URL = "https://github.com/vector233/ai-collaboration-workflow-template.git"
+DEFAULT_REPO_URL = "https://github.com/vector233/repo-continuity.git"
 DEFAULT_REF = "main"
 PAYLOAD_MARKER = Path(".ai-collaboration-workflow-template")
 
@@ -55,7 +55,7 @@ class BootstrapError(RuntimeError):
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Copy the AI Collaboration Workflow Template into a repository without "
+            "Copy Repo Continuity into a repository without "
             "overwriting differing existing files."
         )
     )
