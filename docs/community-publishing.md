@@ -19,7 +19,7 @@ Before posting anywhere:
 Canonical short description:
 
 ```text
-AI Collaboration Workflow Template is a vendor-neutral project knowledge network and lightweight delivery contract for AI-assisted software development.
+Repo Continuity gives coding agents durable, repository-owned project knowledge and a lightweight delivery contract that survives sessions, tools, and parallel work.
 ```
 
 ## Obsidian Forum: Share And Showcase
@@ -59,7 +59,7 @@ a third-party app for Obsidian
 ### Recommended Title
 
 ```text
-AI Collaboration Workflow Template: trusted project knowledge for coding agents
+Repo Continuity: durable project knowledge for coding agents
 ```
 
 ### Required Disclaimer
@@ -109,7 +109,7 @@ This is not an Obsidian plugin. It is a reusable Markdown vault/workflow templat
 There is also an optional companion skill for Claude/Codex-style agents, but the core project is just Markdown files and folders.
 
 GitHub:
-https://github.com/vector233/ai-collaboration-workflow-template
+https://github.com/vector233/repo-continuity
 
 I would appreciate feedback from Obsidian users, especially on whether the folder structure and wiki-link approach feels natural for a project knowledge base.
 ````
@@ -135,11 +135,11 @@ Use this flow for a short public announcement on X.
 ### Recommended Text
 
 ```text
-Open-sourced AI Collaboration Workflow Template: a vendor-neutral project knowledge network and lightweight delivery contract for AI coding agents.
+Open-sourced Repo Continuity: durable, repository-owned project knowledge and a lightweight delivery contract for AI coding agents.
 
 It keeps stable work items, validation, project knowledge, and on-demand skills linked over time.
 
-https://github.com/vector233/ai-collaboration-workflow-template
+https://github.com/vector233/repo-continuity
 ```
 
 ### Clean Intent URL Flow

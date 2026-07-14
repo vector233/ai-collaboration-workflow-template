@@ -1,12 +1,22 @@
-# AI Collaboration Workflow Template
+# Repo Continuity
 
-A vendor-neutral project knowledge network and lightweight delivery contract for AI-assisted software development.
+**One repository. Many coding agents. One durable project memory.**
 
-The template gives capable but context-temporary, vendor-diverse, and potentially parallel agents the same trusted project knowledge, then makes durable writeback part of delivery. It is not an autonomous runtime and requires no helper tool to remain usable.
+Coding agents are powerful, but their context is temporary. Sessions end, context gets compacted, agents change, and important project knowledge is rediscovered or lost.
 
-Version `v4.1.0` is the current new-project template. New installations pinned to this release include context-boundary preservation, semantic Fresh-Agent recovery checks, and idempotent knowledge writeback. Existing initialized projects do not update automatically; adopt selected changes manually when useful. The v4 line intentionally does not migrate or emulate earlier layouts; see [Why v4 Is Breaking](#why-v4-is-breaking).
+Repo Continuity makes the repository their shared source of truth:
+
+- **Resume, do not restart.** A fresh agent can recover the active goal, decisions, validation, risks, and next action without chat history.
+- **Load only what matters.** Linked knowledge and on-demand project Skills keep context focused instead of loading the whole repository story.
+- **Keep small work small.** Direct, Tracked, and Governed routes add process only when duration, coordination, or risk requires it.
+- **Make the project learn.** Verified fixes and repeated procedures become durable rules, notes, runbooks, or project Skills instead of being forgotten in a conversation.
+- **Run parallel work safely.** Task branches, worktrees, owned paths, and stable WORK records keep agents from silently overwriting one another.
+
+Everything required stays in reviewable Markdown and Git. The Companion Skill can automate setup and checks, but there is no required service, database, hidden memory, or autonomous runtime.
 
 ## Quick Start
+
+The commands below are pinned to the current release, `v4.1.1`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
 
 ### Recommended: Install The Companion Skill
 
@@ -14,7 +24,7 @@ Install the pinned release for Claude Code:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a claude-code \
   -g -y
@@ -24,7 +34,7 @@ Or install it for Codex:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/ai-collaboration-workflow-template/tree/v4.1.0/skills/ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
   --skill ai-collaboration-workflow \
   -a codex \
   -g -y
@@ -44,10 +54,10 @@ The Skill previews and bootstraps missing files without overwriting differing re
 The Skill is optional. For a new repository that has no conflicting agent or knowledge files, copy the pinned payload:
 
 ```bash
-git clone --branch v4.1.0 --depth 1 \
-  https://github.com/vector233/ai-collaboration-workflow-template.git
+git clone --branch v4.1.1 --depth 1 \
+  https://github.com/vector233/repo-continuity.git
 
-cp -R ai-collaboration-workflow-template/template/. /path/to/your-project/
+cp -R repo-continuity/template/. /path/to/your-project/
 ```
 
 Then ask the agent:
@@ -142,27 +152,6 @@ Task
 ```
 
 Routing considers scope, uncertainty, risk, reversibility, duration, coordination, and verification. A small security or data change can be Governed even when its diff is tiny.
-
-## Why v4 Is Breaking
-
-Earlier versions modeled delivery as several numbered knowledge areas and separate requirement, technical-design, plan, and review artifacts. That structure made each lifecycle stage explicit, but real AI-assisted development exposed costs that outweighed the benefit:
-
-- small and medium tasks accumulated documents that added no independent decision value;
-- the same scope, status, plan, and validation facts were repeated across files;
-- moving or renaming lifecycle files caused link churn and fragile resume paths;
-- every structural update had to be synchronized across templates, Skills, examples, scripts, and documentation;
-- agents loaded extra layers to reconstruct current state, increasing token use and stale-assumption risk;
-- parallel work amplified conflicts in shared indexes and frequently edited process files.
-
-v4 makes repository knowledge the product and keeps process proportional to risk:
-
-- durable knowledge uses flat, semantic entry points such as `project.md`, `architecture.md`, and `gotchas.md`;
-- Direct work creates no workflow record;
-- Tracked and Governed work use one stable WORK, with governed decisions and approvals represented as gates;
-- Git, Issues, pull requests, CI, and release systems retain the lifecycle they already own;
-- companion tooling remains optional and owns no hidden project state.
-
-There is no automatic migration because previous projects may have customized both their knowledge and workflow artifacts. A generic converter cannot reliably distinguish durable facts from stale process state, and carrying both models forward would preserve the complexity v4 removes. Existing projects may adopt selected v4 ideas manually, but v4 defines only the clean new-project contract.
 
 ## Product Boundary
 
