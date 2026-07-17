@@ -70,7 +70,7 @@ When the current client exposes configured specialist agents, use the cheapest c
 
 Do not delegate routine Direct work merely to use an agent. Keep delegation at one level, return concise evidence rather than raw logs, and stop an agent once its assigned task is complete. Read-only specialists may run in parallel only when their scopes are independent. A write-capable implementer must be the only write-capable agent in its task worktree; use a dedicated task worktree for any concurrent write task.
 
-The Codex adapter in `.codex/agents/` binds these roles to available models and reasoning levels. It is optional: no route, checkpoint, validation, or durable project state may depend on that adapter.
+The optional Codex and Claude Code adapters in `.codex/agents/` and `.claude/agents/` bind these roles to available models, reasoning levels, and tool policies. No route, checkpoint, validation, or durable project state may depend on an adapter.
 
 ## Git Isolation And Commits
 
@@ -96,7 +96,7 @@ Follow `zettelkasten/git-collaboration.md` unless stricter repository rules appl
 
 ## Cross-Agent Contract
 
-- `AGENTS.md` is canonical shared instruction; `CLAUDE.md` and optional `.codex/` configuration are vendor adapters.
+- `AGENTS.md` is canonical shared instruction; `CLAUDE.md` and optional `.codex/` or `.claude/` configuration are vendor adapters.
 - Vendor-specific tools may assist execution but must not own required project state.
 - External Skills must map durable output into the active work item, knowledge notes, runbooks, or project Skills.
 - Before a preservation trigger yields control, satisfy the Context Preservation contract above.

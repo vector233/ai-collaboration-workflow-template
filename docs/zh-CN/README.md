@@ -152,7 +152,21 @@ cp zettelkasten/templates/work-item.md \
 
 适配层将 Codex 限制为最多三个线程和一层委派。作用域独立时，多个只读 Agent 可以并行；`implementer` 有写入权限，必须与同一任务 worktree 中的其他写入 Agent 串行执行。并发写入任务必须使用各自的 task branch 和 worktree。
 
-表中的模型需要目标账户实际可用。如果某个模型不可用，只替换对应 `.codex/agents/*.toml` 的 `model` 配置为账户支持的等价模型。模型路由只是可选的 Codex 能力：没有子 Agent 的 Codex、Claude Code 或其他客户端仍可完整使用 Markdown/Git 工作流、checkpoint、验证和交接机制。
+表中的模型需要目标账户实际可用。如果某个模型不可用，只替换对应 `.codex/agents/*.toml` 的 `model` 配置为账户支持的等价模型。
+
+## 可选的 Claude Code 模型路由
+
+模板同时包含 `.claude/settings.json` 和 `.claude/agents/`。根会话默认使用 `opusplan`：计划模式使用 Opus，执行阶段自动使用 Sonnet；专业 Agent 则把旁路工作保留在各自独立且聚焦的上下文中。
+
+| Agent | 适用任务 | 默认模型策略 |
+|---|---|---|
+| root | 任务路由、规划和普通工作 | `opusplan`：计划阶段 Opus，执行阶段 Sonnet |
+| `explorer` | 只读代码定位、调用路径追踪和证据收集 | Haiku；仅 `Read`、`Grep`、`Glob` |
+| `implementer` | 已确认路径的单个局部改动与定向验证 | Sonnet；可写 |
+| `reviewer` | 只读正确性、安全性、回归和测试覆盖审查 | Opus |
+| `architect` | 只读高影响架构决策或疑难根因分析 | Opus |
+
+Claude Code 根据 Agent 的描述和当前上下文自动选择。需要固定角色时，使用 `@explorer`、`@implementer`、`@reviewer` 或 `@architect`。`implementer` 必须与同一任务 worktree 中的其他写入 Agent 串行执行；作用域独立的只读角色可以并行。如果模型不可用或被组织策略限制，Claude Code 会回退到继承或允许的模型，仓库工作流仍然保持不变。
 
 ## 核心模型
 
@@ -173,7 +187,7 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 核心产品是可链接、可 Review 的仓库知识，以及面向交付结果的轻量契约。它规定交接时必须保留什么，不规定 Agent 必须如何思考或运行哪个命令。
 
 - **核心**：`AGENTS.md`、`zettelkasten/` 知识入口和链接、按需记录的稳定工作意图、验证证据与经验写回。
-- **可选**：Companion Skill 提供的知识检查、WORK 更新和受保护的 worktree 辅助脚本；以及面向 Codex 专业 Agent 的 `.codex/` 模型路由适配层。
+- **可选**：Companion Skill 提供的知识检查、WORK 更新和受保护的 worktree 辅助脚本；以及面向专业 Agent 的 `.codex/` 和 `.claude/` 模型路由适配层。
 - **非目标**：自主循环、任务调度、隐藏记忆、强制 CLI，以及替代 Git、Issue Tracker、CI 和项目测试系统。
 
 知识网络使用纯 Markdown 和 Wiki 链接，可以作为兼容 Obsidian 的 vault 打开；Obsidian 只是可选编辑器，不是 runtime 或插件依赖。
@@ -216,6 +230,7 @@ git worktree add ../<short-name> -b "task/${work_id}" <base>
 ## 主要结构
 
 ```text
+.claude/                           Claude Code 的可选模型路由适配层
 .codex/                            Codex 的可选模型路由适配层
 AGENTS.md                         仓库级共享规则
 zettelkasten/AI.md                最小上下文入口

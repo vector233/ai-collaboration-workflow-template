@@ -32,6 +32,11 @@ PAYLOAD_REQUIRED_FILES = (
 )
 
 OPTIONAL_ADAPTER_FILES = (
+    Path(".claude/settings.json"),
+    Path(".claude/agents/explorer.md"),
+    Path(".claude/agents/implementer.md"),
+    Path(".claude/agents/reviewer.md"),
+    Path(".claude/agents/architect.md"),
     Path(".codex/config.toml"),
     Path(".codex/agents/explorer.toml"),
     Path(".codex/agents/implementer.toml"),
@@ -207,7 +212,7 @@ def template_files(source: Path) -> tuple[Path, ...]:
         Path("CLAUDE.md"),
         Path("INIT.md"),
     ]
-    for directory in ("zettelkasten", "project-skills", ".codex"):
+    for directory in ("zettelkasten", "project-skills", ".claude", ".codex"):
         source_directory = source / directory
         if not source_directory.is_dir():
             continue

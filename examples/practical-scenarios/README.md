@@ -61,6 +61,18 @@ explorer (read-only) -> identify code path and evidence
 
 The explorer and reviewer may run in parallel only for independent read-only scopes. The implementer is the only writer in its task worktree; a second write task needs a separate branch and worktree. If Codex subagents or a configured model are unavailable, the root agent follows the same repository workflow without delegation.
 
+## Optional Claude Code Model Routing
+
+For the same scenario, Claude Code starts on `opusplan`, then uses its model-bound agents without changing the workflow route:
+
+```text
+explorer (Haiku, read-only) -> identify code path and evidence
+-> implementer (Sonnet, serial writer) -> targeted validation
+-> reviewer (Opus, read-only) -> findings -> WORK checkpoint when required
+```
+
+Claude selects a specialist from its description and current context; use `@explorer`, `@implementer`, `@reviewer`, or `@architect` when a particular role is required. If a model is unavailable, Claude Code uses an inherited or organization-permitted model while preserving the same role boundaries.
+
 ## Project Skill Promotion
 
 A third-party sandbox reset procedure repeatedly causes failed tests:

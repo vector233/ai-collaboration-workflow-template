@@ -153,7 +153,21 @@ The payload includes an optional `.codex/` adapter that routes bounded specialis
 
 The adapter caps Codex at three threads and one delegation level. Read-only specialists may work in parallel on independent scopes. The implementer is write-capable and must work serially with other writers in its task worktree; concurrent write tasks require their own task branch and worktree.
 
-The listed models must be available to the target account. If one is unavailable, replace only that agent's `model` setting with an account-supported equivalent. Model routing is an optional Codex capability: the repository's Markdown/Git workflow, checkpoints, validation, and handoff continue to work in Codex without subagents and in other clients.
+The listed models must be available to the target account. If one is unavailable, replace only that agent's `model` setting with an account-supported equivalent.
+
+## Optional Claude Code Model Routing
+
+The payload also includes `.claude/settings.json` and `.claude/agents/`. The root session starts with `opusplan`, which uses Opus in plan mode and Sonnet during execution; specialized agents keep side work in their own focused contexts.
+
+| Agent | Use for | Default model policy |
+|---|---|---|
+| root | task routing, planning, and ordinary work | `opusplan`: Opus in plan mode, Sonnet in execution |
+| `explorer` | read-only discovery, tracing, and evidence gathering | Haiku; `Read`, `Grep`, and `Glob` only |
+| `implementer` | one understood, scoped change and targeted validation | Sonnet; write-capable |
+| `reviewer` | read-only correctness, security, regression, and test review | Opus |
+| `architect` | read-only high-impact design or difficult root-cause analysis | Opus |
+
+Claude Code selects an agent from its description and context. Use `@explorer`, `@implementer`, `@reviewer`, or `@architect` when the exact role must run. The implementer remains serial with other writers in its task worktree; independent read-only roles may run in parallel. If a model is unavailable or restricted, Claude Code falls back to an inherited or permitted model; the same repository workflow still applies.
 
 ## Core Model
 
@@ -174,7 +188,7 @@ Routing considers scope, uncertainty, risk, reversibility, duration, coordinatio
 The core product is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
 
 - **Core**: `AGENTS.md`, the `zettelkasten/` entry and links, stable work intent when needed, validation evidence, and durable experience writeback.
-- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; the `.codex/` model-routing adapter for Codex specialist agents.
+- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; the `.codex/` and `.claude/` model-routing adapters for specialist agents.
 - **Non-goals**: autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
 
 The knowledge network uses plain Markdown and wiki links. It can be opened as an Obsidian-compatible vault, but Obsidian is an optional editor rather than a runtime or plugin dependency.
@@ -218,6 +232,9 @@ The default branch is integration-only. Dependent or overlapping tasks need an e
 
 ```text
 template/
+  .claude/
+    settings.json
+    agents/
   .codex/
     config.toml
     agents/

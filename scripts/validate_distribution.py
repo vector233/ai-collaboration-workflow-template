@@ -40,6 +40,11 @@ REQUIRED_FILES = (
 )
 
 OPTIONAL_ADAPTER_FILES = (
+    Path(".claude/settings.json"),
+    Path(".claude/agents/explorer.md"),
+    Path(".claude/agents/implementer.md"),
+    Path(".claude/agents/reviewer.md"),
+    Path(".claude/agents/architect.md"),
     Path(".codex/config.toml"),
     Path(".codex/agents/explorer.toml"),
     Path(".codex/agents/implementer.toml"),
@@ -139,6 +144,33 @@ def validate_payload() -> None:
         (PAYLOAD / "CLAUDE.md").read_text().lstrip().startswith("@AGENTS.md"),
         "CLAUDE.md is not an adapter",
     )
+    require(
+        "## Model-Routing Adapter" in (PAYLOAD / "CLAUDE.md").read_text(),
+        "CLAUDE.md is missing the Claude Code model-routing adapter",
+    )
+
+    claude_settings = json.loads((PAYLOAD / ".claude/settings.json").read_text())
+    require(
+        claude_settings == {"model": "opusplan"},
+        "Claude Code settings do not select opusplan",
+    )
+    claude_agent_policies = {
+        "explorer": ("model: haiku", "tools: Read, Grep, Glob"),
+        "implementer": ("model: sonnet", "tools: Read, Grep, Glob, Edit, Write, Bash"),
+        "reviewer": ("model: opus", "tools: Read, Grep, Glob, Bash"),
+        "architect": ("model: opus", "tools: Read, Grep, Glob"),
+    }
+    for agent, expected_values in claude_agent_policies.items():
+        policy = (PAYLOAD / f".claude/agents/{agent}.md").read_text()
+        require(
+            f"name: {agent}" in policy,
+            f"Claude Code {agent} agent has the wrong name",
+        )
+        for expected in expected_values:
+            require(
+                expected in policy,
+                f"Claude Code {agent} agent is missing {expected}",
+            )
 
     codex_config = (PAYLOAD / ".codex/config.toml").read_text()
     for expected in (
@@ -910,6 +942,23 @@ def validate_bootstrap_lifecycle() -> None:
             "local Codex config was overwritten",
         )
         shutil.copy2(PAYLOAD / ".codex/config.toml", codex_config)
+
+        local_claude_settings = '{"model": "local-model"}\n'
+        claude_settings = target / ".claude/settings.json"
+        claude_settings.write_text(local_claude_settings)
+        claude_conflict = run(
+            [sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)],
+            expected=2,
+        )
+        require(
+            "conflict: .claude/settings.json" in claude_conflict.stdout,
+            "Claude Code settings conflict was not reported",
+        )
+        require(
+            claude_settings.read_text() == local_claude_settings,
+            "local Claude Code settings were overwritten",
+        )
+        shutil.copy2(PAYLOAD / ".claude/settings.json", claude_settings)
 
         run([sys.executable, str(BOOTSTRAP), "--target", str(target), "--inspect"])
         initialize_target(target)
