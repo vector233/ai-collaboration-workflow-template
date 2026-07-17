@@ -31,6 +31,14 @@ PAYLOAD_REQUIRED_FILES = (
     Path("project-skills/INDEX.md"),
 )
 
+OPTIONAL_ADAPTER_FILES = (
+    Path(".codex/config.toml"),
+    Path(".codex/agents/explorer.toml"),
+    Path(".codex/agents/implementer.toml"),
+    Path(".codex/agents/reviewer.toml"),
+    Path(".codex/agents/architect.toml"),
+)
+
 INSTALLED_REQUIRED_FILES = tuple(
     path for path in PAYLOAD_REQUIRED_FILES if path != Path("INIT.md")
 )
@@ -166,7 +174,9 @@ def clone_source(repo_url: str, ref: str, destination: Path) -> Path:
 def validate_payload(payload: Path) -> None:
     if not (payload / PAYLOAD_MARKER).is_file():
         raise BootstrapError(f"template payload marker is missing: {payload / PAYLOAD_MARKER}")
-    missing_files = missing_required_paths(payload, PAYLOAD_REQUIRED_FILES)
+    missing_files = missing_required_paths(
+        payload, PAYLOAD_REQUIRED_FILES + OPTIONAL_ADAPTER_FILES
+    )
     missing_directories = missing_required_directories(payload)
     problems = [
         *(f"file {path}" for path in missing_files),
@@ -197,15 +207,11 @@ def template_files(source: Path) -> tuple[Path, ...]:
         Path("CLAUDE.md"),
         Path("INIT.md"),
     ]
-    zettelkasten = source / "zettelkasten"
-    for candidate in sorted(zettelkasten.rglob("*")):
-        if candidate.is_symlink():
-            raise BootstrapError(f"template source contains a symlink: {candidate}")
-        if candidate.is_file():
-            files.append(candidate.relative_to(source))
-    project_skills = source / "project-skills"
-    if project_skills.is_dir():
-        for candidate in sorted(project_skills.rglob("*")):
+    for directory in ("zettelkasten", "project-skills", ".codex"):
+        source_directory = source / directory
+        if not source_directory.is_dir():
+            continue
+        for candidate in sorted(source_directory.rglob("*")):
             if candidate.is_symlink():
                 raise BootstrapError(f"template source contains a symlink: {candidate}")
             if candidate.is_file():

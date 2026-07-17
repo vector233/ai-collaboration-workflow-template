@@ -1,6 +1,6 @@
 ---
 name: ai-collaboration-workflow
-description: Initialize and operate Repo Continuity for new projects. Use when an agent needs to install the repository-owned knowledge layer; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; discover or idempotently promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize and operate Repo Continuity for new projects. Use when an agent needs to install the repository-owned knowledge layer; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; discover or idempotently promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # Repo Continuity
@@ -68,6 +68,10 @@ Read [routing.md](references/routing.md) when classifying new work or reconsider
 - **Governed**: use one `WORK-*` with explicit decisions, approvals, owners, evidence, and gates.
 
 Use repository templates or the optional WORK helper. Keep artifact paths stable and update frontmatter status in place.
+
+## Use Optional Codex Model Routing
+
+When operating in Codex and the target has `.codex/agents/`, read [codex-model-routing.md](references/codex-model-routing.md) before delegating. The adapter assigns model and reasoning settings to narrow specialist roles; it never replaces the Direct/Tracked/Governed route, Git isolation, validation, or durable handoff contract.
 
 ## Isolate And Commit
 

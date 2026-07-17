@@ -19,9 +19,11 @@ For parallel coordination, compare active WORK branch and owned-path fields with
 
 | Agent | Instruction entry | Durable knowledge |
 |---|---|---|
-| Codex | `AGENTS.md` | `zettelkasten/`, `project-skills/` |
+| Codex | `AGENTS.md`; optional `.codex/agents/` model-routing adapter | `zettelkasten/`, `project-skills/` |
 | Claude Code | `CLAUDE.md` imports `AGENTS.md` | `zettelkasten/`, `project-skills/` |
 | Other repository-aware agents | explicitly read `AGENTS.md` | `zettelkasten/`, `project-skills/` |
+
+The optional Codex adapter assigns model and reasoning settings to the specialist roles in `AGENTS.md`. It does not replace the route decision, Git isolation, or Markdown checkpoint requirements.
 
 ## Route Tasks
 

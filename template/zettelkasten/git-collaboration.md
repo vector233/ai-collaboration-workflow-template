@@ -16,9 +16,11 @@ related:
 
 - Keep the default branch integration-only for tracked and governed work.
 - Give every work item one task branch.
-- Give every concurrently active task or agent one worktree.
-- Never share one worktree or branch between concurrent agents.
+- Give every concurrently active task or write-capable agent one worktree.
+- Never share one worktree or branch between concurrent write-capable agents.
 - Do not parallelize dependent tasks or tasks with materially overlapping owned paths without an integration plan.
+
+Read-only delegated agents may inspect the current task worktree without a second checkout when their scopes are independent. A write-capable delegated agent works serially in the current task worktree; any concurrent write task gets its own task branch and worktree.
 
 Recommended branch name:
 
@@ -35,7 +37,7 @@ git worktree add ../<short-name> -b "task/${work_id}" <base>
 
 Use the same ID for the WORK filename and task branch. Confirm the base commit and do not silently reuse an existing task branch. The optional companion Skill provides a guarded helper for this operation.
 
-Use a normal branch in the current checkout for one sequential task. Use a worktree when work overlaps in time, must preserve an existing dirty checkout, or is delegated to another agent.
+Use a normal branch in the current checkout for one sequential task. Use a worktree when write-capable work overlaps in time, must preserve an existing dirty checkout, or is delegated to another write-capable agent. Independent read-only specialists may inspect the current task worktree.
 
 Detached worktrees do not claim branch-owned active WORK until attached to the declared task branch.
 

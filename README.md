@@ -139,6 +139,22 @@ cp zettelkasten/templates/work-item.md \
 
 Update frontmatter and checkpoints in place. A WORK never moves for a status change.
 
+## Optional Codex Model Routing
+
+The payload includes an optional `.codex/` adapter that routes bounded specialist work to fixed Codex model settings. Workflow routing and model routing are separate: choose Direct, Tracked, or Governed first, then delegate only when a specialist materially improves the result.
+
+| Agent | Use for | Default model policy |
+|---|---|---|
+| root | task routing and ordinary work | `gpt-5.6-terra`, medium reasoning |
+| `explorer` | read-only discovery, tracing, and evidence gathering | `gpt-5.6-terra`, low reasoning |
+| `implementer` | one understood, scoped change and targeted validation | `gpt-5.6-terra`, medium reasoning |
+| `reviewer` | read-only correctness, security, regression, and test review | `gpt-5.6-sol`, high reasoning |
+| `architect` | read-only high-impact design or difficult root-cause analysis | `gpt-5.6-sol`, extra-high reasoning |
+
+The adapter caps Codex at three threads and one delegation level. Read-only specialists may work in parallel on independent scopes. The implementer is write-capable and must work serially with other writers in its task worktree; concurrent write tasks require their own task branch and worktree.
+
+The listed models must be available to the target account. If one is unavailable, replace only that agent's `model` setting with an account-supported equivalent. Model routing is an optional Codex capability: the repository's Markdown/Git workflow, checkpoints, validation, and handoff continue to work in Codex without subagents and in other clients.
+
 ## Core Model
 
 ```text
@@ -158,7 +174,7 @@ Routing considers scope, uncertainty, risk, reversibility, duration, coordinatio
 The core product is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
 
 - **Core**: `AGENTS.md`, the `zettelkasten/` entry and links, stable work intent when needed, validation evidence, and durable experience writeback.
-- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation.
+- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; the `.codex/` model-routing adapter for Codex specialist agents.
 - **Non-goals**: autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
 
 The knowledge network uses plain Markdown and wiki links. It can be opened as an Obsidian-compatible vault, but Obsidian is an optional editor rather than a runtime or plugin dependency.
@@ -202,6 +218,9 @@ The default branch is integration-only. Dependent or overlapping tasks need an e
 
 ```text
 template/
+  .codex/
+    config.toml
+    agents/
   AGENTS.md
   CLAUDE.md
   INIT.md

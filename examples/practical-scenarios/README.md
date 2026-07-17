@@ -49,6 +49,18 @@ WORK-B -> task branch B -> worktree B -> Agent B
 
 Each context commits only its task. Both tasks record experience candidates locally. Before promotion, one WORK claims the shared destination in `owned_paths`; the other task coordinates or defers, avoiding competing edits to `AGENTS.md` or a project Skill.
 
+## Optional Codex Model Routing
+
+An unfamiliar but bounded bug can use the optional Codex specialist adapter without changing the selected workflow route:
+
+```text
+explorer (read-only) -> identify code path and evidence
+-> implementer (serial writer) -> targeted validation
+-> reviewer (read-only) -> findings -> WORK checkpoint when required
+```
+
+The explorer and reviewer may run in parallel only for independent read-only scopes. The implementer is the only writer in its task worktree; a second write task needs a separate branch and worktree. If Codex subagents or a configured model are unavailable, the root agent follows the same repository workflow without delegation.
+
 ## Project Skill Promotion
 
 A third-party sandbox reset procedure repeatedly causes failed tests:

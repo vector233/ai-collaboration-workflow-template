@@ -39,6 +39,14 @@ REQUIRED_FILES = (
     Path("project-skills/INDEX.md"),
 )
 
+OPTIONAL_ADAPTER_FILES = (
+    Path(".codex/config.toml"),
+    Path(".codex/agents/explorer.toml"),
+    Path(".codex/agents/implementer.toml"),
+    Path(".codex/agents/reviewer.toml"),
+    Path(".codex/agents/architect.toml"),
+)
+
 REQUIRED_DIRECTORIES = (
     Path("zettelkasten/work"),
     Path("project-skills"),
@@ -99,6 +107,8 @@ def validate_payload() -> None:
     )
     for path in REQUIRED_FILES:
         require((PAYLOAD / path).is_file(), f"payload file is missing: {path}")
+    for path in OPTIONAL_ADAPTER_FILES:
+        require((PAYLOAD / path).is_file(), f"payload adapter is missing: {path}")
     for path in REQUIRED_DIRECTORIES:
         require((PAYLOAD / path).is_dir(), f"payload directory is missing: {path}")
     vault_directories = {
@@ -118,6 +128,7 @@ def validate_payload() -> None:
     for section in (
         "## Workflow Routing",
         "## Context Preservation",
+        "## Specialist Delegation",
         "## Project Skills And Experience",
         "## Workflow Feedback",
         "## Git Isolation And Commits",
@@ -128,6 +139,32 @@ def validate_payload() -> None:
         (PAYLOAD / "CLAUDE.md").read_text().lstrip().startswith("@AGENTS.md"),
         "CLAUDE.md is not an adapter",
     )
+
+    codex_config = (PAYLOAD / ".codex/config.toml").read_text()
+    for expected in (
+        'model = "gpt-5.6-terra"',
+        'model_reasoning_effort = "medium"',
+        "max_threads = 3",
+        "max_depth = 1",
+    ):
+        require(expected in codex_config, f"Codex config is missing {expected}")
+    agent_policies = {
+        "explorer": ("gpt-5.6-terra", 'sandbox_mode = "read-only"'),
+        "implementer": ("gpt-5.6-terra", 'sandbox_mode = "workspace-write"'),
+        "reviewer": ("gpt-5.6-sol", 'sandbox_mode = "read-only"'),
+        "architect": ("gpt-5.6-sol", 'sandbox_mode = "read-only"'),
+    }
+    for agent, expected_values in agent_policies.items():
+        policy = (PAYLOAD / f".codex/agents/{agent}.toml").read_text()
+        require(
+            f'name = "{agent}"' in policy,
+            f"Codex {agent} agent has the wrong name",
+        )
+        for expected in expected_values:
+            require(
+                expected in policy,
+                f"Codex {agent} agent is missing {expected}",
+            )
 
     workflow = (PAYLOAD / "zettelkasten/workflow.md").read_text()
     for expected in (
@@ -837,6 +874,11 @@ def validate_bootstrap_lifecycle() -> None:
         )
         require("Would copy:" in dry_run.stdout and not target.exists(), "dry-run changed target")
         run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)])
+        for path in OPTIONAL_ADAPTER_FILES:
+            require(
+                (target / path).is_file(),
+                f"bootstrap omitted adapter: {path}",
+            )
         identical = run(
             [sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)]
         )
@@ -851,6 +893,23 @@ def validate_bootstrap_lifecycle() -> None:
         require("conflict: AGENTS.md" in conflict.stdout, "AGENTS conflict was not reported")
         require((target / "AGENTS.md").read_text() == local_rules, "local rules were overwritten")
         shutil.copy2(PAYLOAD / "AGENTS.md", target / "AGENTS.md")
+
+        local_codex_config = "model = \"local-model\"\n"
+        codex_config = target / ".codex/config.toml"
+        codex_config.write_text(local_codex_config)
+        codex_conflict = run(
+            [sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)],
+            expected=2,
+        )
+        require(
+            "conflict: .codex/config.toml" in codex_conflict.stdout,
+            "Codex config conflict was not reported",
+        )
+        require(
+            codex_config.read_text() == local_codex_config,
+            "local Codex config was overwritten",
+        )
+        shutil.copy2(PAYLOAD / ".codex/config.toml", codex_config)
 
         run([sys.executable, str(BOOTSTRAP), "--target", str(target), "--inspect"])
         initialize_target(target)
@@ -876,6 +935,8 @@ def validate_manual_copy() -> None:
         shutil.copytree(PAYLOAD, target)
         for path in REQUIRED_FILES:
             require((target / path).is_file(), f"manual copy omitted {path}")
+        for path in OPTIONAL_ADAPTER_FILES:
+            require((target / path).is_file(), f"manual copy omitted adapter: {path}")
         for path in REQUIRED_DIRECTORIES:
             require((target / path).is_dir(), f"manual copy omitted {path}")
 
