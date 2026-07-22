@@ -76,7 +76,7 @@ git diff --check
 Remove initialization files after checking links, required fields, project-Skill routing, concrete review dates, and the diff:
 
 ```bash
-rm -f .ai-collaboration-workflow-template INIT.md
+rm -f .repo-continuity-template .ai-collaboration-workflow-template INIT.md
 ```
 
 The optional companion Skill may automate the knowledge checks. Fix all failures. If repository policy requires a commit, commit only initialization changes with a concise conventional message. Otherwise leave the verified changes for the user.

@@ -4,7 +4,7 @@
 
 - Direct low-risk work may use the current non-protected branch when repository policy allows it.
 - Tracked or governed work uses a dedicated task branch.
-- Concurrent tasks, delegated agents, long-lived tasks, or work that must preserve another dirty checkout use separate Git worktrees.
+- Concurrent tasks, delegated write-capable agents, long-lived tasks, or work that must preserve another dirty checkout use separate Git worktrees. Independent read-only specialists may inspect the current task worktree without a second checkout; they do not edit or claim that worktree.
 - Dependent tasks or materially overlapping owned paths should run serially or define an explicit integration plan.
 
 Use normal Git or the bundled guarded helper:

@@ -16,7 +16,12 @@ Everything required stays in reviewable Markdown and Git. The Companion Skill ca
 
 ## Quick Start
 
-The commands below are pinned to the current release, `v4.1.1`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
+The commands below are pinned to the current release, `v4.2.0`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
+
+> [!TIP]
+> **Upgrading from `v4.1.1` or earlier:** the Companion Skill was renamed from `ai-collaboration-workflow` to `repo-continuity`.
+>
+> Remove the old global Skill with `npx skills remove ai-collaboration-workflow -g -y`, then install and invoke `$repo-continuity`. Repositories that already completed `INIT.md` do not need to be initialized again. For an interrupted setup, continue `INIT.md`; the Doctor still recognizes the legacy payload marker.
 
 ### Recommended: Install The Companion Skill
 
@@ -24,8 +29,8 @@ Install the pinned release for Claude Code:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
-  --skill ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0/skills/repo-continuity \
+  --skill repo-continuity \
   -a claude-code \
   -g -y
 ```
@@ -34,8 +39,8 @@ Or install it for Codex:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
-  --skill ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0/skills/repo-continuity \
+  --skill repo-continuity \
   -a codex \
   -g -y
 ```
@@ -43,18 +48,18 @@ npx skills add \
 Then enter the target repository and ask the agent:
 
 ```text
-Use $ai-collaboration-workflow to initialize this repository.
+Use $repo-continuity to initialize this repository.
 Inspect existing project rules first, preserve stricter local policy, and complete INIT.md.
 ```
 
-The Skill previews and bootstraps missing files without overwriting differing repository files. When `AGENTS.md`, `CLAUDE.md`, or other target files conflict, the agent must preserve the existing file and merge the applicable shared rules deliberately.
+`npx skills add` installs the Companion Skill only; it does not copy the full repository payload into the target project. When invoked, the Skill runs its bundled bootstrap, which fetches the same pinned release and previews or copies missing core files without overwriting differing repository files. Its default installation is core-only and does not add model-routing configuration. When `AGENTS.md`, `CLAUDE.md`, or other target files conflict, the agent must preserve the existing file and merge the applicable shared rules deliberately.
 
 ### Core-Only Installation
 
 The Skill is optional. For a new repository that has no conflicting agent or knowledge files, copy the pinned payload:
 
 ```bash
-git clone --branch v4.1.1 --depth 1 \
+git clone --branch v4.2.0 --depth 1 \
   https://github.com/vector233/repo-continuity.git
 
 cp -R repo-continuity/template/. /path/to/your-project/
@@ -75,7 +80,7 @@ Do not use the raw copy command over an existing `AGENTS.md`, `CLAUDE.md`, `zett
 - project purpose, stack, architecture, commands, and validation flows use verified facts;
 - all template placeholders are resolved;
 - wiki links and required knowledge fields pass validation;
-- `INIT.md` and `.ai-collaboration-workflow-template` are removed;
+- `INIT.md`, `.repo-continuity-template`, and any legacy `.ai-collaboration-workflow-template` marker are removed;
 - no empty WORK or invented project Skill was created;
 - initialization changes are committed only when repository policy or the user requires it.
 
@@ -139,6 +144,66 @@ cp zettelkasten/templates/work-item.md \
 
 Update frontmatter and checkpoints in place. A WORK never moves for a status change.
 
+## Optional Codex Model Routing
+
+The repository ships a separate Codex overlay under `adapters/codex/`. Neither the default bootstrap nor the raw `template/` copy installs it. Opt in explicitly with the safe bootstrap:
+
+```bash
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing codex \
+  --dry-run
+
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing codex
+```
+
+For a new conflict-free project using the manual copy path, copy `adapters/codex/.` after `template/.`. Workflow routing and model routing are separate: choose Direct, Tracked, or Governed first, then delegate only when a specialist materially improves the result. The root keeps the model selected by the user or current Codex session.
+
+| Agent | Use for | Default model policy |
+|---|---|---|
+| root | task routing and ordinary work | current user or session selection; not overridden |
+| `explorer` | read-only discovery, tracing, and evidence gathering | `gpt-5.6-terra`, low reasoning |
+| `implementer` | one understood, scoped change and targeted validation | `gpt-5.6-terra`, medium reasoning |
+| `reviewer` | read-only correctness, security, regression, and test review | `gpt-5.6-sol`, high reasoning |
+| `architect` | read-only high-impact design or difficult root-cause analysis | `gpt-5.6-sol`, extra-high reasoning |
+
+The adapter caps Codex at three threads and one delegation level. Read-only specialists may work in parallel on independent scopes. The implementer is write-capable and must work serially with other writers in its task worktree; concurrent write tasks require their own task branch and worktree.
+
+The listed models must be available to the target account. If one is unavailable, replace only that agent's `model` setting with an account-supported equivalent.
+
+## Optional Claude Code Model Routing
+
+The separate overlay under `adapters/claude/` is also opt-in:
+
+```bash
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing claude \
+  --dry-run
+
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing claude
+```
+
+Use `--with-model-routing all` to install both overlays. For a new conflict-free project, the manual equivalent is copying `adapters/claude/.` after the core template. The overlay installs `.claude/agents/` but no `.claude/settings.json`, so the root session keeps the user's current Claude Code model while specialized agents use fixed model and tool policies.
+
+| Agent | Use for | Default model policy |
+|---|---|---|
+| root | task routing, planning, and ordinary work | current user or client selection; not overridden |
+| `explorer` | read-only discovery, tracing, and evidence gathering | Haiku; `Read`, `Grep`, and `Glob` only |
+| `implementer` | one understood, scoped change and targeted validation | Sonnet; write-capable |
+| `reviewer` | read-only correctness, security, regression, and test review | Opus |
+| `architect` | read-only high-impact design or difficult root-cause analysis | Opus |
+
+Claude Code selects an agent from its description and context. Use `@explorer`, `@implementer`, `@reviewer`, or `@architect` when the exact role must run. The implementer remains serial with other writers in its task worktree; independent read-only roles may run in parallel. If a model is unavailable or restricted, Claude Code falls back to an inherited or permitted model; the same repository workflow still applies.
+
 ## Core Model
 
 ```text
@@ -158,7 +223,7 @@ Routing considers scope, uncertainty, risk, reversibility, duration, coordinatio
 The core product is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
 
 - **Core**: `AGENTS.md`, the `zettelkasten/` entry and links, stable work intent when needed, validation evidence, and durable experience writeback.
-- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation.
+- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; explicitly installed model-routing overlays from `adapters/` for specialist agents.
 - **Non-goals**: autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
 
 The knowledge network uses plain Markdown and wiki links. It can be opened as an Obsidian-compatible vault, but Obsidian is an optional editor rather than a runtime or plugin dependency.
@@ -218,9 +283,17 @@ template/
     validation-runbook.md
     templates/
     work/
+adapters/
+  codex/
+    .codex/
+      config.toml
+      agents/
+  claude/
+    .claude/
+      agents/
 ```
 
-`template/` is the only downstream payload. This maintenance repository intentionally has no second root `zettelkasten/`.
+`template/` is the canonical default downstream core. `adapters/` contains separate opt-in overlays and is never copied by the default installation. This maintenance repository intentionally has no second root `zettelkasten/`.
 
 ## Validation
 
@@ -232,7 +305,7 @@ For this distribution repository:
 python3 scripts/validate_distribution.py
 ```
 
-The distribution validator exercises tool-free initialization, single-WORK routing, governed gates, project-Skill discovery, worktree isolation, wiki links, optional helpers, and bootstrap behavior in temporary repositories.
+The distribution validator exercises tool-free core initialization, explicit model-routing opt-in, single-WORK routing, governed gates, project-Skill discovery, worktree isolation, wiki links, optional helpers, and bootstrap behavior in temporary repositories.
 
 Fresh-agent routing behavior can be checked with [docs/workflow-behavior-evaluation.md](docs/workflow-behavior-evaluation.md).
 

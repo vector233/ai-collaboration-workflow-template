@@ -16,7 +16,7 @@ Do not add private project details, customer names, real credentials, internal U
 
 This repository does not initialize a second root knowledge base. Keep the product and its maintenance material separate:
 
-- keep downstream files under `template/`;
+- keep the default downstream core under `template/` and explicit opt-in vendor overlays under `adapters/`;
 - keep maintainer and publishing material under `docs/`;
 - never copy repository-specific publishing, roadmap, or maintenance records into `template/`;
 - validate the initialized output as well as the source repository with `python3 scripts/validate_distribution.py`.

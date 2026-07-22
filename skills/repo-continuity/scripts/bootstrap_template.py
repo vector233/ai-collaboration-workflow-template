@@ -14,8 +14,10 @@ from pathlib import Path
 
 
 DEFAULT_REPO_URL = "https://github.com/vector233/repo-continuity.git"
-DEFAULT_REF = "main"
-PAYLOAD_MARKER = Path(".ai-collaboration-workflow-template")
+DEFAULT_REF = "v4.2.0"
+PAYLOAD_MARKER = Path(".repo-continuity-template")
+LEGACY_PAYLOAD_MARKERS = (Path(".ai-collaboration-workflow-template"),)
+PAYLOAD_MARKERS = (PAYLOAD_MARKER, *LEGACY_PAYLOAD_MARKERS)
 
 PAYLOAD_REQUIRED_FILES = (
     Path("AGENTS.md"),
@@ -30,6 +32,22 @@ PAYLOAD_REQUIRED_FILES = (
     Path("zettelkasten/work/README.md"),
     Path("project-skills/INDEX.md"),
 )
+
+MODEL_ROUTING_ADAPTER_FILES = {
+    "codex": (
+        Path(".codex/config.toml"),
+        Path(".codex/agents/explorer.toml"),
+        Path(".codex/agents/implementer.toml"),
+        Path(".codex/agents/reviewer.toml"),
+        Path(".codex/agents/architect.toml"),
+    ),
+    "claude": (
+        Path(".claude/agents/explorer.md"),
+        Path(".claude/agents/implementer.md"),
+        Path(".claude/agents/reviewer.md"),
+        Path(".claude/agents/architect.md"),
+    ),
+}
 
 INSTALLED_REQUIRED_FILES = tuple(
     path for path in PAYLOAD_REQUIRED_FILES if path != Path("INIT.md")
@@ -91,7 +109,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--inspect",
         action="store_true",
-        help="Only check whether the target has the required initialized core files.",
+        help=(
+            "Only check the initialized core and any model-routing adapter "
+            "requested with --with-model-routing."
+        ),
+    )
+    parser.add_argument(
+        "--with-model-routing",
+        choices=("codex", "claude", "all"),
+        help=(
+            "Also install or inspect an optional model-routing adapter. "
+            "The default installation remains core-only."
+        ),
     )
     return parser.parse_args()
 
@@ -117,9 +146,26 @@ def missing_required_directories(root: Path) -> list[Path]:
     ]
 
 
-def inspect_target(target: Path) -> int:
+def selected_model_routing(selection: str | None) -> tuple[str, ...]:
+    if selection == "all":
+        return ("codex", "claude")
+    if selection:
+        return (selection,)
+    return ()
+
+
+def inspect_target(target: Path, adapters: tuple[str, ...]) -> int:
     missing_files = missing_required_paths(target, INSTALLED_REQUIRED_FILES)
     missing_directories = missing_required_directories(target)
+    missing_adapters = {
+        adapter: missing_required_paths(
+            target, MODEL_ROUTING_ADAPTER_FILES[adapter]
+        )
+        for adapter in adapters
+    }
+    missing_adapters = {
+        adapter: paths for adapter, paths in missing_adapters.items() if paths
+    }
     if missing_files or missing_directories:
         print(f"Template status: incomplete ({target})")
         for relative in missing_files:
@@ -128,14 +174,23 @@ def inspect_target(target: Path) -> int:
             print(f"  missing directory: {relative}")
         if (target / "INIT.md").is_file():
             print("Initialization status: INIT.md is present; continue initialization.")
-        return 2
-
-    print(f"Template status: core files present ({target})")
-    if (target / "INIT.md").is_file():
-        print("Initialization status: INIT.md is present; initialization is not finished.")
     else:
-        print("Initialization status: INIT.md is absent; verify placeholder checks are clean.")
-    return 0
+        print(f"Template status: core files present ({target})")
+        if (target / "INIT.md").is_file():
+            print("Initialization status: INIT.md is present; initialization is not finished.")
+        else:
+            print("Initialization status: INIT.md is absent; verify placeholder checks are clean.")
+
+    for adapter in adapters:
+        missing = missing_adapters.get(adapter, [])
+        if missing:
+            print(f"Model routing status: {adapter} adapter incomplete")
+            for relative in missing:
+                print(f"  missing adapter file: {relative}")
+        else:
+            print(f"Model routing status: {adapter} adapter present")
+
+    return 2 if missing_files or missing_directories or missing_adapters else 0
 
 
 def clone_source(repo_url: str, ref: str, destination: Path) -> Path:
@@ -163,9 +218,18 @@ def clone_source(repo_url: str, ref: str, destination: Path) -> Path:
     return destination
 
 
-def validate_payload(payload: Path) -> None:
-    if not (payload / PAYLOAD_MARKER).is_file():
-        raise BootstrapError(f"template payload marker is missing: {payload / PAYLOAD_MARKER}")
+def find_payload_marker(payload: Path) -> Path | None:
+    return next(
+        (marker for marker in PAYLOAD_MARKERS if (payload / marker).is_file()),
+        None,
+    )
+
+
+def validate_payload(payload: Path) -> Path:
+    marker = find_payload_marker(payload)
+    if marker is None:
+        expected = ", ".join(str(payload / candidate) for candidate in PAYLOAD_MARKERS)
+        raise BootstrapError(f"template payload marker is missing; expected one of: {expected}")
     missing_files = missing_required_paths(payload, PAYLOAD_REQUIRED_FILES)
     missing_directories = missing_required_directories(payload)
     problems = [
@@ -176,41 +240,69 @@ def validate_payload(payload: Path) -> None:
         raise BootstrapError(
             "template payload is missing required paths: " + ", ".join(problems)
         )
+    return marker
 
 
 def resolve_payload_root(source: Path) -> Path:
     candidates = (source / "template", source)
     for candidate in candidates:
-        if (candidate / PAYLOAD_MARKER).is_file():
+        if find_payload_marker(candidate) is not None:
             validate_payload(candidate)
             return candidate
+    expected = " or ".join(
+        str(candidate / marker)
+        for candidate in candidates
+        for marker in PAYLOAD_MARKERS
+    )
     raise BootstrapError(
-        f"no marked template payload found under {source}; expected "
-        f"{source / 'template' / PAYLOAD_MARKER} or {source / PAYLOAD_MARKER}"
+        f"no marked template payload found under {source}; expected {expected}"
     )
 
 
 def template_files(source: Path) -> tuple[Path, ...]:
+    marker = validate_payload(source)
     files = [
-        PAYLOAD_MARKER,
+        marker,
         Path("AGENTS.md"),
         Path("CLAUDE.md"),
         Path("INIT.md"),
     ]
-    zettelkasten = source / "zettelkasten"
-    for candidate in sorted(zettelkasten.rglob("*")):
-        if candidate.is_symlink():
-            raise BootstrapError(f"template source contains a symlink: {candidate}")
-        if candidate.is_file():
-            files.append(candidate.relative_to(source))
-    project_skills = source / "project-skills"
-    if project_skills.is_dir():
-        for candidate in sorted(project_skills.rglob("*")):
+    for directory in ("zettelkasten", "project-skills"):
+        source_directory = source / directory
+        if not source_directory.is_dir():
+            continue
+        for candidate in sorted(source_directory.rglob("*")):
             if candidate.is_symlink():
                 raise BootstrapError(f"template source contains a symlink: {candidate}")
             if candidate.is_file():
                 files.append(candidate.relative_to(source))
     return tuple(files)
+
+
+def resolve_adapters_root(source: Path, payload: Path) -> Path:
+    candidates = (source / "adapters", payload.parent / "adapters")
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate.resolve()
+    raise BootstrapError(
+        "model-routing adapters are unavailable from this source; use the "
+        "canonical repository checkout or omit --with-model-routing"
+    )
+
+
+def validate_adapter_source(adapters_root: Path, adapter: str) -> Path:
+    adapter_root = adapters_root / adapter
+    if not adapter_root.is_dir():
+        raise BootstrapError(f"model-routing adapter is missing: {adapter_root}")
+    if adapter_root.is_symlink():
+        raise BootstrapError(f"model-routing adapter is a symlink: {adapter_root}")
+    for relative in MODEL_ROUTING_ADAPTER_FILES[adapter]:
+        candidate = adapter_root / relative
+        if has_symlink_component(adapter_root, relative):
+            raise BootstrapError(f"adapter source contains a symlink: {candidate}")
+        if not candidate.is_file():
+            raise BootstrapError(f"adapter file is missing: {candidate}")
+    return adapter_root
 
 
 def has_symlink_component(target: Path, relative: Path) -> bool:
@@ -222,12 +314,14 @@ def has_symlink_component(target: Path, relative: Path) -> bool:
     return False
 
 
-def build_plan(source: Path, target: Path) -> InstallPlan:
+def build_plan(
+    source: Path, target: Path, files: tuple[Path, ...]
+) -> InstallPlan:
     missing: list[Path] = []
     identical: list[Path] = []
     conflicts: list[Path] = []
 
-    for relative in template_files(source):
+    for relative in files:
         source_file = source / relative
         target_file = target / relative
         if has_symlink_component(target, relative):
@@ -245,6 +339,14 @@ def build_plan(source: Path, target: Path) -> InstallPlan:
         missing=tuple(missing),
         identical=tuple(identical),
         conflicts=tuple(conflicts),
+    )
+
+
+def combine_plans(plans: tuple[InstallPlan, ...]) -> InstallPlan:
+    return InstallPlan(
+        missing=tuple(path for plan in plans for path in plan.missing),
+        identical=tuple(path for plan in plans for path in plan.identical),
+        conflicts=tuple(path for plan in plans for path in plan.conflicts),
     )
 
 
@@ -278,36 +380,63 @@ def print_plan(target: Path, plan: InstallPlan, *, dry_run: bool) -> None:
     elif dry_run:
         print("Next: rerun without --dry-run to copy the missing template files.")
     else:
-        print("Next: follow INIT.md in the target repository.")
+        print("Next: follow INIT.md when present, then review the installed files.")
 
 
-def install(args: argparse.Namespace, target: Path) -> int:
+def install_from_source(
+    source: Path,
+    target: Path,
+    adapters: tuple[str, ...],
+    *,
+    dry_run: bool,
+) -> int:
+    payload = resolve_payload_root(source)
+    components = [(payload, template_files(payload))]
+    if adapters:
+        adapters_root = resolve_adapters_root(source, payload)
+        for adapter in adapters:
+            adapter_root = validate_adapter_source(adapters_root, adapter)
+            components.append(
+                (adapter_root, MODEL_ROUTING_ADAPTER_FILES[adapter])
+            )
+
+    plans = tuple(
+        build_plan(component_root, target, files)
+        for component_root, files in components
+    )
+    for (component_root, _), plan in zip(components, plans):
+        apply_plan(component_root, target, plan, dry_run=dry_run)
+    combined = combine_plans(plans)
+    print_plan(target, combined, dry_run=dry_run)
+    return 2 if combined.conflicts else 0
+
+
+def install(
+    args: argparse.Namespace, target: Path, adapters: tuple[str, ...]
+) -> int:
     if args.source:
         source = normalize_directory(args.source, "source", must_exist=True)
-        payload = resolve_payload_root(source)
-        plan = build_plan(payload, target)
-        apply_plan(payload, target, plan, dry_run=args.dry_run)
-        print_plan(target, plan, dry_run=args.dry_run)
-        return 2 if plan.conflicts else 0
+        return install_from_source(
+            source, target, adapters, dry_run=args.dry_run
+        )
 
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-template-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-template-") as temp_dir:
         source = clone_source(
             args.repo_url, args.ref, Path(temp_dir) / "template"
         )
-        payload = resolve_payload_root(source)
-        plan = build_plan(payload, target)
-        apply_plan(payload, target, plan, dry_run=args.dry_run)
-        print_plan(target, plan, dry_run=args.dry_run)
-        return 2 if plan.conflicts else 0
+        return install_from_source(
+            source, target, adapters, dry_run=args.dry_run
+        )
 
 
 def main() -> int:
     args = parse_args()
     try:
         target = normalize_directory(args.target, "target", must_exist=False)
+        adapters = selected_model_routing(args.with_model_routing)
         if args.inspect:
-            return inspect_target(target)
-        return install(args, target)
+            return inspect_target(target, adapters)
+        return install(args, target, adapters)
     except BootstrapError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

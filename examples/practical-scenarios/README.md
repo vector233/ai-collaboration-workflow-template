@@ -49,6 +49,30 @@ WORK-B -> task branch B -> worktree B -> Agent B
 
 Each context commits only its task. Both tasks record experience candidates locally. Before promotion, one WORK claims the shared destination in `owned_paths`; the other task coordinates or defers, avoiding competing edits to `AGENTS.md` or a project Skill.
 
+## Optional Codex Model Routing
+
+After the user explicitly installs the Codex overlay, an unfamiliar but bounded bug can use its specialist agents without changing the selected workflow route. The root keeps the user's current Codex model:
+
+```text
+explorer (read-only) -> identify code path and evidence
+-> implementer (serial writer) -> targeted validation
+-> reviewer (read-only) -> findings -> WORK checkpoint when required
+```
+
+The explorer and reviewer may run in parallel only for independent read-only scopes. The implementer is the only writer in its task worktree; a second write task needs a separate branch and worktree. If Codex subagents or a configured model are unavailable, the root agent follows the same repository workflow without delegation.
+
+## Optional Claude Code Model Routing
+
+After the user explicitly installs the Claude Code overlay, the current root model can use its model-bound agents without changing the workflow route:
+
+```text
+explorer (Haiku, read-only) -> identify code path and evidence
+-> implementer (Sonnet, serial writer) -> targeted validation
+-> reviewer (Opus, read-only) -> findings -> WORK checkpoint when required
+```
+
+Claude selects a specialist from its description and current context; use `@explorer`, `@implementer`, `@reviewer`, or `@architect` when a particular role is required. If a model is unavailable, Claude Code uses an inherited or organization-permitted model while preserving the same role boundaries.
+
 ## Project Skill Promotion
 
 A third-party sandbox reset procedure repeatedly causes failed tests:

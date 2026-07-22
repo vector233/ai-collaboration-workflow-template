@@ -1,11 +1,12 @@
 # Repository Guidelines
 
-This repository develops and distributes Repo Continuity. The product knowledge-base payload lives under `template/`; this maintenance repository intentionally does not keep a second root `zettelkasten/`.
+This repository develops and distributes Repo Continuity. The core product knowledge-base payload lives under `template/`; opt-in vendor overlays live under `adapters/`. This maintenance repository intentionally does not keep a second root `zettelkasten/`.
 
 ## Repository Structure
 
 - `template/`: canonical files copied into downstream projects.
-- `skills/ai-collaboration-workflow/`: companion Agent Skill and bootstrap tooling.
+- `adapters/`: canonical opt-in Codex and Claude Code model-routing overlays.
+- `skills/repo-continuity/`: companion Agent Skill and bootstrap tooling.
 - `scripts/validate_distribution.py`: end-to-end distribution contract.
 - `docs/`: maintainer and publishing documentation.
 - `examples/`: fictional initialized-project walkthroughs.
@@ -15,8 +16,10 @@ This repository develops and distributes Repo Continuity. The product knowledge-
 - `AGENTS.md` is the canonical shared instruction file. Codex reads it directly; `CLAUDE.md` imports it for Claude Code.
 - Shared behavior belongs in repository files, not chat history, vendor memory, or tool-local state.
 - Vendor-specific files are adapters only. Keep requirements, workflow semantics, validation, and handoff rules vendor-neutral.
-- `Repo Continuity` is the product display name. Keep the `ai-collaboration-workflow` Skill ID and `.ai-collaboration-workflow-template` payload marker stable unless a separately approved compatibility plan changes them.
+- `Repo Continuity` is the product display name. Keep the `repo-continuity` Skill ID and `.repo-continuity-template` payload marker stable unless a separately approved compatibility plan changes them. The legacy `ai-collaboration-workflow` ID and marker may appear only in explicit migration guidance or compatibility checks.
+- Keep the Quick Start release tag, payload baseline, distribution validator version, and Companion Skill `DEFAULT_REF` identical. Never describe an installation as pinned while its bootstrap defaults to a moving branch.
 - The downstream core must remain usable with Markdown and Git alone. Companion-Skill scripts are optional automation and must not be copied into or required by `template/`.
+- Optional vendor adapters must stay outside `template/`, require explicit installation opt-in, and preserve the user's root-session model unless a separately approved profile says otherwise.
 - Downstream workflow feedback is opt-in, evidence-backed, sanitized, and user-approved before publication. Never add telemetry or automatic cross-project collection.
 - When workflow behavior changes, align the canonical payload, Skill, documentation, examples, and validation as applicable.
 - Never put repository-specific release, publishing, or maintenance material in `template/`.

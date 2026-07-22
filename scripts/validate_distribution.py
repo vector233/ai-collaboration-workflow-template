@@ -15,13 +15,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
-RELEASE_VERSION = "v4.1.1"
+ADAPTERS = ROOT / "adapters"
+RELEASE_VERSION = "v4.2.0"
 CANONICAL_REPO_URL = "https://github.com/vector233/repo-continuity"
-MARKER = PAYLOAD / ".ai-collaboration-workflow-template"
-BOOTSTRAP = ROOT / "skills/ai-collaboration-workflow/scripts/bootstrap_template.py"
-WORKFLOW_DOCTOR = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_doctor.py"
-WORKFLOW_TASK = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_task.py"
-TASK_WORKTREE = ROOT / "skills/ai-collaboration-workflow/scripts/task_worktree.py"
+SKILL_ID = "repo-continuity"
+SKILL_ROOT = ROOT / "skills" / SKILL_ID
+MARKER_NAME = ".repo-continuity-template"
+LEGACY_MARKER_NAME = ".ai-collaboration-workflow-template"
+MARKER = PAYLOAD / MARKER_NAME
+BOOTSTRAP = SKILL_ROOT / "scripts/bootstrap_template.py"
+WORKFLOW_DOCTOR = SKILL_ROOT / "scripts/workflow_doctor.py"
+WORKFLOW_TASK = SKILL_ROOT / "scripts/workflow_task.py"
+TASK_WORKTREE = SKILL_ROOT / "scripts/task_worktree.py"
 BEHAVIOR_EVALUATOR = ROOT / "scripts/evaluate_workflow_behavior.py"
 
 REQUIRED_FILES = (
@@ -38,6 +43,22 @@ REQUIRED_FILES = (
     Path("zettelkasten/work/README.md"),
     Path("project-skills/INDEX.md"),
 )
+
+MODEL_ROUTING_ADAPTER_FILES = {
+    "codex": (
+        Path(".codex/config.toml"),
+        Path(".codex/agents/explorer.toml"),
+        Path(".codex/agents/implementer.toml"),
+        Path(".codex/agents/reviewer.toml"),
+        Path(".codex/agents/architect.toml"),
+    ),
+    "claude": (
+        Path(".claude/agents/explorer.md"),
+        Path(".claude/agents/implementer.md"),
+        Path(".claude/agents/reviewer.md"),
+        Path(".claude/agents/architect.md"),
+    ),
+}
 
 REQUIRED_DIRECTORIES = (
     Path("zettelkasten/work"),
@@ -89,6 +110,10 @@ def run(
 def validate_payload() -> None:
     require(MARKER.is_file(), "payload marker is missing")
     require(
+        not (PAYLOAD / LEGACY_MARKER_NAME).exists(),
+        "legacy marker remains canonical in the payload",
+    )
+    require(
         MARKER.read_text().strip() == "canonical-payload-v4",
         "payload marker version is incorrect",
     )
@@ -101,6 +126,10 @@ def validate_payload() -> None:
         require((PAYLOAD / path).is_file(), f"payload file is missing: {path}")
     for path in REQUIRED_DIRECTORIES:
         require((PAYLOAD / path).is_dir(), f"payload directory is missing: {path}")
+    require(
+        not (PAYLOAD / ".codex").exists() and not (PAYLOAD / ".claude").exists(),
+        "model-routing adapters leaked into the default core payload",
+    )
     vault_directories = {
         path.name for path in (PAYLOAD / "zettelkasten").iterdir() if path.is_dir()
     }
@@ -118,6 +147,7 @@ def validate_payload() -> None:
     for section in (
         "## Workflow Routing",
         "## Context Preservation",
+        "## Specialist Delegation",
         "## Project Skills And Experience",
         "## Workflow Feedback",
         "## Git Isolation And Commits",
@@ -127,6 +157,10 @@ def validate_payload() -> None:
     require(
         (PAYLOAD / "CLAUDE.md").read_text().lstrip().startswith("@AGENTS.md"),
         "CLAUDE.md is not an adapter",
+    )
+    require(
+        "## Optional Model-Routing Adapter" in (PAYLOAD / "CLAUDE.md").read_text(),
+        "CLAUDE.md is missing the Claude Code model-routing adapter",
     )
 
     workflow = (PAYLOAD / "zettelkasten/workflow.md").read_text()
@@ -159,7 +193,11 @@ def validate_payload() -> None:
     ):
         require(expected in validation_policy, f"validation policy is missing recovery contract: {expected}")
 
-    skill = (ROOT / "skills/ai-collaboration-workflow/SKILL.md").read_text()
+    skill = (SKILL_ROOT / "SKILL.md").read_text()
+    require(
+        skill.startswith("---\nname: repo-continuity\n"),
+        "companion Skill metadata uses a stale ID",
+    )
     for expected in (
         "## Preserve Context",
         "Do not checkpoint every turn",
@@ -203,6 +241,77 @@ def validate_payload() -> None:
             )
 
 
+def validate_model_routing_adapters() -> None:
+    expected_roots = set(MODEL_ROUTING_ADAPTER_FILES)
+    require(ADAPTERS.is_dir(), "optional adapters directory is missing")
+    actual_roots = {path.name for path in ADAPTERS.iterdir()}
+    require(
+        actual_roots == expected_roots,
+        f"unexpected model-routing adapters: {sorted(actual_roots)}",
+    )
+
+    for adapter, expected_files in MODEL_ROUTING_ADAPTER_FILES.items():
+        adapter_root = ADAPTERS / adapter
+        actual_files = {
+            path.relative_to(adapter_root)
+            for path in adapter_root.rglob("*")
+            if path.is_file()
+        }
+        require(
+            actual_files == set(expected_files),
+            f"{adapter} adapter files differ: {sorted(str(path) for path in actual_files)}",
+        )
+
+    claude_agent_policies = {
+        "explorer": ("model: haiku", "tools: Read, Grep, Glob"),
+        "implementer": ("model: sonnet", "tools: Read, Grep, Glob, Edit, Write, Bash"),
+        "reviewer": ("model: opus", "tools: Read, Grep, Glob, Bash"),
+        "architect": ("model: opus", "tools: Read, Grep, Glob"),
+    }
+    claude_root = ADAPTERS / "claude"
+    require(
+        not (claude_root / ".claude/settings.json").exists(),
+        "Claude Code adapter must not override the root model",
+    )
+    for agent, expected_values in claude_agent_policies.items():
+        policy = (claude_root / f".claude/agents/{agent}.md").read_text()
+        require(
+            f"name: {agent}" in policy,
+            f"Claude Code {agent} agent has the wrong name",
+        )
+        for expected in expected_values:
+            require(
+                expected in policy,
+                f"Claude Code {agent} agent is missing {expected}",
+            )
+
+    codex_root = ADAPTERS / "codex"
+    codex_config = (codex_root / ".codex/config.toml").read_text()
+    require(
+        not re.search(r"^\s*model(?:_reasoning_effort)?\s*=", codex_config, re.MULTILINE),
+        "Codex adapter must not override the root model or reasoning effort",
+    )
+    for expected in ("max_threads = 3", "max_depth = 1"):
+        require(expected in codex_config, f"Codex config is missing {expected}")
+    codex_agent_policies = {
+        "explorer": ("gpt-5.6-terra", 'sandbox_mode = "read-only"'),
+        "implementer": ("gpt-5.6-terra", 'sandbox_mode = "workspace-write"'),
+        "reviewer": ("gpt-5.6-sol", 'sandbox_mode = "read-only"'),
+        "architect": ("gpt-5.6-sol", 'sandbox_mode = "read-only"'),
+    }
+    for agent, expected_values in codex_agent_policies.items():
+        policy = (codex_root / f".codex/agents/{agent}.toml").read_text()
+        require(
+            f'name = "{agent}"' in policy,
+            f"Codex {agent} agent has the wrong name",
+        )
+        for expected in expected_values:
+            require(
+                expected in policy,
+                f"Codex {agent} agent is missing {expected}",
+            )
+
+
 def initialize_target(target: Path) -> None:
     vault = target / "zettelkasten"
     today = date.today().isoformat()
@@ -214,6 +323,9 @@ def initialize_target(target: Path) -> None:
         path.write_text(text)
 
     (target / MARKER.name).unlink()
+    legacy_marker = target / LEGACY_MARKER_NAME
+    if legacy_marker.exists():
+        legacy_marker.unlink()
     (target / "INIT.md").unlink()
 
     for path in vault.rglob("*.md"):
@@ -257,6 +369,10 @@ def copy_artifact(
 
 def validate_tool_free_core(target: Path) -> None:
     require(not (target / "scripts").exists(), "bootstrap installed optional tools into the project")
+    require(
+        not (target / ".codex").exists() and not (target / ".claude").exists(),
+        "core-only bootstrap installed a model-routing adapter",
+    )
     work_id = "WORK-20260712115000-manual-core"
     work = copy_artifact(
         target,
@@ -821,9 +937,188 @@ def validate_wiki_links(vault: Path) -> None:
     require(not broken, "invalid wiki links:\n" + "\n".join(broken))
 
 
+def require_adapter_present(target: Path, adapter: str) -> None:
+    for path in MODEL_ROUTING_ADAPTER_FILES[adapter]:
+        require(
+            (target / path).is_file(),
+            f"bootstrap omitted {adapter} adapter file: {path}",
+        )
+
+
+def validate_model_routing_bootstrap(base: Path) -> None:
+    payload_only = base / "payload-only"
+    unavailable_target = base / "unavailable-routing-target"
+    shutil.copytree(PAYLOAD, payload_only)
+    unavailable = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--source",
+            str(payload_only),
+            "--target",
+            str(unavailable_target),
+            "--with-model-routing",
+            "codex",
+        ],
+        expected=1,
+    )
+    require(
+        "model-routing adapters are unavailable" in unavailable.stderr,
+        "payload-only source did not explain the missing adapter overlay",
+    )
+    require(
+        not unavailable_target.exists(),
+        "missing adapter source caused a partial core installation",
+    )
+
+    target = base / "routing-target"
+    run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)])
+    require(
+        not (target / ".codex").exists() and not (target / ".claude").exists(),
+        "default bootstrap enabled model routing",
+    )
+    missing_codex = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--inspect",
+            "--with-model-routing",
+            "codex",
+        ],
+        expected=2,
+    )
+    require(
+        "Model routing status: codex adapter incomplete" in missing_codex.stdout,
+        "adapter inspection did not report an omitted Codex overlay",
+    )
+
+    codex_command = [
+        sys.executable,
+        str(BOOTSTRAP),
+        "--source",
+        str(ROOT),
+        "--target",
+        str(target),
+        "--with-model-routing",
+        "codex",
+    ]
+    run(codex_command)
+    require_adapter_present(target, "codex")
+    require(not (target / ".claude").exists(), "Codex opt-in installed Claude routing")
+    identical_codex = run(codex_command)
+    require(
+        "Conflicts left untouched: 0" in identical_codex.stdout,
+        "identical Codex adapter rerun conflicted",
+    )
+
+    local_codex_config = "model = \"local-model\"\n"
+    codex_config = target / ".codex/config.toml"
+    codex_config.write_text(local_codex_config)
+    codex_conflict = run(codex_command, expected=2)
+    require(
+        "conflict: .codex/config.toml" in codex_conflict.stdout,
+        "Codex config conflict was not reported",
+    )
+    require(
+        codex_config.read_text() == local_codex_config,
+        "local Codex config was overwritten",
+    )
+    shutil.copy2(ADAPTERS / "codex/.codex/config.toml", codex_config)
+
+    claude_command = [
+        sys.executable,
+        str(BOOTSTRAP),
+        "--source",
+        str(ROOT),
+        "--target",
+        str(target),
+        "--with-model-routing",
+        "claude",
+    ]
+    run(claude_command)
+    require_adapter_present(target, "claude")
+    require(
+        not (target / ".claude/settings.json").exists(),
+        "Claude opt-in overrode the root model",
+    )
+    local_claude_agent = "---\nname: explorer\nmodel: local-model\n---\n"
+    claude_agent = target / ".claude/agents/explorer.md"
+    claude_agent.write_text(local_claude_agent)
+    claude_conflict = run(claude_command, expected=2)
+    require(
+        "conflict: .claude/agents/explorer.md" in claude_conflict.stdout,
+        "Claude Code agent conflict was not reported",
+    )
+    require(
+        claude_agent.read_text() == local_claude_agent,
+        "local Claude Code agent was overwritten",
+    )
+    shutil.copy2(
+        ADAPTERS / "claude/.claude/agents/explorer.md", claude_agent
+    )
+    run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--inspect",
+            "--with-model-routing",
+            "all",
+        ]
+    )
+
+    all_target = base / "all-routing-target"
+    run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--source",
+            str(ROOT),
+            "--target",
+            str(all_target),
+            "--with-model-routing",
+            "all",
+        ]
+    )
+    require_adapter_present(all_target, "codex")
+    require_adapter_present(all_target, "claude")
+
+
 def validate_bootstrap_lifecycle() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-distribution-") as temp_dir:
-        target = Path(temp_dir) / "target"
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-distribution-") as temp_dir:
+        base = Path(temp_dir)
+        legacy_payload = base / "legacy-payload"
+        legacy_target = base / "legacy-target"
+        shutil.copytree(PAYLOAD, legacy_payload)
+        (legacy_payload / MARKER_NAME).rename(legacy_payload / LEGACY_MARKER_NAME)
+        run(
+            [
+                sys.executable,
+                str(BOOTSTRAP),
+                "--source",
+                str(legacy_payload),
+                "--target",
+                str(legacy_target),
+            ]
+        )
+        require(
+            (legacy_target / LEGACY_MARKER_NAME).is_file(),
+            "bootstrap dropped the legacy interrupted-initialization marker",
+        )
+        legacy_doctor = run(
+            [sys.executable, str(WORKFLOW_DOCTOR), "--strict"],
+            cwd=legacy_target,
+            expected=1,
+        )
+        require(
+            f"WARN: {LEGACY_MARKER_NAME}: payload marker is present" in legacy_doctor.stdout,
+            "Doctor no longer recognizes the legacy payload marker",
+        )
+
+        target = base / "target"
         dry_run = run(
             [
                 sys.executable,
@@ -837,6 +1132,10 @@ def validate_bootstrap_lifecycle() -> None:
         )
         require("Would copy:" in dry_run.stdout and not target.exists(), "dry-run changed target")
         run([sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)])
+        require(
+            not (target / ".codex").exists() and not (target / ".claude").exists(),
+            "default bootstrap installed optional model routing",
+        )
         identical = run(
             [sys.executable, str(BOOTSTRAP), "--source", str(ROOT), "--target", str(target)]
         )
@@ -868,20 +1167,40 @@ def validate_bootstrap_lifecycle() -> None:
         active = run([sys.executable, str(WORKFLOW_DOCTOR), "--strict"], cwd=target)
         require("active work:" in active.stdout, "doctor did not report active WORK")
         validate_worktree_helper(target, tracked_id)
+        validate_model_routing_bootstrap(base)
 
 
 def validate_manual_copy() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-copy-") as temp_dir:
-        target = Path(temp_dir) / "target"
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-copy-") as temp_dir:
+        base = Path(temp_dir)
+        target = base / "target"
         shutil.copytree(PAYLOAD, target)
         for path in REQUIRED_FILES:
             require((target / path).is_file(), f"manual copy omitted {path}")
+        require(
+            not (target / ".codex").exists() and not (target / ".claude").exists(),
+            "manual core copy included optional model routing",
+        )
         for path in REQUIRED_DIRECTORIES:
             require((target / path).is_dir(), f"manual copy omitted {path}")
 
+        for adapter in MODEL_ROUTING_ADAPTER_FILES:
+            overlay_target = base / f"{adapter}-target"
+            shutil.copytree(PAYLOAD, overlay_target)
+            shutil.copytree(
+                ADAPTERS / adapter, overlay_target, dirs_exist_ok=True
+            )
+            require_adapter_present(overlay_target, adapter)
+            other_adapter = "claude" if adapter == "codex" else "codex"
+            other_directory = ".claude" if other_adapter == "claude" else ".codex"
+            require(
+                not (overlay_target / other_directory).exists(),
+                f"manual {adapter} overlay included {other_adapter} routing",
+            )
+
 
 def validate_symlink_boundary() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-symlink-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-symlink-") as temp_dir:
         base = Path(temp_dir)
         target = base / "target"
         outside = base / "outside"
@@ -897,14 +1216,16 @@ def validate_symlink_boundary() -> None:
 
 
 def validate_remote_source() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-remote-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-remote-") as temp_dir:
         base = Path(temp_dir)
         source = base / "source"
         target = base / "target"
+        all_target = base / "all-target"
         source.mkdir()
         shutil.copytree(PAYLOAD, source / "template")
+        shutil.copytree(ADAPTERS, source / "adapters")
         run(["git", "init", "--initial-branch", "main"], cwd=source)
-        run(["git", "add", "template"], cwd=source)
+        run(["git", "add", "template", "adapters"], cwd=source)
         run(
             [
                 "git",
@@ -918,19 +1239,36 @@ def validate_remote_source() -> None:
             ],
             cwd=source,
         )
+        run(["git", "tag", RELEASE_VERSION], cwd=source)
         run(
             [
                 sys.executable,
                 str(BOOTSTRAP),
                 "--repo-url",
                 str(source),
-                "--ref",
-                "main",
                 "--target",
                 str(target),
             ]
         )
         require((target / "project-skills/INDEX.md").is_file(), "remote omitted Skills")
+        require(
+            not (target / ".codex").exists() and not (target / ".claude").exists(),
+            "remote default bootstrap installed optional model routing",
+        )
+        run(
+            [
+                sys.executable,
+                str(BOOTSTRAP),
+                "--repo-url",
+                str(source),
+                "--target",
+                str(all_target),
+                "--with-model-routing",
+                "all",
+            ]
+        )
+        require_adapter_present(all_target, "codex")
+        require_adapter_present(all_target, "claude")
 
 
 def validate_behavior_evaluator() -> None:
@@ -963,6 +1301,17 @@ def validate_behavior_evaluator() -> None:
 def validate_repository_layout() -> None:
     require(not (ROOT / "zettelkasten").exists(), "root zettelkasten must not exist")
     require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
+    require(SKILL_ROOT.is_dir(), "repo-continuity companion Skill is missing")
+    require(
+        not (ROOT / "skills/ai-collaboration-workflow").exists(),
+        "legacy companion Skill directory remains installed beside repo-continuity",
+    )
+    openai_metadata = (SKILL_ROOT / "agents/openai.yaml").read_text()
+    require(
+        "$repo-continuity" in openai_metadata
+        and "$ai-collaboration-workflow" not in openai_metadata,
+        "companion Skill UI metadata uses a stale invocation name",
+    )
     readme = (ROOT / "README.md").read_text()
     for expected in (
         "# Repo Continuity",
@@ -970,14 +1319,19 @@ def validate_repository_layout() -> None:
         "Resume, do not restart.",
         "Make the project learn.",
         "## Quick Start",
-        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
-        "Use $ai-collaboration-workflow to initialize this repository.",
+        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/repo-continuity",
+        "Use $repo-continuity to initialize this repository.",
+        "npx skills add` installs the Companion Skill only",
+        "npx skills remove ai-collaboration-workflow -g -y",
         "## Initialization Is Complete When",
         "## Daily Use",
         "Checkpoint only at meaningful boundaries",
         "Promotion is idempotent",
         "Semantic Fresh-Agent recovery",
         "Do not use the raw copy command over an existing",
+        "--with-model-routing codex",
+        "current user or session selection; not overridden",
+        "adapters/",
         "## License",
     ):
         require(expected in readme, f"README is missing onboarding contract: {expected}")
@@ -989,14 +1343,19 @@ def validate_repository_layout() -> None:
         "接着做，而不是重新开始。",
         "让项目从开发中持续学习。",
         "## 快速开始",
-        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
-        "使用 $ai-collaboration-workflow 初始化当前仓库。",
+        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/repo-continuity",
+        "使用 $repo-continuity 初始化当前仓库。",
+        "npx skills add` 只会安装 Companion Skill",
+        "npx skills remove ai-collaboration-workflow -g -y",
         "## 初始化完成标准",
         "## 日常使用",
         "只在有意义的边界记录 checkpoint",
         "经验固化必须是幂等的",
         "Fresh-Agent 语义恢复",
         "不要直接执行覆盖式复制",
+        "--with-model-routing codex",
+        "用户或当前会话选择；overlay 不覆盖",
+        "adapters/",
         "## 产品边界",
         "**核心**",
         "**可选**",
@@ -1012,13 +1371,22 @@ def validate_repository_layout() -> None:
         f'DEFAULT_REPO_URL = "{CANONICAL_REPO_URL}.git"' in BOOTSTRAP.read_text(),
         "bootstrap uses a stale canonical repository URL",
     )
+    require(
+        f'DEFAULT_REF = "{RELEASE_VERSION}"' in BOOTSTRAP.read_text(),
+        "bootstrap default ref is not locked to the documented release",
+    )
+    for expected in (
+        'choices=("codex", "claude", "all")',
+        "The default installation remains core-only.",
+    ):
+        require(expected in BOOTSTRAP.read_text(), f"bootstrap is missing opt-in contract: {expected}")
     git_collaboration = (PAYLOAD / "zettelkasten/git-collaboration.md").read_text()
     require("date +%Y%m%d%H%M%S" in git_collaboration, "manual WORK ID recipe is not locally discoverable")
     feedback_guide = ROOT / "docs/workflow-feedback.md"
     require(feedback_guide.is_file(), "workflow feedback maintainer guide is missing")
     issue_form = ROOT / ".github/ISSUE_TEMPLATE/workflow-feedback.yml"
     require(issue_form.is_file(), "workflow feedback Issue form is missing")
-    feedback_reference = ROOT / "skills/ai-collaboration-workflow/references/template-feedback.md"
+    feedback_reference = SKILL_ROOT / "references/template-feedback.md"
     require(feedback_reference.is_file(), "companion Skill feedback reference is missing")
     resume_evaluation = ROOT / "docs/fresh-agent-resume-evaluation.md"
     for expected in (
@@ -1043,7 +1411,7 @@ def validate_repository_layout() -> None:
         require(helper.is_file(), f"optional Skill helper is missing: {helper.relative_to(ROOT)}")
         require(helper.stat().st_mode & 0o111, f"optional Skill helper is not executable: {helper.relative_to(ROOT)}")
     require(
-        not (ROOT / "skills/ai-collaboration-workflow/references/migration.md").exists(),
+        not (SKILL_ROOT / "references/migration.md").exists(),
         "unsupported migration reference remains",
     )
     for path in (
@@ -1052,7 +1420,7 @@ def validate_repository_layout() -> None:
         feedback_guide,
         ROOT / "examples/practical-scenarios/README.md",
         ROOT / "examples/evaluations/workflow-cases.json",
-        ROOT / "skills/ai-collaboration-workflow/references/routing.md",
+        SKILL_ROOT / "references/routing.md",
         feedback_reference,
     ):
         require(path.is_file(), f"repository artifact is missing: {path.relative_to(ROOT)}")
@@ -1061,6 +1429,7 @@ def validate_repository_layout() -> None:
 def main() -> int:
     try:
         validate_payload()
+        validate_model_routing_adapters()
         validate_repository_layout()
         validate_manual_copy()
         validate_bootstrap_lifecycle()

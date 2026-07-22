@@ -4,7 +4,7 @@ Use this evaluation to test whether a fresh agent applies the workflow policy, n
 
 ## Procedure
 
-1. Give a fresh agent `AGENTS.md`, `skills/ai-collaboration-workflow/SKILL.md`, and `project-skills/INDEX.md` from an initialized fixture.
+1. Give a fresh agent `AGENTS.md`, `skills/repo-continuity/SKILL.md`, and `project-skills/INDEX.md` from an initialized fixture.
 2. Present each prompt from `examples/evaluations/workflow-cases.json` independently.
 3. Ask for a JSON object with run provenance and responses. Do not give the agent the `expected` fields or an earlier response file:
 

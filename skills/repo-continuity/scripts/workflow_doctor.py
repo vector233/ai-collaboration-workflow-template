@@ -282,8 +282,14 @@ def check_core(root: Path, findings: list[Finding]) -> None:
             add(findings, "ERROR", "missing required directory", path)
     if (root / "INIT.md").is_file():
         add(findings, "WARN", "INIT.md is present; initialization is not finished", Path("INIT.md"))
-    if (root / ".ai-collaboration-workflow-template").is_file():
-        add(findings, "WARN", "payload marker is present; initialization is not finished", Path(".ai-collaboration-workflow-template"))
+    for marker in (".repo-continuity-template", ".ai-collaboration-workflow-template"):
+        if (root / marker).is_file():
+            add(
+                findings,
+                "WARN",
+                "payload marker is present; initialization is not finished",
+                Path(marker),
+            )
 
 
 def check_placeholders(root: Path, findings: list[Finding]) -> None:

@@ -59,12 +59,25 @@ At a tracked or governed checkpoint, at closeout, or after the user corrects wor
 
 Follow the Template Feedback Check in `zettelkasten/workflow.md`.
 
+## Specialist Delegation
+
+When the current client exposes configured specialist agents, use the cheapest capable specialist only for an independent, bounded subtask that materially improves speed or confidence:
+
+- **Explorer**: read-only codebase discovery, symbol lookup, execution tracing, logs, and evidence gathering before a change.
+- **Implementer**: one well-scoped feature, fix, test update, or routine refactor after the code path and acceptance criteria are understood.
+- **Reviewer**: read-only correctness, security, regression, data-consistency, or missing-test review.
+- **Architect**: read-only analysis of ambiguous, high-impact cross-module design, migration, or root-cause decisions after ordinary investigation is insufficient.
+
+Do not delegate routine Direct work merely to use an agent. Keep delegation at one level, return concise evidence rather than raw logs, and stop an agent once its assigned task is complete. Read-only specialists may run in parallel only when their scopes are independent. A write-capable implementer must be the only write-capable agent in its task worktree; use a dedicated task worktree for any concurrent write task.
+
+When explicitly installed, the optional Codex and Claude Code overlays in `.codex/agents/` and `.claude/agents/` bind these roles to available models, reasoning levels, and tool policies without changing the root-session model. No route, checkpoint, validation, or durable project state may depend on an adapter.
+
 ## Git Isolation And Commits
 
 Follow `zettelkasten/git-collaboration.md` unless stricter repository rules apply.
 
 - Do not implement tracked or governed work directly on `main` or `master`.
-- Use one task branch per work item. Use one Git worktree per concurrently active task or agent.
+- Use one task branch per work item. Use one Git worktree per concurrently active task or write-capable agent. Independent read-only specialists may inspect the current task worktree.
 - Do not run dependent or overlapping tasks in parallel without an explicit integration plan.
 - Each agent context that produces persistent changes, or each coherent implementation slice, must end with a task-scoped commit. Read-only analysis does not create an empty commit.
 - Use `checkpoint:` or `wip:` commits only on task branches when incomplete state must be handed off. Broken checkpoints must not be merged into the default branch.
@@ -83,7 +96,7 @@ Follow `zettelkasten/git-collaboration.md` unless stricter repository rules appl
 
 ## Cross-Agent Contract
 
-- `AGENTS.md` is canonical shared instruction; `CLAUDE.md` is an adapter.
+- `AGENTS.md` is canonical shared instruction; `CLAUDE.md` and optional `.codex/` or `.claude/` configuration are vendor adapters.
 - Vendor-specific tools may assist execution but must not own required project state.
 - External Skills must map durable output into the active work item, knowledge notes, runbooks, or project Skills.
 - Before a preservation trigger yields control, satisfy the Context Preservation contract above.
