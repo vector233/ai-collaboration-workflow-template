@@ -28,6 +28,8 @@ WORKFLOW_DOCTOR = SKILL_ROOT / "scripts/workflow_doctor.py"
 WORKFLOW_TASK = SKILL_ROOT / "scripts/workflow_task.py"
 TASK_WORKTREE = SKILL_ROOT / "scripts/task_worktree.py"
 BEHAVIOR_EVALUATOR = ROOT / "scripts/evaluate_workflow_behavior.py"
+MODEL_ROUTING_EVALUATOR = ROOT / "scripts/evaluate_model_routing.py"
+RELEASE_PREPARER = ROOT / "scripts/prepare_release.py"
 
 REQUIRED_FILES = (
     Path("AGENTS.md"),
@@ -199,6 +201,9 @@ def validate_payload() -> None:
         "companion Skill metadata uses a stale ID",
     )
     for expected in (
+        "## Compare An Upgrade",
+        "--upgrade-report",
+        "never changes the target",
         "## Preserve Context",
         "Do not checkpoint every turn",
         "make repeated promotion a no-op rather than a duplicate",
@@ -945,6 +950,163 @@ def require_adapter_present(target: Path, adapter: str) -> None:
         )
 
 
+def snapshot_files(root: Path) -> dict[str, bytes]:
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and not path.is_symlink()
+    }
+
+
+def validate_upgrade_report(base: Path) -> None:
+    baseline_source = base / "upgrade-baseline-source"
+    upstream_source = base / "upgrade-upstream-source"
+    target = base / "upgrade-target"
+    for source in (baseline_source, upstream_source):
+        shutil.copytree(PAYLOAD, source / "template")
+        shutil.copytree(ADAPTERS, source / "adapters")
+
+    baseline_payload = baseline_source / "template"
+    upstream_payload = upstream_source / "template"
+    baseline_ai = baseline_payload / "zettelkasten/AI.md"
+    baseline_ai.write_text(
+        baseline_ai.read_text().replace(RELEASE_VERSION, "v4.1.1")
+    )
+
+    (baseline_payload / "zettelkasten/glossary.md").unlink()
+    (baseline_payload / "AGENTS.md").write_text("# Baseline agents\n")
+    (upstream_payload / "AGENTS.md").write_text("# Upstream agents\n")
+    (baseline_payload / "CLAUDE.md").write_text("# Baseline Claude\n")
+    (upstream_payload / "CLAUDE.md").write_text("# Baseline Claude\n")
+    (baseline_payload / "zettelkasten/quick-reference.md").write_text(
+        "# Baseline quick reference\n"
+    )
+    (upstream_payload / "zettelkasten/quick-reference.md").write_text(
+        "# Upstream quick reference\n"
+    )
+
+    shutil.copytree(baseline_payload, target)
+    shutil.copytree(
+        baseline_source / "adapters/codex",
+        target,
+        dirs_exist_ok=True,
+    )
+    (target / "CLAUDE.md").write_text("# Local Claude rules\n")
+    (target / "zettelkasten/quick-reference.md").write_text(
+        "# Local quick reference\n"
+    )
+    before = snapshot_files(target)
+    report = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--source",
+            str(upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-report",
+            "--with-model-routing",
+            "codex",
+            "--json",
+        ]
+    )
+    payload = json.loads(report.stdout)
+    require(payload["read_only"] is True, "upgrade report is not marked read-only")
+    require(payload["baseline_ref"] == "v4.1.1", "upgrade report did not read baseline")
+    categories = {item["path"]: item["category"] for item in payload["files"]}
+    require(
+        categories["zettelkasten/glossary.md"] == "added",
+        "upgrade report missed an added upstream file",
+    )
+    require(
+        categories["AGENTS.md"] == "upstream-modified",
+        "upgrade report missed an upstream-only change",
+    )
+    require(
+        categories["CLAUDE.md"] == "local-modified",
+        "upgrade report missed a local-only change",
+    )
+    require(
+        categories["zettelkasten/quick-reference.md"] == "both-modified",
+        "upgrade report missed a three-way conflict",
+    )
+    require(
+        categories["zettelkasten/architecture.md"] == "unchanged",
+        "upgrade report misclassified an unchanged file",
+    )
+    require(
+        categories[".codex/config.toml"] == "unchanged",
+        "upgrade report omitted the explicitly selected adapter",
+    )
+    both_entry = next(
+        item
+        for item in payload["files"]
+        if item["path"] == "zettelkasten/quick-reference.md"
+    )
+    require(
+        both_entry["local_diff"] and both_entry["upstream_diff"],
+        "upgrade report omitted three-way diffs",
+    )
+    require(snapshot_files(target) == before, "upgrade report changed target files")
+
+    text_report = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--source",
+            str(upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-report",
+        ]
+    )
+    require(
+        "No files were changed" in text_report.stdout,
+        "text upgrade report omitted its read-only guarantee",
+    )
+    require(snapshot_files(target) == before, "text upgrade report changed target files")
+
+    outside = base / "upgrade-outside.md"
+    outside.write_text("outside must remain untouched\n")
+    architecture = target / "zettelkasten/architecture.md"
+    architecture.unlink()
+    architecture.symlink_to(outside)
+    unsafe_report = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--source",
+            str(upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-report",
+            "--json",
+        ]
+    )
+    unsafe_payload = json.loads(unsafe_report.stdout)
+    unsafe_entry = next(
+        item
+        for item in unsafe_payload["files"]
+        if item["path"] == "zettelkasten/architecture.md"
+    )
+    require(
+        unsafe_entry["category"] == "both-modified"
+        and unsafe_entry["local_state"] == "unsafe"
+        and not unsafe_entry["local_diff"],
+        "upgrade report followed or misreported a target symlink",
+    )
+    require(
+        outside.read_text() == "outside must remain untouched\n",
+        "upgrade report wrote through a target symlink",
+    )
+
+
 def validate_model_routing_bootstrap(base: Path) -> None:
     payload_only = base / "payload-only"
     unavailable_target = base / "unavailable-routing-target"
@@ -1168,6 +1330,7 @@ def validate_bootstrap_lifecycle() -> None:
         require("active work:" in active.stdout, "doctor did not report active WORK")
         validate_worktree_helper(target, tracked_id)
         validate_model_routing_bootstrap(base)
+        validate_upgrade_report(base)
 
 
 def validate_manual_copy() -> None:
@@ -1298,6 +1461,141 @@ def validate_behavior_evaluator() -> None:
         require("FAIL: direct-doc-link: route" in mismatch.stdout, "behavior evaluator accepted a known mismatch")
 
 
+def validate_model_routing_evaluator() -> None:
+    cases = json.loads(
+        (ROOT / "examples/evaluations/model-routing-cases.json").read_text()
+    )
+    runs: list[dict[str, object]] = []
+    for variant in ("codex-core", "codex-routing"):
+        for index, case in enumerate(cases):
+            roles = case["required_routed_roles"] if variant.endswith("routing") else []
+            runs.append(
+                {
+                    "task_id": case["id"],
+                    "variant": variant,
+                    "agent": "synthetic evaluator regression fixture",
+                    "model": "synthetic-model",
+                    "session_id": f"synthetic-{variant}-{index}",
+                    "captured_at": "2026-07-23T00:00:00Z",
+                    "duration_seconds": 10 + index,
+                    "passed_acceptance": True,
+                    "high_risk_misses": 0,
+                    "specialist_calls": [
+                        {"role": role, "model": "synthetic-specialist"}
+                        for role in roles
+                    ],
+                    "files_loaded": index + 1,
+                    "usage": {
+                        "quota_units": 1 if variant.endswith("routing") else 2
+                    },
+                }
+            )
+    fixture = {
+        "suite": {
+            "suite_id": "distribution-validator-fixture",
+            "evidence_kind": "synthetic-harness-fixture",
+            "repository_commit": "synthetic-commit",
+            "template_version": RELEASE_VERSION,
+            "captured_at": "2026-07-23T00:00:00Z",
+        },
+        "runs": runs,
+    }
+    with tempfile.TemporaryDirectory(prefix="model-routing-evaluator-") as temp_dir:
+        run_path = Path(temp_dir) / "runs.json"
+        run_path.write_text(json.dumps(fixture))
+        matched = run(
+            [
+                sys.executable,
+                str(MODEL_ROUTING_EVALUATOR),
+                "--runs",
+                str(run_path),
+                "--require-cost-improvement",
+            ]
+        )
+        require(
+            "HARNESS MATCH:" in matched.stdout
+            and "EVIDENCE PASS:" not in matched.stdout,
+            "model-routing evaluator blurred synthetic and real evidence",
+        )
+        routed_direct = next(
+            item
+            for item in fixture["runs"]
+            if item["task_id"] == "direct-small-doc-fix"
+            and item["variant"] == "codex-routing"
+        )
+        routed_direct["specialist_calls"] = [
+            {"role": "reviewer", "model": "synthetic-specialist"}
+        ]
+        run_path.write_text(json.dumps(fixture))
+        mismatch = run(
+            [
+                sys.executable,
+                str(MODEL_ROUTING_EVALUATOR),
+                "--runs",
+                str(run_path),
+            ],
+            expected=1,
+        )
+        require(
+            "unexpected specialist roles" in mismatch.stdout,
+            "model-routing evaluator accepted unnecessary Direct delegation",
+        )
+
+
+def validate_release_preparer() -> None:
+    checked = run([sys.executable, str(RELEASE_PREPARER), "--check"])
+    require(
+        f"aligned at {RELEASE_VERSION}" in checked.stdout,
+        "release-version checker did not confirm the current release",
+    )
+    with tempfile.TemporaryDirectory(prefix="release-preparer-") as temp_dir:
+        copy = Path(temp_dir) / "repository"
+        shutil.copytree(
+            ROOT,
+            copy,
+            ignore=shutil.ignore_patterns(
+                ".git",
+                ".ruff_cache",
+                "__pycache__",
+                "*.pyc",
+            ),
+        )
+        copied_preparer = copy / "scripts/prepare_release.py"
+        before = snapshot_files(copy)
+        dry_run = run(
+            [sys.executable, str(copied_preparer), "v9.8.7-rc.1", "--dry-run"],
+            cwd=copy,
+        )
+        require("Would update" in dry_run.stdout, "release dry-run did not report changes")
+        require(snapshot_files(copy) == before, "release dry-run changed repository files")
+        invalid = run(
+            [sys.executable, str(copied_preparer), "v01.2.3"],
+            cwd=copy,
+            expected=1,
+        )
+        require(
+            "version must use" in invalid.stderr,
+            "release preparer accepted an invalid version",
+        )
+        require(snapshot_files(copy) == before, "invalid release changed repository files")
+        run(
+            [sys.executable, str(copied_preparer), "v9.8.7-rc.1"],
+            cwd=copy,
+        )
+        rechecked = run(
+            [sys.executable, str(copied_preparer), "--check"],
+            cwd=copy,
+        )
+        require(
+            "aligned at v9.8.7-rc.1" in rechecked.stdout,
+            "release preparer did not align every surface",
+        )
+        require(
+            "v4.1.1" in (copy / "README.md").read_text(),
+            "release preparer changed migration history",
+        )
+
+
 def validate_repository_layout() -> None:
     require(not (ROOT / "zettelkasten").exists(), "root zettelkasten must not exist")
     require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
@@ -1312,6 +1610,10 @@ def validate_repository_layout() -> None:
         and "$ai-collaboration-workflow" not in openai_metadata,
         "companion Skill UI metadata uses a stale invocation name",
     )
+    require(
+        "upgrade" in openai_metadata.lower(),
+        "companion Skill UI metadata omits safe upgrades",
+    )
     readme = (ROOT / "README.md").read_text()
     for expected in (
         "# Repo Continuity",
@@ -1324,6 +1626,8 @@ def validate_repository_layout() -> None:
         "npx skills add` installs the Companion Skill only",
         "npx skills remove ai-collaboration-workflow -g -y",
         "## Initialization Is Complete When",
+        "## Safely Review An Upgrade",
+        "read-only upgrade report",
         "## Daily Use",
         "Checkpoint only at meaningful boundaries",
         "Promotion is idempotent",
@@ -1332,6 +1636,8 @@ def validate_repository_layout() -> None:
         "--with-model-routing codex",
         "current user or session selection; not overridden",
         "adapters/",
+        "## Evaluate Model Routing",
+        "docs/model-routing-evaluation.md",
         "## License",
     ):
         require(expected in readme, f"README is missing onboarding contract: {expected}")
@@ -1348,6 +1654,8 @@ def validate_repository_layout() -> None:
         "npx skills add` 只会安装 Companion Skill",
         "npx skills remove ai-collaboration-workflow -g -y",
         "## 初始化完成标准",
+        "## 安全检查升级",
+        "只读升级报告",
         "## 日常使用",
         "只在有意义的边界记录 checkpoint",
         "经验固化必须是幂等的",
@@ -1356,6 +1664,8 @@ def validate_repository_layout() -> None:
         "--with-model-routing codex",
         "用户或当前会话选择；overlay 不覆盖",
         "adapters/",
+        "## 评估模型路由",
+        "model-routing-evaluation.md",
         "## 产品边界",
         "**核心**",
         "**可选**",
@@ -1378,6 +1688,8 @@ def validate_repository_layout() -> None:
     for expected in (
         'choices=("codex", "claude", "all")',
         "The default installation remains core-only.",
+        "--upgrade-report",
+        "Repo Continuity upgrade report (read-only)",
     ):
         require(expected in BOOTSTRAP.read_text(), f"bootstrap is missing opt-in contract: {expected}")
     git_collaboration = (PAYLOAD / "zettelkasten/git-collaboration.md").read_text()
@@ -1410,6 +1722,21 @@ def validate_repository_layout() -> None:
     for helper in (WORKFLOW_DOCTOR, WORKFLOW_TASK, TASK_WORKTREE):
         require(helper.is_file(), f"optional Skill helper is missing: {helper.relative_to(ROOT)}")
         require(helper.stat().st_mode & 0o111, f"optional Skill helper is not executable: {helper.relative_to(ROOT)}")
+    for script in (MODEL_ROUTING_EVALUATOR, RELEASE_PREPARER):
+        require(script.is_file(), f"maintainer script is missing: {script.relative_to(ROOT)}")
+        require(script.stat().st_mode & 0o111, f"maintainer script is not executable: {script.relative_to(ROOT)}")
+    workflow = ROOT / ".github/workflows/validate.yml"
+    workflow_text = workflow.read_text()
+    for expected in (
+        "actions/checkout@v7",
+        "actions/setup-python@v6",
+        "actions/setup-node@v7",
+        "python3 scripts/prepare_release.py --check",
+        "python3 scripts/validate_distribution.py",
+        "skills@1.5.19",
+        "--with-model-routing codex",
+    ):
+        require(expected in workflow_text, f"CI workflow is missing: {expected}")
     require(
         not (SKILL_ROOT / "references/migration.md").exists(),
         "unsupported migration reference remains",
@@ -1417,9 +1744,11 @@ def validate_repository_layout() -> None:
     for path in (
         ROOT / "docs/fresh-agent-resume-evaluation.md",
         ROOT / "docs/workflow-behavior-evaluation.md",
+        ROOT / "docs/model-routing-evaluation.md",
         feedback_guide,
         ROOT / "examples/practical-scenarios/README.md",
         ROOT / "examples/evaluations/workflow-cases.json",
+        ROOT / "examples/evaluations/model-routing-cases.json",
         SKILL_ROOT / "references/routing.md",
         feedback_reference,
     ):
@@ -1436,6 +1765,8 @@ def main() -> int:
         validate_symlink_boundary()
         validate_remote_source()
         validate_behavior_evaluator()
+        validate_model_routing_evaluator()
+        validate_release_preparer()
     except ValidationFailure as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1

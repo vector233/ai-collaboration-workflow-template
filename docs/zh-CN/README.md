@@ -2,6 +2,8 @@
 
 **一个仓库，多种 Coding Agent，一套持续演进的项目知识。**
 
+[![分发验证](https://github.com/vector233/repo-continuity/actions/workflows/validate.yml/badge.svg)](https://github.com/vector233/repo-continuity/actions/workflows/validate.yml)
+
 Coding Agent 很强，但它们的上下文是暂时的：会话会结束，上下文会被压缩，执行任务的 Agent 会变化，重要的项目知识也会被反复重新发现。
 
 Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
@@ -85,6 +87,19 @@ cp -R repo-continuity/template/. /path/to/your-project/
 - 只有项目策略或用户要求时才提交初始化变更。
 
 初始化后，项目只依赖 Markdown、Git 和项目自身的验证系统。移除 Companion Skill 不会丢失项目知识或工作状态。
+
+## 安全检查升级
+
+Companion Skill 更新后，不会自动覆盖已经初始化的项目。先安装目标版本 Skill，进入项目后告诉 Agent：
+
+```text
+使用 $repo-continuity 为当前仓库生成只读升级报告。
+比较仓库记录的模板基线与 Skill 固定的目标版本，显示三方差异，不修改任何项目文件。
+```
+
+报告会比较旧版上游基线、当前项目和目标上游版本，把核心文件分类为新增、未修改、本地修改、上游修改或双方修改。它不会复制、删除或覆盖文件；只有显式要求时才会把 Codex 或 Claude Code overlay 纳入比较。
+
+检查报告后，应有意识地合并适用的上游变化，保留项目事实和更严格的本地规则，运行项目验证，并且只在协调完成后更新 `Template baseline`。完整 CLI 参数见 [Companion Skill](../../skills/repo-continuity/SKILL.md#compare-an-upgrade)。
 
 ## 日常使用
 
@@ -203,6 +218,10 @@ python3 skills/repo-continuity/scripts/bootstrap_template.py \
 
 Claude Code 根据 Agent 的描述和当前上下文自动选择。需要固定角色时，使用 `@explorer`、`@implementer`、`@reviewer` 或 `@architect`。`implementer` 必须与同一任务 worktree 中的其他写入 Agent 串行执行；作用域独立的只读角色可以并行。如果模型不可用或被组织策略限制，Claude Code 会回退到继承或允许的模型，仓库工作流仍然保持不变。
 
+## 评估模型路由
+
+不能仅凭配置推断额度节省。[模型路由 A/B 评估](../model-routing-evaluation.md) 定义了六类成对任务、全新会话来源、独立验收结果、高风险漏检检查、专业角色检查、耗时和可选的可比额度单位。评估器会明确区分合成测试夹具与真实 Agent 证据；无法获得可比额度数据时，成本结论会保持为“不确定”。
+
 ## 核心模型
 
 ```text
@@ -290,5 +309,7 @@ python3 scripts/validate_distribution.py
 ```
 
 验证覆盖纯核心初始化、模型路由显式 opt-in、单一 WORK 路由、Governed 门禁、项目 Skill、并行 worktree、Wiki 链接、可选 helper 和 bootstrap 行为。
+
+真实模型路由的质量和可比额度证据按 [模型路由 A/B 评估](../model-routing-evaluation.md) 收集；评估器不会把自身的合成回归夹具当成 Agent 效果证据。`.github/workflows/validate.yml` 会在 Pull Request 和 `main` 上重复检查版本一致性、完整分发生命周期、空白错误，以及官方 Skills CLI 的安装和 bootstrap 冒烟测试。
 
 核心模板只依赖 Markdown 与 Git。辅助工具不产生独立状态，也不是理解或执行流程的前置条件。

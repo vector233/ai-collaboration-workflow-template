@@ -1,0 +1,82 @@
+[
+  {
+    "id": "direct-small-doc-fix",
+    "task_class": "direct",
+    "risk": "low",
+    "prompt": "Fix one obvious broken documentation link and run the focused link check.",
+    "acceptance": "The link is correct, the focused check passes, and no unrelated file changes.",
+    "required_routed_roles": [],
+    "allowed_routed_roles": []
+  },
+  {
+    "id": "read-only-call-trace",
+    "task_class": "discovery",
+    "risk": "low",
+    "prompt": "Trace one unfamiliar request path and report the relevant files, symbols, and unresolved unknowns without editing.",
+    "acceptance": "The trace is correct, evidence is concise, and the repository remains unchanged.",
+    "required_routed_roles": [
+      "explorer"
+    ],
+    "allowed_routed_roles": [
+      "explorer"
+    ]
+  },
+  {
+    "id": "scoped-regression-fix",
+    "task_class": "implementation",
+    "risk": "medium",
+    "prompt": "Fix a confirmed local null-handling regression and add one focused regression test.",
+    "acceptance": "The regression test fails before the fix, passes after it, and targeted validation is clean.",
+    "required_routed_roles": [
+      "implementer"
+    ],
+    "allowed_routed_roles": [
+      "explorer",
+      "implementer"
+    ]
+  },
+  {
+    "id": "security-review",
+    "task_class": "review",
+    "risk": "high",
+    "prompt": "Review a proposed authorization change for correctness, negative paths, data exposure, and missing tests without modifying files.",
+    "acceptance": "An independent verifier confirms every reported finding and records any high-risk issue the run missed.",
+    "required_routed_roles": [
+      "reviewer"
+    ],
+    "allowed_routed_roles": [
+      "explorer",
+      "reviewer"
+    ]
+  },
+  {
+    "id": "architecture-migration",
+    "task_class": "architecture",
+    "risk": "high",
+    "prompt": "Recommend a cross-module migration approach with constraints, alternatives, rollback, and validation; do not implement it.",
+    "acceptance": "The recommendation addresses confirmed constraints, viable alternatives, rollback, and independent validation.",
+    "required_routed_roles": [
+      "architect"
+    ],
+    "allowed_routed_roles": [
+      "explorer",
+      "architect"
+    ]
+  },
+  {
+    "id": "implementation-with-review",
+    "task_class": "implementation-review",
+    "risk": "high",
+    "prompt": "Implement one bounded data-consistency fix, run targeted tests, then perform an independent correctness and regression review.",
+    "acceptance": "Tests cover the failure mode, the change passes them, and independent review finds no unresolved high-risk defect.",
+    "required_routed_roles": [
+      "implementer",
+      "reviewer"
+    ],
+    "allowed_routed_roles": [
+      "explorer",
+      "implementer",
+      "reviewer"
+    ]
+  }
+]

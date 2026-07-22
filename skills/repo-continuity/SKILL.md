@@ -1,6 +1,6 @@
 ---
 name: repo-continuity
-description: Initialize and operate Repo Continuity for new projects. Use when an agent needs to install the repository-owned knowledge layer; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; discover or idempotently promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize, inspect, safely compare upgrades for, and operate Repo Continuity. Use when an agent needs to install the repository-owned knowledge layer; produce a read-only three-way upgrade report without overwriting project files; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; discover or idempotently promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # Repo Continuity
@@ -41,6 +41,18 @@ python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --with-
 Use `--source <checkout-or-template>` for local or offline core installation. Model-routing opt-in requires the full checkout, or a direct template directory whose parent also contains `adapters/`. The bootstrap copies missing files, skips identical files, and never overwrites differing repository files.
 
 If `INIT.md` exists, follow it completely. Preserve stricter local rules, replace all placeholders, initialize only verified project facts, remove initialization files, and verify the knowledge links and required fields.
+
+## Compare An Upgrade
+
+For an initialized project, generate a read-only three-way report before adopting a newer installed release:
+
+```bash
+python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --upgrade-report
+```
+
+The report reads the recorded `Template baseline` from `zettelkasten/AI.md`, compares that old upstream payload with the project and the Skill's pinned target release, and classifies files as added, unchanged, local-modified, upstream-modified, or both-modified. It prints local and upstream diffs but never changes the target. Use `--baseline-ref <tag>` if the recorded baseline is unavailable, `--json` for machine-readable output, and `--with-model-routing codex`, `claude`, or `all` only when the corresponding optional overlay should also be compared.
+
+Review every both-modified path deliberately. Preserve project facts and stricter local policy, merge only applicable upstream changes, validate the result, and update the recorded baseline only after reconciliation is complete. Do not re-add `INIT.md` or a payload marker to an initialized project.
 
 ## Load Minimal Context
 

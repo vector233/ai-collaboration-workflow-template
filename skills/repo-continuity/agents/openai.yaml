@@ -1,4 +1,4 @@
 interface:
   display_name: "Repo Continuity"
-  short_description: "Route work, preserve knowledge, and improve the workflow"
-  default_prompt: "Use $repo-continuity to route this task, load only needed project knowledge, preserve recoverable context at meaningful boundaries, write back reusable experience idempotently, and capture evidence-backed template friction only when it occurs."
+  short_description: "Install or upgrade safely, route work, and preserve knowledge"
+  default_prompt: "Use $repo-continuity to inspect, initialize, or safely compare an upgrade for this repository as needed; then route the task, load only required project knowledge, preserve recoverable context at meaningful boundaries, and write back reusable experience idempotently."

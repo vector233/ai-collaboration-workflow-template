@@ -2,6 +2,8 @@
 
 **One repository. Many coding agents. One durable project memory.**
 
+[![Validate distribution](https://github.com/vector233/repo-continuity/actions/workflows/validate.yml/badge.svg)](https://github.com/vector233/repo-continuity/actions/workflows/validate.yml)
+
 Coding agents are powerful, but their context is temporary. Sessions end, context gets compacted, agents change, and important project knowledge is rediscovered or lost.
 
 Repo Continuity makes the repository their shared source of truth:
@@ -85,6 +87,20 @@ Do not use the raw copy command over an existing `AGENTS.md`, `CLAUDE.md`, `zett
 - initialization changes are committed only when repository policy or the user requires it.
 
 After initialization, the repository remains usable with only Markdown, Git, and project-native validation. Removing the companion Skill must not remove project knowledge or workflow state.
+
+## Safely Review An Upgrade
+
+An initialized project is not overwritten when the Companion Skill changes. Install the target Skill release, enter the project, and ask:
+
+```text
+Use $repo-continuity to generate a read-only upgrade report for this repository.
+Compare its recorded template baseline with the Skill's pinned release, show the three-way diffs,
+and do not change any project file.
+```
+
+The report compares the old upstream baseline, the current project, and the target upstream release. It classifies each core file as added, unchanged, local-modified, upstream-modified, or both-modified. It never copies, removes, or overwrites a file. Optional Codex or Claude Code overlays are included only when explicitly requested.
+
+After reviewing the report, merge applicable upstream changes deliberately, preserve project facts and stricter local rules, run project validation, and update the `Template baseline` only after reconciliation is complete. See the exact CLI options in the [Companion Skill](skills/repo-continuity/SKILL.md#compare-an-upgrade).
 
 ## Daily Use
 
@@ -204,6 +220,10 @@ Use `--with-model-routing all` to install both overlays. For a new conflict-free
 
 Claude Code selects an agent from its description and context. Use `@explorer`, `@implementer`, `@reviewer`, or `@architect` when the exact role must run. The implementer remains serial with other writers in its task worktree; independent read-only roles may run in parallel. If a model is unavailable or restricted, Claude Code falls back to an inherited or permitted model; the same repository workflow still applies.
 
+## Evaluate Model Routing
+
+Do not infer cost savings from configuration alone. The [model-routing A/B evaluation](docs/model-routing-evaluation.md) defines six paired task classes, fresh-session provenance, independent acceptance results, high-risk-miss checks, specialist-role checks, duration, and optional comparable quota units. Its evaluator keeps synthetic harness fixtures visibly separate from real Agent evidence and reports cost as inconclusive when comparable quota data is unavailable.
+
 ## Core Model
 
 ```text
@@ -308,6 +328,9 @@ python3 scripts/validate_distribution.py
 The distribution validator exercises tool-free core initialization, explicit model-routing opt-in, single-WORK routing, governed gates, project-Skill discovery, worktree isolation, wiki links, optional helpers, and bootstrap behavior in temporary repositories.
 
 Fresh-agent routing behavior can be checked with [docs/workflow-behavior-evaluation.md](docs/workflow-behavior-evaluation.md).
+Actual model-routing quality and comparable quota evidence use [docs/model-routing-evaluation.md](docs/model-routing-evaluation.md); the evaluator never treats its synthetic regression fixture as Agent evidence.
+
+`.github/workflows/validate.yml` repeats release-version alignment, the full distribution lifecycle, whitespace checks, and an official Skills CLI install/bootstrap smoke test on pull requests and `main`.
 
 Chinese guide: [docs/zh-CN/README.md](docs/zh-CN/README.md).
 

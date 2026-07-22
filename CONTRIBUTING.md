@@ -31,6 +31,20 @@ This repository does not initialize a second root knowledge base. Keep the produ
 - Search for private project terms before submitting.
 - Make sure non-placeholder wiki links resolve to files in `template/zettelkasten/`.
 
+## Release Preparation
+
+Keep the Quick Start tag, payload baseline, distribution validator version, and Companion Skill default ref aligned through the release helper:
+
+```bash
+python3 scripts/prepare_release.py --check
+python3 scripts/prepare_release.py v4.3.0 --dry-run
+python3 scripts/prepare_release.py v4.3.0
+```
+
+The helper changes only the known release-version anchors and fails if their shape or current values diverge. Review its diff, run `python3 scripts/validate_distribution.py`, and let `.github/workflows/validate.yml` repeat the distribution and official Skills CLI installation checks before tagging.
+
+Model-routing claims need externally captured, fresh-session A/B evidence. Follow `docs/model-routing-evaluation.md`; never report a synthetic evaluator fixture as actual Agent quality or quota evidence.
+
 ## Commit Style
 
 Use concise conventional-style commits:

@@ -1,0 +1,70 @@
+name: Validate distribution
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  distribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Check release-version alignment
+        run: python3 scripts/prepare_release.py --check
+
+      - name: Validate payload and distribution lifecycle
+        run: python3 scripts/validate_distribution.py
+
+      - name: Check whitespace errors
+        run: git diff --check 4b825dc642cb6eb9a060e54bf8d69288fbee4904 HEAD
+
+      - name: Install the Skill and bootstrap through the installed copy
+        env:
+          DISABLE_TELEMETRY: "1"
+        run: |
+          set -euo pipefail
+          skill_smoke_dir="$(mktemp -d)"
+          cd "$skill_smoke_dir"
+          npx --yes skills@1.5.19 add "$GITHUB_WORKSPACE" \
+            --skill repo-continuity \
+            --agent codex \
+            --copy \
+            --yes
+          installed_skill="$skill_smoke_dir/.agents/skills/repo-continuity"
+          test -f "$installed_skill/SKILL.md"
+          python3 "$installed_skill/scripts/bootstrap_template.py" \
+            --source "$GITHUB_WORKSPACE" \
+            --target "$skill_smoke_dir/target"
+          test -f "$skill_smoke_dir/target/zettelkasten/AI.md"
+          test ! -e "$skill_smoke_dir/target/.codex"
+          test ! -e "$skill_smoke_dir/target/.claude"
+          python3 "$installed_skill/scripts/bootstrap_template.py" \
+            --source "$GITHUB_WORKSPACE" \
+            --target "$skill_smoke_dir/target" \
+            --with-model-routing codex
+          test -f "$skill_smoke_dir/target/.codex/agents/architect.toml"
+          test ! -e "$skill_smoke_dir/target/.claude"
