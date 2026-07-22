@@ -1,5 +1,5 @@
 ---
-name: ai-collaboration-workflow
+name: repo-continuity
 description: Initialize and operate Repo Continuity for new projects. Use when an agent needs to install the repository-owned knowledge layer; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; discover or idempotently promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 

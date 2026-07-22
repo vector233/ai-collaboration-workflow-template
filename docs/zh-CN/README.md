@@ -16,7 +16,12 @@ Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
 
 ## 快速开始
 
-以下命令固定到当前版本 `v4.1.1`。已经初始化的项目不会被自动修改，可以按需人工采用新版改进。
+以下命令固定到预览版本 `v4.2.0-rc.1`。已经初始化的项目不会被自动修改，可以按需人工采用新版改进。
+
+> [!TIP]
+> **从 `v4.1.1` 或更早版本升级：** Companion Skill 已从 `ai-collaboration-workflow` 更名为 `repo-continuity`。
+>
+> 先执行 `npx skills remove ai-collaboration-workflow -g -y` 移除全局旧 Skill，再安装并调用 `$repo-continuity`。已经完整执行过 `INIT.md` 的仓库不需要重新初始化；如果上次初始化中断，继续完成 `INIT.md` 即可，Doctor 仍能识别旧 payload marker。
 
 ### 推荐：安装 Companion Skill
 
@@ -24,8 +29,8 @@ Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
-  --skill ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0-rc.1/skills/repo-continuity \
+  --skill repo-continuity \
   -a claude-code \
   -g -y
 ```
@@ -34,8 +39,8 @@ npx skills add \
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
-  --skill ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0-rc.1/skills/repo-continuity \
+  --skill repo-continuity \
   -a codex \
   -g -y
 ```
@@ -43,18 +48,18 @@ npx skills add \
 然后进入目标项目，让 Agent 执行：
 
 ```text
-使用 $ai-collaboration-workflow 初始化当前仓库。
+使用 $repo-continuity 初始化当前仓库。
 先检查已有项目规则，保留更严格的本地策略，并完整执行 INIT.md。
 ```
 
-Skill 会先预览，再复制缺失文件，不会覆盖内容不同的仓库文件。默认安装只包含核心，不会加入模型路由配置。如果 `AGENTS.md`、`CLAUDE.md` 或其他文件发生冲突，Agent 必须保留原文件并有意识地合并适用的共享规则。
+`npx skills add` 只会安装 Companion Skill，不会在这一步把完整仓库 payload 复制到目标项目。调用 Skill 后，它才会运行内置 bootstrap，获取同一个固定版本，并预览或复制缺失的核心文件，不会覆盖内容不同的仓库文件。默认安装只包含核心，不会加入模型路由配置。如果 `AGENTS.md`、`CLAUDE.md` 或其他文件发生冲突，Agent 必须保留原文件并有意识地合并适用的共享规则。
 
 ### 只安装核心模板
 
 Companion Skill 不是必需项。如果是一个尚不存在 Agent 指令或知识目录冲突的新仓库，可以复制固定版本的 payload：
 
 ```bash
-git clone --branch v4.1.1 --depth 1 \
+git clone --branch v4.2.0-rc.1 --depth 1 \
   https://github.com/vector233/repo-continuity.git
 
 cp -R repo-continuity/template/. /path/to/your-project/
@@ -75,7 +80,7 @@ cp -R repo-continuity/template/. /path/to/your-project/
 - 项目目的、技术栈、架构、命令和验证流程来自已确认事实；
 - 模板占位符已经清理；
 - Wiki 链接和知识必填字段验证通过；
-- `INIT.md` 和 `.ai-collaboration-workflow-template` 已删除；
+- `INIT.md`、`.repo-continuity-template` 和可能存在的旧 `.ai-collaboration-workflow-template` marker 已删除；
 - 没有创建空 WORK，也没有凭空发明项目 Skill；
 - 只有项目策略或用户要求时才提交初始化变更。
 
@@ -143,13 +148,13 @@ cp zettelkasten/templates/work-item.md \
 仓库在 `adapters/codex/` 下提供独立的 Codex overlay。默认 bootstrap 和直接复制 `template/` 都不会安装它。需要时显式启用：
 
 ```bash
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing codex \
   --dry-run
 
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing codex
@@ -174,13 +179,13 @@ python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
 `adapters/claude/` 下的独立 overlay 同样需要显式启用：
 
 ```bash
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing claude \
   --dry-run
 
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing claude

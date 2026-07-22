@@ -14,8 +14,10 @@ from pathlib import Path
 
 
 DEFAULT_REPO_URL = "https://github.com/vector233/repo-continuity.git"
-DEFAULT_REF = "main"
-PAYLOAD_MARKER = Path(".ai-collaboration-workflow-template")
+DEFAULT_REF = "v4.2.0-rc.1"
+PAYLOAD_MARKER = Path(".repo-continuity-template")
+LEGACY_PAYLOAD_MARKERS = (Path(".ai-collaboration-workflow-template"),)
+PAYLOAD_MARKERS = (PAYLOAD_MARKER, *LEGACY_PAYLOAD_MARKERS)
 
 PAYLOAD_REQUIRED_FILES = (
     Path("AGENTS.md"),
@@ -216,9 +218,18 @@ def clone_source(repo_url: str, ref: str, destination: Path) -> Path:
     return destination
 
 
-def validate_payload(payload: Path) -> None:
-    if not (payload / PAYLOAD_MARKER).is_file():
-        raise BootstrapError(f"template payload marker is missing: {payload / PAYLOAD_MARKER}")
+def find_payload_marker(payload: Path) -> Path | None:
+    return next(
+        (marker for marker in PAYLOAD_MARKERS if (payload / marker).is_file()),
+        None,
+    )
+
+
+def validate_payload(payload: Path) -> Path:
+    marker = find_payload_marker(payload)
+    if marker is None:
+        expected = ", ".join(str(payload / candidate) for candidate in PAYLOAD_MARKERS)
+        raise BootstrapError(f"template payload marker is missing; expected one of: {expected}")
     missing_files = missing_required_paths(payload, PAYLOAD_REQUIRED_FILES)
     missing_directories = missing_required_directories(payload)
     problems = [
@@ -229,23 +240,29 @@ def validate_payload(payload: Path) -> None:
         raise BootstrapError(
             "template payload is missing required paths: " + ", ".join(problems)
         )
+    return marker
 
 
 def resolve_payload_root(source: Path) -> Path:
     candidates = (source / "template", source)
     for candidate in candidates:
-        if (candidate / PAYLOAD_MARKER).is_file():
+        if find_payload_marker(candidate) is not None:
             validate_payload(candidate)
             return candidate
+    expected = " or ".join(
+        str(candidate / marker)
+        for candidate in candidates
+        for marker in PAYLOAD_MARKERS
+    )
     raise BootstrapError(
-        f"no marked template payload found under {source}; expected "
-        f"{source / 'template' / PAYLOAD_MARKER} or {source / PAYLOAD_MARKER}"
+        f"no marked template payload found under {source}; expected {expected}"
     )
 
 
 def template_files(source: Path) -> tuple[Path, ...]:
+    marker = validate_payload(source)
     files = [
-        PAYLOAD_MARKER,
+        marker,
         Path("AGENTS.md"),
         Path("CLAUDE.md"),
         Path("INIT.md"),
@@ -403,7 +420,7 @@ def install(
             source, target, adapters, dry_run=args.dry_run
         )
 
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-template-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-template-") as temp_dir:
         source = clone_source(
             args.repo_url, args.ref, Path(temp_dir) / "template"
         )

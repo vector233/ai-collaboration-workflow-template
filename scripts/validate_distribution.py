@@ -16,13 +16,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
 ADAPTERS = ROOT / "adapters"
-RELEASE_VERSION = "v4.1.1"
+RELEASE_VERSION = "v4.2.0-rc.1"
 CANONICAL_REPO_URL = "https://github.com/vector233/repo-continuity"
-MARKER = PAYLOAD / ".ai-collaboration-workflow-template"
-BOOTSTRAP = ROOT / "skills/ai-collaboration-workflow/scripts/bootstrap_template.py"
-WORKFLOW_DOCTOR = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_doctor.py"
-WORKFLOW_TASK = ROOT / "skills/ai-collaboration-workflow/scripts/workflow_task.py"
-TASK_WORKTREE = ROOT / "skills/ai-collaboration-workflow/scripts/task_worktree.py"
+SKILL_ID = "repo-continuity"
+SKILL_ROOT = ROOT / "skills" / SKILL_ID
+MARKER_NAME = ".repo-continuity-template"
+LEGACY_MARKER_NAME = ".ai-collaboration-workflow-template"
+MARKER = PAYLOAD / MARKER_NAME
+BOOTSTRAP = SKILL_ROOT / "scripts/bootstrap_template.py"
+WORKFLOW_DOCTOR = SKILL_ROOT / "scripts/workflow_doctor.py"
+WORKFLOW_TASK = SKILL_ROOT / "scripts/workflow_task.py"
+TASK_WORKTREE = SKILL_ROOT / "scripts/task_worktree.py"
 BEHAVIOR_EVALUATOR = ROOT / "scripts/evaluate_workflow_behavior.py"
 
 REQUIRED_FILES = (
@@ -106,6 +110,10 @@ def run(
 def validate_payload() -> None:
     require(MARKER.is_file(), "payload marker is missing")
     require(
+        not (PAYLOAD / LEGACY_MARKER_NAME).exists(),
+        "legacy marker remains canonical in the payload",
+    )
+    require(
         MARKER.read_text().strip() == "canonical-payload-v4",
         "payload marker version is incorrect",
     )
@@ -185,7 +193,11 @@ def validate_payload() -> None:
     ):
         require(expected in validation_policy, f"validation policy is missing recovery contract: {expected}")
 
-    skill = (ROOT / "skills/ai-collaboration-workflow/SKILL.md").read_text()
+    skill = (SKILL_ROOT / "SKILL.md").read_text()
+    require(
+        skill.startswith("---\nname: repo-continuity\n"),
+        "companion Skill metadata uses a stale ID",
+    )
     for expected in (
         "## Preserve Context",
         "Do not checkpoint every turn",
@@ -311,6 +323,9 @@ def initialize_target(target: Path) -> None:
         path.write_text(text)
 
     (target / MARKER.name).unlink()
+    legacy_marker = target / LEGACY_MARKER_NAME
+    if legacy_marker.exists():
+        legacy_marker.unlink()
     (target / "INIT.md").unlink()
 
     for path in vault.rglob("*.md"):
@@ -1073,8 +1088,36 @@ def validate_model_routing_bootstrap(base: Path) -> None:
 
 
 def validate_bootstrap_lifecycle() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-distribution-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-distribution-") as temp_dir:
         base = Path(temp_dir)
+        legacy_payload = base / "legacy-payload"
+        legacy_target = base / "legacy-target"
+        shutil.copytree(PAYLOAD, legacy_payload)
+        (legacy_payload / MARKER_NAME).rename(legacy_payload / LEGACY_MARKER_NAME)
+        run(
+            [
+                sys.executable,
+                str(BOOTSTRAP),
+                "--source",
+                str(legacy_payload),
+                "--target",
+                str(legacy_target),
+            ]
+        )
+        require(
+            (legacy_target / LEGACY_MARKER_NAME).is_file(),
+            "bootstrap dropped the legacy interrupted-initialization marker",
+        )
+        legacy_doctor = run(
+            [sys.executable, str(WORKFLOW_DOCTOR), "--strict"],
+            cwd=legacy_target,
+            expected=1,
+        )
+        require(
+            f"WARN: {LEGACY_MARKER_NAME}: payload marker is present" in legacy_doctor.stdout,
+            "Doctor no longer recognizes the legacy payload marker",
+        )
+
         target = base / "target"
         dry_run = run(
             [
@@ -1128,7 +1171,7 @@ def validate_bootstrap_lifecycle() -> None:
 
 
 def validate_manual_copy() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-copy-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-copy-") as temp_dir:
         base = Path(temp_dir)
         target = base / "target"
         shutil.copytree(PAYLOAD, target)
@@ -1157,7 +1200,7 @@ def validate_manual_copy() -> None:
 
 
 def validate_symlink_boundary() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-symlink-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-symlink-") as temp_dir:
         base = Path(temp_dir)
         target = base / "target"
         outside = base / "outside"
@@ -1173,7 +1216,7 @@ def validate_symlink_boundary() -> None:
 
 
 def validate_remote_source() -> None:
-    with tempfile.TemporaryDirectory(prefix="ai-workflow-remote-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-remote-") as temp_dir:
         base = Path(temp_dir)
         source = base / "source"
         target = base / "target"
@@ -1196,14 +1239,13 @@ def validate_remote_source() -> None:
             ],
             cwd=source,
         )
+        run(["git", "tag", RELEASE_VERSION], cwd=source)
         run(
             [
                 sys.executable,
                 str(BOOTSTRAP),
                 "--repo-url",
                 str(source),
-                "--ref",
-                "main",
                 "--target",
                 str(target),
             ]
@@ -1219,8 +1261,6 @@ def validate_remote_source() -> None:
                 str(BOOTSTRAP),
                 "--repo-url",
                 str(source),
-                "--ref",
-                "main",
                 "--target",
                 str(all_target),
                 "--with-model-routing",
@@ -1261,6 +1301,17 @@ def validate_behavior_evaluator() -> None:
 def validate_repository_layout() -> None:
     require(not (ROOT / "zettelkasten").exists(), "root zettelkasten must not exist")
     require((ROOT / "LICENSE").is_file(), "LICENSE is missing")
+    require(SKILL_ROOT.is_dir(), "repo-continuity companion Skill is missing")
+    require(
+        not (ROOT / "skills/ai-collaboration-workflow").exists(),
+        "legacy companion Skill directory remains installed beside repo-continuity",
+    )
+    openai_metadata = (SKILL_ROOT / "agents/openai.yaml").read_text()
+    require(
+        "$repo-continuity" in openai_metadata
+        and "$ai-collaboration-workflow" not in openai_metadata,
+        "companion Skill UI metadata uses a stale invocation name",
+    )
     readme = (ROOT / "README.md").read_text()
     for expected in (
         "# Repo Continuity",
@@ -1268,8 +1319,10 @@ def validate_repository_layout() -> None:
         "Resume, do not restart.",
         "Make the project learn.",
         "## Quick Start",
-        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
-        "Use $ai-collaboration-workflow to initialize this repository.",
+        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/repo-continuity",
+        "Use $repo-continuity to initialize this repository.",
+        "npx skills add` installs the Companion Skill only",
+        "npx skills remove ai-collaboration-workflow -g -y",
         "## Initialization Is Complete When",
         "## Daily Use",
         "Checkpoint only at meaningful boundaries",
@@ -1290,8 +1343,10 @@ def validate_repository_layout() -> None:
         "接着做，而不是重新开始。",
         "让项目从开发中持续学习。",
         "## 快速开始",
-        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/ai-collaboration-workflow",
-        "使用 $ai-collaboration-workflow 初始化当前仓库。",
+        f"{CANONICAL_REPO_URL}/tree/{RELEASE_VERSION}/skills/repo-continuity",
+        "使用 $repo-continuity 初始化当前仓库。",
+        "npx skills add` 只会安装 Companion Skill",
+        "npx skills remove ai-collaboration-workflow -g -y",
         "## 初始化完成标准",
         "## 日常使用",
         "只在有意义的边界记录 checkpoint",
@@ -1316,6 +1371,10 @@ def validate_repository_layout() -> None:
         f'DEFAULT_REPO_URL = "{CANONICAL_REPO_URL}.git"' in BOOTSTRAP.read_text(),
         "bootstrap uses a stale canonical repository URL",
     )
+    require(
+        f'DEFAULT_REF = "{RELEASE_VERSION}"' in BOOTSTRAP.read_text(),
+        "bootstrap default ref is not locked to the documented release",
+    )
     for expected in (
         'choices=("codex", "claude", "all")',
         "The default installation remains core-only.",
@@ -1327,7 +1386,7 @@ def validate_repository_layout() -> None:
     require(feedback_guide.is_file(), "workflow feedback maintainer guide is missing")
     issue_form = ROOT / ".github/ISSUE_TEMPLATE/workflow-feedback.yml"
     require(issue_form.is_file(), "workflow feedback Issue form is missing")
-    feedback_reference = ROOT / "skills/ai-collaboration-workflow/references/template-feedback.md"
+    feedback_reference = SKILL_ROOT / "references/template-feedback.md"
     require(feedback_reference.is_file(), "companion Skill feedback reference is missing")
     resume_evaluation = ROOT / "docs/fresh-agent-resume-evaluation.md"
     for expected in (
@@ -1352,7 +1411,7 @@ def validate_repository_layout() -> None:
         require(helper.is_file(), f"optional Skill helper is missing: {helper.relative_to(ROOT)}")
         require(helper.stat().st_mode & 0o111, f"optional Skill helper is not executable: {helper.relative_to(ROOT)}")
     require(
-        not (ROOT / "skills/ai-collaboration-workflow/references/migration.md").exists(),
+        not (SKILL_ROOT / "references/migration.md").exists(),
         "unsupported migration reference remains",
     )
     for path in (
@@ -1361,7 +1420,7 @@ def validate_repository_layout() -> None:
         feedback_guide,
         ROOT / "examples/practical-scenarios/README.md",
         ROOT / "examples/evaluations/workflow-cases.json",
-        ROOT / "skills/ai-collaboration-workflow/references/routing.md",
+        SKILL_ROOT / "references/routing.md",
         feedback_reference,
     ):
         require(path.is_file(), f"repository artifact is missing: {path.relative_to(ROOT)}")

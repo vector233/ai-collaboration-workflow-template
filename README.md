@@ -16,7 +16,12 @@ Everything required stays in reviewable Markdown and Git. The Companion Skill ca
 
 ## Quick Start
 
-The commands below are pinned to the current release, `v4.1.1`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
+The commands below are pinned to the preview release, `v4.2.0-rc.1`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
+
+> [!TIP]
+> **Upgrading from `v4.1.1` or earlier:** the Companion Skill was renamed from `ai-collaboration-workflow` to `repo-continuity`.
+>
+> Remove the old global Skill with `npx skills remove ai-collaboration-workflow -g -y`, then install and invoke `$repo-continuity`. Repositories that already completed `INIT.md` do not need to be initialized again. For an interrupted setup, continue `INIT.md`; the Doctor still recognizes the legacy payload marker.
 
 ### Recommended: Install The Companion Skill
 
@@ -24,8 +29,8 @@ Install the pinned release for Claude Code:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
-  --skill ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0-rc.1/skills/repo-continuity \
+  --skill repo-continuity \
   -a claude-code \
   -g -y
 ```
@@ -34,8 +39,8 @@ Or install it for Codex:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.1.1/skills/ai-collaboration-workflow \
-  --skill ai-collaboration-workflow \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0-rc.1/skills/repo-continuity \
+  --skill repo-continuity \
   -a codex \
   -g -y
 ```
@@ -43,18 +48,18 @@ npx skills add \
 Then enter the target repository and ask the agent:
 
 ```text
-Use $ai-collaboration-workflow to initialize this repository.
+Use $repo-continuity to initialize this repository.
 Inspect existing project rules first, preserve stricter local policy, and complete INIT.md.
 ```
 
-The Skill previews and bootstraps missing files without overwriting differing repository files. Its default installation is core-only and does not add model-routing configuration. When `AGENTS.md`, `CLAUDE.md`, or other target files conflict, the agent must preserve the existing file and merge the applicable shared rules deliberately.
+`npx skills add` installs the Companion Skill only; it does not copy the full repository payload into the target project. When invoked, the Skill runs its bundled bootstrap, which fetches the same pinned release and previews or copies missing core files without overwriting differing repository files. Its default installation is core-only and does not add model-routing configuration. When `AGENTS.md`, `CLAUDE.md`, or other target files conflict, the agent must preserve the existing file and merge the applicable shared rules deliberately.
 
 ### Core-Only Installation
 
 The Skill is optional. For a new repository that has no conflicting agent or knowledge files, copy the pinned payload:
 
 ```bash
-git clone --branch v4.1.1 --depth 1 \
+git clone --branch v4.2.0-rc.1 --depth 1 \
   https://github.com/vector233/repo-continuity.git
 
 cp -R repo-continuity/template/. /path/to/your-project/
@@ -75,7 +80,7 @@ Do not use the raw copy command over an existing `AGENTS.md`, `CLAUDE.md`, `zett
 - project purpose, stack, architecture, commands, and validation flows use verified facts;
 - all template placeholders are resolved;
 - wiki links and required knowledge fields pass validation;
-- `INIT.md` and `.ai-collaboration-workflow-template` are removed;
+- `INIT.md`, `.repo-continuity-template`, and any legacy `.ai-collaboration-workflow-template` marker are removed;
 - no empty WORK or invented project Skill was created;
 - initialization changes are committed only when repository policy or the user requires it.
 
@@ -144,13 +149,13 @@ Update frontmatter and checkpoints in place. A WORK never moves for a status cha
 The repository ships a separate Codex overlay under `adapters/codex/`. Neither the default bootstrap nor the raw `template/` copy installs it. Opt in explicitly with the safe bootstrap:
 
 ```bash
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing codex \
   --dry-run
 
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing codex
@@ -175,13 +180,13 @@ The listed models must be available to the target account. If one is unavailable
 The separate overlay under `adapters/claude/` is also opt-in:
 
 ```bash
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing claude \
   --dry-run
 
-python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+python3 skills/repo-continuity/scripts/bootstrap_template.py \
   --source . \
   --target /path/to/your-project \
   --with-model-routing claude
