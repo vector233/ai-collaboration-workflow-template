@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 DEFAULT_REPO_URL = "https://github.com/vector233/repo-continuity.git"
-DEFAULT_REF = "v4.2.0-rc.1"
+DEFAULT_REF = "v4.2.0"
 PAYLOAD_MARKER = Path(".repo-continuity-template")
 LEGACY_PAYLOAD_MARKERS = (Path(".ai-collaboration-workflow-template"),)
 PAYLOAD_MARKERS = (PAYLOAD_MARKER, *LEGACY_PAYLOAD_MARKERS)

@@ -16,7 +16,7 @@ Everything required stays in reviewable Markdown and Git. The Companion Skill ca
 
 ## Quick Start
 
-The commands below are pinned to the preview release, `v4.2.0-rc.1`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
+The commands below are pinned to the current release, `v4.2.0`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
 
 > [!TIP]
 > **Upgrading from `v4.1.1` or earlier:** the Companion Skill was renamed from `ai-collaboration-workflow` to `repo-continuity`.
@@ -29,7 +29,7 @@ Install the pinned release for Claude Code:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.2.0-rc.1/skills/repo-continuity \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0/skills/repo-continuity \
   --skill repo-continuity \
   -a claude-code \
   -g -y
@@ -39,7 +39,7 @@ Or install it for Codex:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.2.0-rc.1/skills/repo-continuity \
+  https://github.com/vector233/repo-continuity/tree/v4.2.0/skills/repo-continuity \
   --skill repo-continuity \
   -a codex \
   -g -y
@@ -59,7 +59,7 @@ Inspect existing project rules first, preserve stricter local policy, and comple
 The Skill is optional. For a new repository that has no conflicting agent or knowledge files, copy the pinned payload:
 
 ```bash
-git clone --branch v4.2.0-rc.1 --depth 1 \
+git clone --branch v4.2.0 --depth 1 \
   https://github.com/vector233/repo-continuity.git
 
 cp -R repo-continuity/template/. /path/to/your-project/

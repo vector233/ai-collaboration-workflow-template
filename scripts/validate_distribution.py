@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
 ADAPTERS = ROOT / "adapters"
-RELEASE_VERSION = "v4.2.0-rc.1"
+RELEASE_VERSION = "v4.2.0"
 CANONICAL_REPO_URL = "https://github.com/vector233/repo-continuity"
 SKILL_ID = "repo-continuity"
 SKILL_ROOT = ROOT / "skills" / SKILL_ID
