@@ -4,7 +4,7 @@ Use this reference only when the target repository contains `.claude/agents/` an
 
 ## Root And Roles
 
-The adapter sets Claude Code's project model to `opusplan`: plan mode uses Opus for complex reasoning and execution uses Sonnet for implementation. Its custom specialists keep recurring side work out of the main context:
+The adapter does not set Claude Code's root-session model. The root keeps the model selected by the user or current client configuration, while custom specialists keep recurring side work out of the main context:
 
 | Role | Route to it for | Default adapter policy |
 |---|---|---|

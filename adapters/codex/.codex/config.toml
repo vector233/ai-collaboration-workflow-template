@@ -1,0 +1,7 @@
+# Optional Codex adapter for model-aware specialist routing.
+# The root keeps the model selected by the user or current session.
+
+[agents]
+# Keep delegation bounded and prevent recursive fan-out.
+max_threads = 3
+max_depth = 1

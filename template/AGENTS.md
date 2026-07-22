@@ -70,7 +70,7 @@ When the current client exposes configured specialist agents, use the cheapest c
 
 Do not delegate routine Direct work merely to use an agent. Keep delegation at one level, return concise evidence rather than raw logs, and stop an agent once its assigned task is complete. Read-only specialists may run in parallel only when their scopes are independent. A write-capable implementer must be the only write-capable agent in its task worktree; use a dedicated task worktree for any concurrent write task.
 
-The optional Codex and Claude Code adapters in `.codex/agents/` and `.claude/agents/` bind these roles to available models, reasoning levels, and tool policies. No route, checkpoint, validation, or durable project state may depend on an adapter.
+When explicitly installed, the optional Codex and Claude Code overlays in `.codex/agents/` and `.claude/agents/` bind these roles to available models, reasoning levels, and tool policies without changing the root-session model. No route, checkpoint, validation, or durable project state may depend on an adapter.
 
 ## Git Isolation And Commits
 

@@ -47,7 +47,7 @@ npx skills add \
 先检查已有项目规则，保留更严格的本地策略，并完整执行 INIT.md。
 ```
 
-Skill 会先预览，再复制缺失文件，不会覆盖内容不同的仓库文件。如果 `AGENTS.md`、`CLAUDE.md` 或其他文件发生冲突，Agent 必须保留原文件并有意识地合并适用的共享规则。
+Skill 会先预览，再复制缺失文件，不会覆盖内容不同的仓库文件。默认安装只包含核心，不会加入模型路由配置。如果 `AGENTS.md`、`CLAUDE.md` 或其他文件发生冲突，Agent 必须保留原文件并有意识地合并适用的共享规则。
 
 ### 只安装核心模板
 
@@ -140,11 +140,26 @@ cp zettelkasten/templates/work-item.md \
 
 ## 可选的 Codex 模型路由
 
-模板包含一个可选的 `.codex/` 适配层，将边界清晰的专业子任务路由到固定的 Codex 模型配置。流程路由与模型路由相互独立：先选择 Direct、Tracked 或 Governed，再判断是否由专业 Agent 提高结果质量或效率。
+仓库在 `adapters/codex/` 下提供独立的 Codex overlay。默认 bootstrap 和直接复制 `template/` 都不会安装它。需要时显式启用：
+
+```bash
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing codex \
+  --dry-run
+
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing codex
+```
+
+对于没有冲突的新项目，也可以在复制 `template/.` 后再手工复制 `adapters/codex/.`。流程路由与模型路由相互独立：先选择 Direct、Tracked 或 Governed，再判断是否由专业 Agent 提高结果质量或效率。root 继续使用用户或当前 Codex 会话选择的模型。
 
 | Agent | 适用任务 | 默认模型策略 |
 |---|---|---|
-| root | 任务路由和普通工作 | `gpt-5.6-terra`，中等推理强度 |
+| root | 任务路由和普通工作 | 用户或当前会话选择；overlay 不覆盖 |
 | `explorer` | 只读代码定位、调用路径追踪和证据收集 | `gpt-5.6-terra`，低推理强度 |
 | `implementer` | 已确认路径的单个局部改动与定向验证 | `gpt-5.6-terra`，中等推理强度 |
 | `reviewer` | 只读正确性、安全性、回归和测试覆盖审查 | `gpt-5.6-sol`，高推理强度 |
@@ -156,11 +171,26 @@ cp zettelkasten/templates/work-item.md \
 
 ## 可选的 Claude Code 模型路由
 
-模板同时包含 `.claude/settings.json` 和 `.claude/agents/`。根会话默认使用 `opusplan`：计划模式使用 Opus，执行阶段自动使用 Sonnet；专业 Agent 则把旁路工作保留在各自独立且聚焦的上下文中。
+`adapters/claude/` 下的独立 overlay 同样需要显式启用：
+
+```bash
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing claude \
+  --dry-run
+
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing claude
+```
+
+使用 `--with-model-routing all` 可以同时安装两个 overlay。对于没有冲突的新项目，也可以在核心模板之后手工复制 `adapters/claude/.`。该 overlay 只安装 `.claude/agents/`，不会安装 `.claude/settings.json`，所以 root 继续使用用户当前选择的 Claude Code 模型，专业 Agent 使用固定的模型和工具策略。
 
 | Agent | 适用任务 | 默认模型策略 |
 |---|---|---|
-| root | 任务路由、规划和普通工作 | `opusplan`：计划阶段 Opus，执行阶段 Sonnet |
+| root | 任务路由、规划和普通工作 | 用户或当前客户端选择；overlay 不覆盖 |
 | `explorer` | 只读代码定位、调用路径追踪和证据收集 | Haiku；仅 `Read`、`Grep`、`Glob` |
 | `implementer` | 已确认路径的单个局部改动与定向验证 | Sonnet；可写 |
 | `reviewer` | 只读正确性、安全性、回归和测试覆盖审查 | Opus |
@@ -187,7 +217,7 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 核心产品是可链接、可 Review 的仓库知识，以及面向交付结果的轻量契约。它规定交接时必须保留什么，不规定 Agent 必须如何思考或运行哪个命令。
 
 - **核心**：`AGENTS.md`、`zettelkasten/` 知识入口和链接、按需记录的稳定工作意图、验证证据与经验写回。
-- **可选**：Companion Skill 提供的知识检查、WORK 更新和受保护的 worktree 辅助脚本；以及面向专业 Agent 的 `.codex/` 和 `.claude/` 模型路由适配层。
+- **可选**：Companion Skill 提供的知识检查、WORK 更新和受保护的 worktree 辅助脚本；以及从 `adapters/` 显式安装的专业 Agent 模型路由 overlay。
 - **非目标**：自主循环、任务调度、隐藏记忆、强制 CLI，以及替代 Git、Issue Tracker、CI 和项目测试系统。
 
 知识网络使用纯 Markdown 和 Wiki 链接，可以作为兼容 Obsidian 的 vault 打开；Obsidian 只是可选编辑器，不是 runtime 或插件依赖。
@@ -230,19 +260,19 @@ git worktree add ../<short-name> -b "task/${work_id}" <base>
 ## 主要结构
 
 ```text
-.claude/                           Claude Code 的可选模型路由适配层
-.codex/                            Codex 的可选模型路由适配层
-AGENTS.md                         仓库级共享规则
-zettelkasten/AI.md                最小上下文入口
-zettelkasten/project.md           项目定位和范围
-zettelkasten/architecture.md      架构事实和不变量
-zettelkasten/workflow.md          任务路由与经验写回
-zettelkasten/validation-runbook.md 项目验证流程
-zettelkasten/work/                路径稳定的 WORK
-project-skills/INDEX.md           项目 Skill 触发索引
+template/                          默认安装的核心模板
+  AGENTS.md                        仓库级共享规则
+  zettelkasten/AI.md               最小上下文入口
+  zettelkasten/workflow.md         任务路由与经验写回
+  zettelkasten/validation-runbook.md 项目验证流程
+  zettelkasten/work/               路径稳定的 WORK
+  project-skills/INDEX.md          项目 Skill 触发索引
+adapters/
+  codex/.codex/                    Codex 显式启用的模型路由 overlay
+  claude/.claude/                  Claude Code 显式启用的模型路由 overlay
 ```
 
-`template/` 是唯一 canonical 下游模板；维护仓库不会再保存第二套根级知识库。
+`template/` 是 canonical 默认下游核心；`adapters/` 保存独立的显式 opt-in overlay，默认安装不会复制它们。维护仓库不会再保存第二套根级知识库。
 
 ## 验证
 
@@ -254,6 +284,6 @@ project-skills/INDEX.md           项目 Skill 触发索引
 python3 scripts/validate_distribution.py
 ```
 
-验证覆盖纯知识路径初始化、单一 WORK 路由、Governed 门禁、项目 Skill、并行 worktree、Wiki 链接、可选 helper 和 bootstrap 行为。
+验证覆盖纯核心初始化、模型路由显式 opt-in、单一 WORK 路由、Governed 门禁、项目 Skill、并行 worktree、Wiki 链接、可选 helper 和 bootstrap 行为。
 
 核心模板只依赖 Markdown 与 Git。辅助工具不产生独立状态，也不是理解或执行流程的前置条件。

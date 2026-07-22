@@ -1,10 +1,11 @@
 # Repository Guidelines
 
-This repository develops and distributes Repo Continuity. The product knowledge-base payload lives under `template/`; this maintenance repository intentionally does not keep a second root `zettelkasten/`.
+This repository develops and distributes Repo Continuity. The core product knowledge-base payload lives under `template/`; opt-in vendor overlays live under `adapters/`. This maintenance repository intentionally does not keep a second root `zettelkasten/`.
 
 ## Repository Structure
 
 - `template/`: canonical files copied into downstream projects.
+- `adapters/`: canonical opt-in Codex and Claude Code model-routing overlays.
 - `skills/ai-collaboration-workflow/`: companion Agent Skill and bootstrap tooling.
 - `scripts/validate_distribution.py`: end-to-end distribution contract.
 - `docs/`: maintainer and publishing documentation.
@@ -17,6 +18,7 @@ This repository develops and distributes Repo Continuity. The product knowledge-
 - Vendor-specific files are adapters only. Keep requirements, workflow semantics, validation, and handoff rules vendor-neutral.
 - `Repo Continuity` is the product display name. Keep the `ai-collaboration-workflow` Skill ID and `.ai-collaboration-workflow-template` payload marker stable unless a separately approved compatibility plan changes them.
 - The downstream core must remain usable with Markdown and Git alone. Companion-Skill scripts are optional automation and must not be copied into or required by `template/`.
+- Optional vendor adapters must stay outside `template/`, require explicit installation opt-in, and preserve the user's root-session model unless a separately approved profile says otherwise.
 - Downstream workflow feedback is opt-in, evidence-backed, sanitized, and user-approved before publication. Never add telemetry or automatic cross-project collection.
 - When workflow behavior changes, align the canonical payload, Skill, documentation, examples, and validation as applicable.
 - Never put repository-specific release, publishing, or maintenance material in `template/`.

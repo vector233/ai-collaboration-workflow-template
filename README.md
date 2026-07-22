@@ -47,7 +47,7 @@ Use $ai-collaboration-workflow to initialize this repository.
 Inspect existing project rules first, preserve stricter local policy, and complete INIT.md.
 ```
 
-The Skill previews and bootstraps missing files without overwriting differing repository files. When `AGENTS.md`, `CLAUDE.md`, or other target files conflict, the agent must preserve the existing file and merge the applicable shared rules deliberately.
+The Skill previews and bootstraps missing files without overwriting differing repository files. Its default installation is core-only and does not add model-routing configuration. When `AGENTS.md`, `CLAUDE.md`, or other target files conflict, the agent must preserve the existing file and merge the applicable shared rules deliberately.
 
 ### Core-Only Installation
 
@@ -141,11 +141,26 @@ Update frontmatter and checkpoints in place. A WORK never moves for a status cha
 
 ## Optional Codex Model Routing
 
-The payload includes an optional `.codex/` adapter that routes bounded specialist work to fixed Codex model settings. Workflow routing and model routing are separate: choose Direct, Tracked, or Governed first, then delegate only when a specialist materially improves the result.
+The repository ships a separate Codex overlay under `adapters/codex/`. Neither the default bootstrap nor the raw `template/` copy installs it. Opt in explicitly with the safe bootstrap:
+
+```bash
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing codex \
+  --dry-run
+
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing codex
+```
+
+For a new conflict-free project using the manual copy path, copy `adapters/codex/.` after `template/.`. Workflow routing and model routing are separate: choose Direct, Tracked, or Governed first, then delegate only when a specialist materially improves the result. The root keeps the model selected by the user or current Codex session.
 
 | Agent | Use for | Default model policy |
 |---|---|---|
-| root | task routing and ordinary work | `gpt-5.6-terra`, medium reasoning |
+| root | task routing and ordinary work | current user or session selection; not overridden |
 | `explorer` | read-only discovery, tracing, and evidence gathering | `gpt-5.6-terra`, low reasoning |
 | `implementer` | one understood, scoped change and targeted validation | `gpt-5.6-terra`, medium reasoning |
 | `reviewer` | read-only correctness, security, regression, and test review | `gpt-5.6-sol`, high reasoning |
@@ -157,11 +172,26 @@ The listed models must be available to the target account. If one is unavailable
 
 ## Optional Claude Code Model Routing
 
-The payload also includes `.claude/settings.json` and `.claude/agents/`. The root session starts with `opusplan`, which uses Opus in plan mode and Sonnet during execution; specialized agents keep side work in their own focused contexts.
+The separate overlay under `adapters/claude/` is also opt-in:
+
+```bash
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing claude \
+  --dry-run
+
+python3 skills/ai-collaboration-workflow/scripts/bootstrap_template.py \
+  --source . \
+  --target /path/to/your-project \
+  --with-model-routing claude
+```
+
+Use `--with-model-routing all` to install both overlays. For a new conflict-free project, the manual equivalent is copying `adapters/claude/.` after the core template. The overlay installs `.claude/agents/` but no `.claude/settings.json`, so the root session keeps the user's current Claude Code model while specialized agents use fixed model and tool policies.
 
 | Agent | Use for | Default model policy |
 |---|---|---|
-| root | task routing, planning, and ordinary work | `opusplan`: Opus in plan mode, Sonnet in execution |
+| root | task routing, planning, and ordinary work | current user or client selection; not overridden |
 | `explorer` | read-only discovery, tracing, and evidence gathering | Haiku; `Read`, `Grep`, and `Glob` only |
 | `implementer` | one understood, scoped change and targeted validation | Sonnet; write-capable |
 | `reviewer` | read-only correctness, security, regression, and test review | Opus |
@@ -188,7 +218,7 @@ Routing considers scope, uncertainty, risk, reversibility, duration, coordinatio
 The core product is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
 
 - **Core**: `AGENTS.md`, the `zettelkasten/` entry and links, stable work intent when needed, validation evidence, and durable experience writeback.
-- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; the `.codex/` and `.claude/` model-routing adapters for specialist agents.
+- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; explicitly installed model-routing overlays from `adapters/` for specialist agents.
 - **Non-goals**: autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
 
 The knowledge network uses plain Markdown and wiki links. It can be opened as an Obsidian-compatible vault, but Obsidian is an optional editor rather than a runtime or plugin dependency.
@@ -232,12 +262,6 @@ The default branch is integration-only. Dependent or overlapping tasks need an e
 
 ```text
 template/
-  .claude/
-    settings.json
-    agents/
-  .codex/
-    config.toml
-    agents/
   AGENTS.md
   CLAUDE.md
   INIT.md
@@ -254,9 +278,17 @@ template/
     validation-runbook.md
     templates/
     work/
+adapters/
+  codex/
+    .codex/
+      config.toml
+      agents/
+  claude/
+    .claude/
+      agents/
 ```
 
-`template/` is the only downstream payload. This maintenance repository intentionally has no second root `zettelkasten/`.
+`template/` is the canonical default downstream core. `adapters/` contains separate opt-in overlays and is never copied by the default installation. This maintenance repository intentionally has no second root `zettelkasten/`.
 
 ## Validation
 
@@ -268,7 +300,7 @@ For this distribution repository:
 python3 scripts/validate_distribution.py
 ```
 
-The distribution validator exercises tool-free initialization, single-WORK routing, governed gates, project-Skill discovery, worktree isolation, wiki links, optional helpers, and bootstrap behavior in temporary repositories.
+The distribution validator exercises tool-free core initialization, explicit model-routing opt-in, single-WORK routing, governed gates, project-Skill discovery, worktree isolation, wiki links, optional helpers, and bootstrap behavior in temporary repositories.
 
 Fresh-agent routing behavior can be checked with [docs/workflow-behavior-evaluation.md](docs/workflow-behavior-evaluation.md).
 

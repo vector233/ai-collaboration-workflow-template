@@ -51,7 +51,7 @@ Each context commits only its task. Both tasks record experience candidates loca
 
 ## Optional Codex Model Routing
 
-An unfamiliar but bounded bug can use the optional Codex specialist adapter without changing the selected workflow route:
+After the user explicitly installs the Codex overlay, an unfamiliar but bounded bug can use its specialist agents without changing the selected workflow route. The root keeps the user's current Codex model:
 
 ```text
 explorer (read-only) -> identify code path and evidence
@@ -63,7 +63,7 @@ The explorer and reviewer may run in parallel only for independent read-only sco
 
 ## Optional Claude Code Model Routing
 
-For the same scenario, Claude Code starts on `opusplan`, then uses its model-bound agents without changing the workflow route:
+After the user explicitly installs the Claude Code overlay, the current root model can use its model-bound agents without changing the workflow route:
 
 ```text
 explorer (Haiku, read-only) -> identify code path and evidence

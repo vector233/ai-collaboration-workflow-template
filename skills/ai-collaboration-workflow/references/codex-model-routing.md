@@ -2,7 +2,7 @@
 
 Use this reference only when the target repository contains `.codex/agents/` and Codex is the active client. It describes a vendor adapter; the repository's Markdown and Git workflow remains authoritative and client-neutral.
 
-The adapter's root default is `gpt-5.6-terra` at medium reasoning. The root classifies work, chooses the repository route, and decides whether a specialist is warranted; it does not dynamically change its own model during a task.
+The adapter does not override the root model or reasoning effort. The root keeps the user's current Codex selection, classifies work, chooses the repository route, and decides whether a specialist is warranted. The project `.codex/config.toml` only bounds concurrency and delegation depth.
 
 ## Roles
 

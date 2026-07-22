@@ -30,7 +30,15 @@ python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --dry-r
 python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root>
 ```
 
-Use `--source <checkout-or-template>` for local or offline installation. The bootstrap copies missing files, skips identical files, and never overwrites differing repository files.
+The default bootstrap is core-only. Install model routing only after the user explicitly opts in:
+
+```bash
+python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --with-model-routing codex --dry-run
+python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --with-model-routing codex
+# Use `claude` or `all` instead when requested.
+```
+
+Use `--source <checkout-or-template>` for local or offline core installation. Model-routing opt-in requires the full checkout, or a direct template directory whose parent also contains `adapters/`. The bootstrap copies missing files, skips identical files, and never overwrites differing repository files.
 
 If `INIT.md` exists, follow it completely. Preserve stricter local rules, replace all placeholders, initialize only verified project facts, remove initialization files, and verify the knowledge links and required fields.
 
@@ -71,7 +79,9 @@ Use repository templates or the optional WORK helper. Keep artifact paths stable
 
 ## Use Optional Model-Routing Adapters
 
-When operating in Codex and the target has `.codex/agents/`, read [codex-model-routing.md](references/codex-model-routing.md) before delegating. When operating in Claude Code and the target has `.claude/agents/`, read [claude-model-routing.md](references/claude-model-routing.md). Each adapter assigns model, reasoning, and tool settings to narrow specialist roles; neither replaces the Direct/Tracked/Governed route, Git isolation, validation, or durable handoff contract.
+Do not install model routing by default. When the user explicitly requests it, rerun the bootstrap with `--with-model-routing codex`, `claude`, or `all`; preview first and preserve differing local files as conflicts. The overlays configure only narrow specialist roles and leave the root-session model unchanged.
+
+When operating in Codex and the target has `.codex/agents/`, read [codex-model-routing.md](references/codex-model-routing.md) before delegating. When operating in Claude Code and the target has `.claude/agents/`, read [claude-model-routing.md](references/claude-model-routing.md). Neither adapter replaces the Direct/Tracked/Governed route, Git isolation, validation, or durable handoff contract. If an adapter is absent, continue with the root agent.
 
 ## Isolate And Commit
 

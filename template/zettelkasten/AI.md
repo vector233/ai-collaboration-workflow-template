@@ -19,11 +19,11 @@ For parallel coordination, compare active WORK branch and owned-path fields with
 
 | Agent | Instruction entry | Durable knowledge |
 |---|---|---|
-| Codex | `AGENTS.md`; optional `.codex/agents/` model-routing adapter | `zettelkasten/`, `project-skills/` |
-| Claude Code | `CLAUDE.md` imports `AGENTS.md`; optional `.claude/agents/` model-routing adapter | `zettelkasten/`, `project-skills/` |
+| Codex | `AGENTS.md`; explicitly installed optional `.codex/agents/` model-routing overlay | `zettelkasten/`, `project-skills/` |
+| Claude Code | `CLAUDE.md` imports `AGENTS.md`; explicitly installed optional `.claude/agents/` model-routing overlay | `zettelkasten/`, `project-skills/` |
 | Other repository-aware agents | explicitly read `AGENTS.md` | `zettelkasten/`, `project-skills/` |
 
-The optional Codex and Claude Code adapters assign model, reasoning, and tool settings to the specialist roles in `AGENTS.md`. They do not replace the route decision, Git isolation, or Markdown checkpoint requirements.
+The optional Codex and Claude Code overlays assign model, reasoning, and tool settings to the specialist roles in `AGENTS.md` only after explicit installation. They do not override the root-session model or replace the route decision, Git isolation, or Markdown checkpoint requirements.
 
 ## Route Tasks
 
