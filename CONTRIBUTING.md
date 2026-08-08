@@ -18,8 +18,12 @@ This repository does not initialize a second root knowledge base. Keep the produ
 
 - keep the default downstream core under `template/` and explicit opt-in vendor overlays under `adapters/`;
 - keep maintainer and publishing material under `docs/`;
+- keep any optional Control Plane, client, worker, connector, credential, or runtime implementation outside `template/` and independently removable from Core;
+- keep capability and workflow contracts host- and model-neutral; a Codex or Claude Code package is an adapter, not the owner of durable project state;
 - never copy repository-specific publishing, roadmap, or maintenance records into `template/`;
 - validate the initialized output as well as the source repository with `python3 scripts/validate_distribution.py`.
+
+Use [docs/control-plane-architecture.md](docs/control-plane-architecture.md) as the accepted design baseline for future runtime work. Add only the runtime packages exercised by an approved vertical slice; do not create empty Hub, worker, or client scaffolding. Prefer API, SDK, or CLI connectors before browser automation, and browser automation before desktop control.
 
 ## Change Checklist
 

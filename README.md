@@ -16,6 +16,15 @@ Repo Continuity makes the repository their shared source of truth:
 
 Everything required stays in reviewable Markdown and Git. The Companion Skill can automate setup and checks, but there is no required service, database, hidden memory, or autonomous runtime.
 
+## Product Direction
+
+Repo Continuity now distinguishes two independently usable product layers:
+
+- **Core, available today:** the repository-owned knowledge and delivery contract described in this guide.
+- **Control Plane, accepted design direction:** an optional future runtime for cross-platform task state, deterministic workflow, policy, approval, audit, and dispatch to API, code, browser, desktop, CI/CD, and Kubernetes workers.
+
+The target is a hybrid architecture. Codex, Claude Code, other coding agents, and a future first-party web agent remain interchangeable hosts or clients; the optional control plane owns long-lived workflow state, while workers expose bounded capabilities. This direction does not add a runtime dependency to the default template and does not claim that the Hub or connectors are implemented today. See the [Control Plane Architecture](docs/control-plane-architecture.md).
+
 ## Quick Start
 
 The commands below are pinned to the current release, `v4.2.0`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
@@ -240,11 +249,13 @@ Routing considers scope, uncertainty, risk, reversibility, duration, coordinatio
 
 ## Product Boundary
 
-The core product is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
+The currently shipped Core is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
 
 - **Core**: `AGENTS.md`, the `zettelkasten/` entry and links, stable work intent when needed, validation evidence, and durable experience writeback.
 - **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; explicitly installed model-routing overlays from `adapters/` for specialist agents.
-- **Non-goals**: autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
+- **Non-goals**: for Core, autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
+
+The optional Control Plane extends the product without changing this Core contract. It may coordinate autonomous or background execution, but remains separately deployable, keeps lifecycle-owning external systems authoritative, and cannot make repository state depend on a particular host, model, or service. Its accepted ownership, security, protocol, deployment, and phased-delivery design is documented in the [Control Plane Architecture](docs/control-plane-architecture.md).
 
 The knowledge network uses plain Markdown and wiki links. It can be opened as an Obsidian-compatible vault, but Obsidian is an optional editor rather than a runtime or plugin dependency.
 
@@ -311,9 +322,13 @@ adapters/
   claude/
     .claude/
       agents/
+docs/
+  control-plane-architecture.md
+  zh-CN/
+    control-plane-architecture.md
 ```
 
-`template/` is the canonical default downstream core. `adapters/` contains separate opt-in overlays and is never copied by the default installation. This maintenance repository intentionally has no second root `zettelkasten/`.
+`template/` is the canonical default downstream core. `adapters/` contains separate opt-in overlays and is never copied by the default installation. `docs/` owns maintainer and future-runtime design; it is not copied into downstream projects. This maintenance repository intentionally has no second root `zettelkasten/`.
 
 ## Validation
 
