@@ -21,7 +21,7 @@ First confirm structurally that the branch maps to one active WORK, checkpoint f
 ## Prompt
 
 ```text
-Review this repository's current project state using only repository files and Git. Start from AGENTS.md and zettelkasten/AI.md, identify the work item matching the current branch, and report its selected route, acceptance state, last checkpoint and commit, validation evidence, unresolved risk, next allowed action, and any matching project Skill. Do not run companion workflow helpers and do not edit files.
+Review this repository's current project state using only repository files and Git. Start from AGENTS.md and zettelkasten/AI.md, identify the work item matching the current branch, and report its selected route, acceptance state, last checkpoint and commit, validation evidence, unresolved risk, next allowed action, pending or decided experience candidates, and any matching project Skill. Distinguish an existing active Skill from a candidate that has not been promoted or updated yet. Do not run companion workflow helpers and do not edit files.
 ```
 
 ## Pass Criteria

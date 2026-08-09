@@ -194,6 +194,8 @@ def validate_payload() -> None:
         "## Knowledge Recoverability",
         "Structural check",
         "Semantic Fresh-Agent Resume Probe",
+        "pending or decided experience candidates",
+        "candidate that has not been promoted or updated yet",
         "it is not evidence that a fresh agent recovered the work",
     ):
         require(expected in validation_policy, f"validation policy is missing recovery contract: {expected}")
