@@ -26,6 +26,14 @@ Do not move workflow files to represent state. Update frontmatter in place so li
 
 Create and update WORK artifacts from `zettelkasten/templates/work-item.md`. Optional companion-Skill tools may automate the same Markdown updates, but repository files remain authoritative.
 
+## Large Requirement Decomposition
+
+Do not let one WORK become an unbounded Epic log. Keep a single WORK for one tightly coupled delivery boundary, even when it has several implementation slices. Split a requirement when outcomes can be accepted, routed, assigned, validated, rolled back, or released independently.
+
+Prefer an existing project-native Epic, Issue, or Milestone as the parent and link it from each child WORK. If no suitable external parent exists and repository-local coordination must survive, create one thin `INITIATIVE-*` from `zettelkasten/templates/initiative.md`. The only local hierarchy is Initiative -> WORK: a WORK never parents another WORK or Initiative. Each child remains self-contained and branch-bound; load the Initiative only for shared gates, dependencies, or integration constraints, and do not load sibling WORK records by default.
+
+Keep the Initiative limited to overall goal, cross-child acceptance, shared gates, integration order, rollup, and next coordination action. Child status and implementation evidence stay in each WORK. Durable architecture facts, decisions, gotchas, runbooks, and procedures stay in their linked knowledge destinations rather than expanding either coordination artifact.
+
 ## Context Preservation
 
 Do not checkpoint every turn. For Tracked or Governed work, preserve context after each bounded slice. For any unfinished task, preserve it before a handoff, long pause, agent or session switch, detectable context compaction, or any yield that would otherwise leave decisions only in chat. Direct work that completes, validates, and commits in the current context needs no WORK; if it cannot, re-route it to Tracked before yielding.

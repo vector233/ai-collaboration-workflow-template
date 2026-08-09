@@ -3,6 +3,9 @@ title: Work Item Title
 status: backlog
 project: {{PROJECT_NAME}}
 work_id: WORK-YYYYMMDDHHMMSS-short-name
+initiative_id: ""
+external_parent: ""
+depends_on: []
 route: tracked
 risk: normal
 branch: task/work-id-short-name
@@ -14,6 +17,13 @@ related: []
 ---
 
 # Work Item Title
+
+## Parent Coordination
+
+- Local initiative: use `initiative_id` only when a repository-local Initiative is the coordination authority.
+- External parent: use `external_parent` when Jira, GitHub, GitLab, or another tracker owns the Epic or parent lifecycle.
+- Dependencies: `depends_on` contains WORK IDs that must complete before this delivery unit can proceed.
+- Boundary: a WORK cannot parent another WORK or Initiative. Large coordination has at most one Initiative layer.
 
 ## Goal And Acceptance
 

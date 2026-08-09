@@ -13,7 +13,10 @@
       "learning_action": "none",
       "requires_helper": false,
       "feedback_action": "none",
-      "feedback_scope": "none"
+      "feedback_scope": "none",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
     }
   },
   {
@@ -30,7 +33,10 @@
       "learning_action": "record-no-reusable-lesson",
       "requires_helper": false,
       "feedback_action": "none",
-      "feedback_scope": "none"
+      "feedback_scope": "none",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
     }
   },
   {
@@ -47,7 +53,10 @@
       "learning_action": "record-no-reusable-lesson",
       "requires_helper": false,
       "feedback_action": "none",
-      "feedback_scope": "none"
+      "feedback_scope": "none",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
     }
   },
   {
@@ -64,7 +73,10 @@
       "learning_action": "record-no-reusable-lesson",
       "requires_helper": false,
       "feedback_action": "none",
-      "feedback_scope": "none"
+      "feedback_scope": "none",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
     }
   },
   {
@@ -81,7 +93,10 @@
       "learning_action": "no-op-existing-knowledge",
       "requires_helper": false,
       "feedback_action": "none",
-      "feedback_scope": "none"
+      "feedback_scope": "none",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
     }
   },
   {
@@ -98,7 +113,10 @@
       "learning_action": "none",
       "requires_helper": false,
       "feedback_action": "none",
-      "feedback_scope": "none"
+      "feedback_scope": "none",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
     }
   },
   {
@@ -115,7 +133,10 @@
       "learning_action": "promote-workflow-feedback",
       "requires_helper": false,
       "feedback_action": "record-local",
-      "feedback_scope": "template-wide"
+      "feedback_scope": "template-wide",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
     }
   },
   {
@@ -132,7 +153,50 @@
       "learning_action": "promote-project-skill",
       "requires_helper": false,
       "feedback_action": "none",
-      "feedback_scope": "none"
+      "feedback_scope": "none",
+      "decomposition": "none",
+      "hierarchy_depth": 0,
+      "load_siblings": false
+    }
+  },
+  {
+    "id": "large-requirement-external-epic",
+    "prompt": "Deliver three normal-risk outcomes that have separate owners, validation, rollback, and release boundaries. A Jira Epic already owns overall planning and reporting, and the children may run in parallel.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "tracked",
+      "artifacts": ["WORK"],
+      "gates": [],
+      "isolation": "dedicated-worktree",
+      "project_skills": [],
+      "promote_project_skill": false,
+      "learning_action": "record-no-reusable-lesson",
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none",
+      "decomposition": "external-parent",
+      "hierarchy_depth": 2,
+      "load_siblings": false
+    }
+  },
+  {
+    "id": "large-requirement-local-initiative",
+    "prompt": "Deliver three normal-risk outcomes that have separate owners, validation, rollback, and release boundaries. No external Epic, Issue, or Milestone exists, but repository-local coordination must survive across sessions.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "tracked",
+      "artifacts": ["INITIATIVE", "WORK"],
+      "gates": [],
+      "isolation": "dedicated-worktree",
+      "project_skills": [],
+      "promote_project_skill": false,
+      "learning_action": "record-no-reusable-lesson",
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none",
+      "decomposition": "local-initiative",
+      "hierarchy_depth": 2,
+      "load_siblings": false
     }
   }
 ]

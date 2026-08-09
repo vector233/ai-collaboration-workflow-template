@@ -2,6 +2,8 @@
 
 This fictional walkthrough shows a Governed feature using one stable work record and an on-demand project Skill.
 
+The invitation-link feature has one coupled acceptance and rollback boundary, so it intentionally remains one WORK. If the roadmap later separates token infrastructure, admin migration, SDK compatibility, and production cutover into independently releasable outcomes, use the external roadmap Epic or one optional local Initiative with separate child WORK records instead of expanding this file indefinitely.
+
 ## Task
 
 Add expiring team invitation links across API, database, email, and browser flows.

@@ -1,6 +1,6 @@
 ---
 name: repo-continuity
-description: Initialize, inspect, safely reconcile upgrades for, and operate Repo Continuity. Use when an agent needs to install the repository-owned knowledge layer; produce a read-only three-way upgrade report or apply only conflict-free upstream changes without overwriting project customization; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; run the evidence-backed Learning Check and idempotently promote repository experience into rules, knowledge, runbooks, or an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize, inspect, safely reconcile upgrades for, and operate Repo Continuity. Use when an agent needs to install the repository-owned knowledge layer; produce a read-only three-way upgrade report or apply only conflict-free upstream changes without overwriting project customization; route work into Direct, Tracked, or Governed delivery; decompose a large requirement through an external Epic or one bounded local Initiative with independent child WORK records; preserve, resume, or verify stable work across context boundaries; run the evidence-backed Learning Check and idempotently promote repository experience into rules, knowledge, runbooks, or an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # Repo Continuity
@@ -70,7 +70,8 @@ For initialized projects:
 1. Read `AGENTS.md` and `zettelkasten/AI.md`.
 2. Inspect the current Git branch and `zettelkasten/work/`.
 3. Read the active `WORK-*` matching the assigned task or current branch, when one exists.
-4. Read only linked knowledge, runbooks, and matching rows from `project-skills/INDEX.md`.
+4. When that WORK declares a local `initiative_id`, read the Initiative only if a shared gate, dependency, or integration constraint affects the current slice. Do not load sibling WORK records by default.
+5. Read only linked knowledge, runbooks, and matching rows from `project-skills/INDEX.md`.
 
 Do not scan all workflow artifacts or project Skills by default.
 
@@ -82,6 +83,7 @@ Resolve this Skill directory as `SKILL_ROOT`. Use bundled helpers only when dete
 
 ```bash
 python3 "$SKILL_ROOT/scripts/workflow_doctor.py" --root <repo-root> --status
+python3 "$SKILL_ROOT/scripts/workflow_task.py" initiative-new <slug> --root <repo-root>
 python3 "$SKILL_ROOT/scripts/workflow_task.py" new <slug> --root <repo-root>
 (cd <repo-root> && python3 "$SKILL_ROOT/scripts/task_worktree.py" create <WORK-ID>)
 ```
@@ -111,6 +113,14 @@ Read [routing.md](references/routing.md) when classifying new work or reconsider
 - **Governed**: use one `WORK-*` with explicit decisions, approvals, owners, evidence, and gates.
 
 Use repository templates or the optional WORK helper. Keep artifact paths stable and update frontmatter status in place.
+
+## Decompose Large Requirements
+
+Read [routing.md](references/routing.md) before treating a large request as one WORK. Keep one WORK for a tightly coupled acceptance and rollback boundary. Split independently acceptable, assignable, testable, reversible, or releasable outcomes into separate child WORK records.
+
+Prefer the existing project-native Epic, Issue, or Milestone and set `external_parent` in each child. If no suitable external coordination authority exists, create one thin local `INITIATIVE-*` from `zettelkasten/templates/initiative.md` and set its ID as each child's `initiative_id`. Never set both. The only local hierarchy is Initiative -> WORK; do not create recursive Initiatives or parent-WORK trees.
+
+The Initiative is not branch-bound implementation state. Keep only the overall goal, cross-child acceptance, shared decisions or gates, integration order, derived rollup, and next coordination action there. Each child owns its own route, branch or worktree, acceptance, dependencies, validation, checkpoint, Learning Check, and closure. Record ordering through `depends_on`, keep child membership canonical in WORK frontmatter, and update Initiative coordination serially rather than making parallel children concurrent writers of the parent.
 
 ## Use Optional Model-Routing Adapters
 

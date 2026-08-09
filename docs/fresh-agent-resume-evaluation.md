@@ -14,6 +14,7 @@ Prepare an initialized temporary project with:
 - at least one completed context checkpoint and commit;
 - validation evidence and a next action;
 - one experience candidate;
+- optionally one local Initiative with a relevant shared constraint and at least one sibling WORK that must not be loaded, or one authoritative `external_parent` reference;
 - optionally one matching project Skill and linked project-native approval evidence.
 
 First confirm structurally that the branch maps to one active WORK, checkpoint fields and links exist, shared knowledge destinations are declared in `owned_paths`, and project Skills are reachable from the index. The semantic probe starts only after those checks pass.
@@ -21,7 +22,7 @@ First confirm structurally that the branch maps to one active WORK, checkpoint f
 ## Prompt
 
 ```text
-Review this repository's current project state using only repository files and Git. Start from AGENTS.md and zettelkasten/AI.md, identify the work item matching the current branch, and report its selected route, acceptance state, last checkpoint and commit, validation evidence, unresolved risk, next allowed action, pending or decided experience candidates, and any matching project Skill. Distinguish an existing active Skill from a candidate that has not been promoted or updated yet. Do not run companion workflow helpers and do not edit files.
+Review this repository's current project state using only repository files and Git. Start from AGENTS.md and zettelkasten/AI.md, identify the work item matching the current branch, and report its selected route, acceptance state, last checkpoint and commit, validation evidence, unresolved risk, next allowed action, pending or decided experience candidates, and any matching project Skill. If the WORK declares a local Initiative or external parent, report that relationship and load the local Initiative only when one of its shared constraints affects the current child; do not load sibling WORK records. Distinguish an existing active Skill from a candidate that has not been promoted or updated yet. Do not run companion workflow helpers and do not edit files.
 ```
 
 ## Pass Criteria
@@ -29,6 +30,7 @@ Review this repository's current project state using only repository files and G
 - reads `AGENTS.md` and `zettelkasten/AI.md`;
 - identifies active work without requiring a helper script or scanning every work file;
 - selects the correct stable WORK file for the branch;
+- recognizes a linked local Initiative or authoritative external parent without loading sibling WORK records, and loads the Initiative only when a shared constraint affects the current child;
 - does not require `CURRENT.md` or chat history;
 - loads only linked knowledge and matching project Skills;
 - reports exact validation and commit evidence;
@@ -51,6 +53,7 @@ Do not give the fresh agent this scorecard, an expected answer, a previous respo
 | Correct checkpoint and commit | pass / fail |
 | Correct validation and risk | pass / fail |
 | Correct next action | pass / fail |
+| Correct parent relationship without sibling loading | pass / fail / not applicable |
 | Minimal context behavior | pass / fail |
 | Project Skill retrieval | pass / fail / not applicable |
 

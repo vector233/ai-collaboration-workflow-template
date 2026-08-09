@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create and update stable WORK artifacts without hand-editing workflow fields."""
+"""Create and update bounded Initiative and stable WORK artifacts."""
 
 from __future__ import annotations
 
@@ -14,6 +14,9 @@ from pathlib import Path
 
 SAFE_SLUG_RE = re.compile(r"[^a-z0-9-]+")
 WORK_ID_RE = re.compile(r"^WORK-[0-9]{14}-[a-z0-9][a-z0-9-]*$")
+INITIATIVE_ID_RE = re.compile(
+    r"^INITIATIVE-[0-9]{14}-[a-z0-9][a-z0-9-]*$"
+)
 FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|\Z)", re.DOTALL)
 EXPERIENCE_SHAPES = (
     "rule",
@@ -64,6 +67,10 @@ def generate_work_id(slug: str) -> str:
     return f"WORK-{datetime.now().strftime('%Y%m%d%H%M%S')}-{slugify(slug)}"
 
 
+def generate_initiative_id(slug: str) -> str:
+    return f"INITIATIVE-{datetime.now().strftime('%Y%m%d%H%M%S')}-{slugify(slug)}"
+
+
 def validate_work_id(work_id: str) -> str:
     if not WORK_ID_RE.fullmatch(work_id):
         raise WorkflowTaskError(
@@ -72,8 +79,23 @@ def validate_work_id(work_id: str) -> str:
     return work_id
 
 
+def validate_initiative_id(initiative_id: str) -> str:
+    if not INITIATIVE_ID_RE.fullmatch(initiative_id):
+        raise WorkflowTaskError(
+            "initiative ID must match INITIATIVE-YYYYMMDDHHMMSS-lowercase-slug"
+        )
+    return initiative_id
+
+
 def work_path(root: Path, work_id: str) -> Path:
     path = root / "zettelkasten/work" / f"{validate_work_id(work_id)}.md"
+    if not path.parent.is_dir():
+        raise WorkflowTaskError("zettelkasten/work is missing; initialize the template first")
+    return path
+
+
+def initiative_path(root: Path, initiative_id: str) -> Path:
+    path = root / "zettelkasten/work" / f"{validate_initiative_id(initiative_id)}.md"
     if not path.parent.is_dir():
         raise WorkflowTaskError("zettelkasten/work is missing; initialize the template first")
     return path
@@ -288,6 +310,53 @@ def command_id(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_initiative_id(args: argparse.Namespace) -> int:
+    print(generate_initiative_id(args.slug))
+    return 0
+
+
+def command_initiative_new(args: argparse.Namespace) -> int:
+    root = repository_root(args.root)
+    branch = current_branch(root)
+    if branch in {"main", "master"}:
+        raise WorkflowTaskError(
+            "create or switch to a coordination task branch before creating an Initiative"
+        )
+    initiative_id = validate_initiative_id(
+        args.initiative_id or generate_initiative_id(args.slug)
+    )
+    destination = initiative_path(root, initiative_id)
+    if destination.exists():
+        raise WorkflowTaskError(f"Initiative already exists: {destination}")
+    template = root / "zettelkasten/templates/initiative.md"
+    if not template.is_file():
+        raise WorkflowTaskError(f"Initiative template is missing: {template}")
+    title = single_line(args.title or args.slug.replace("-", " ").strip().title())
+    text = template.read_text(encoding="utf-8")
+    replacements = {
+        "title: Initiative Title": f"title: {json.dumps(title, ensure_ascii=True)}",
+        "# Initiative Title": f"# {title}",
+        "INITIATIVE-YYYYMMDDHHMMSS-short-name": initiative_id,
+        "status: backlog": "status: active",
+        "next_action: define independently deliverable child work": (
+            f"next_action: {json.dumps(single_line(args.next_action), ensure_ascii=False)}"
+        ),
+        "last_verified_at: YYYY-MM-DD": f"last_verified_at: {date.today().isoformat()}",
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    destination.write_text(text, encoding="utf-8")
+    write_result(
+        {
+            "initiative_id": initiative_id,
+            "path": str(destination.relative_to(root)),
+            "status": "active",
+        },
+        args.json,
+    )
+    return 0
+
+
 def command_new(args: argparse.Namespace) -> int:
     root = repository_root(args.root)
     branch = current_branch(root)
@@ -302,6 +371,21 @@ def command_new(args: argparse.Namespace) -> int:
         raise WorkflowTaskError(f"WORK template is missing: {template}")
     title = single_line(args.title or args.slug.replace("-", " ").strip().title())
     owned_paths = validate_owned_paths(args.owned_path)
+    initiative_id = ""
+    if args.initiative_id:
+        initiative_id = validate_initiative_id(args.initiative_id)
+        if not initiative_path(root, initiative_id).is_file():
+            raise WorkflowTaskError(f"local Initiative does not exist: {initiative_id}")
+    external_parent = single_line(args.external_parent or "")
+    dependencies: list[str] = []
+    for dependency in args.depends_on:
+        dependency_id = validate_work_id(dependency)
+        if dependency_id == work_id:
+            raise WorkflowTaskError("WORK cannot depend on itself")
+        if not work_path(root, dependency_id).is_file():
+            raise WorkflowTaskError(f"WORK dependency does not exist: {dependency_id}")
+        if dependency_id not in dependencies:
+            dependencies.append(dependency_id)
     text = template.read_text(encoding="utf-8")
     replacements = {
         "title: Work Item Title": f"title: {json.dumps(title, ensure_ascii=True)}",
@@ -323,6 +407,9 @@ def command_new(args: argparse.Namespace) -> int:
     for old, new in replacements.items():
         text = text.replace(old, new)
     text = set_frontmatter_field(text, "route", args.route)
+    text = set_frontmatter_field(text, "initiative_id", initiative_id)
+    text = set_frontmatter_field(text, "external_parent", external_parent)
+    text = set_frontmatter_field(text, "depends_on", dependencies)
     text = set_section_bullet(text, "Route Decision", "Selected route", args.route)
     destination.write_text(text, encoding="utf-8")
     write_result(
@@ -331,6 +418,9 @@ def command_new(args: argparse.Namespace) -> int:
             "path": str(destination.relative_to(root)),
             "branch": branch,
             "route": args.route,
+            "initiative_id": initiative_id,
+            "external_parent": external_parent,
+            "depends_on": dependencies,
         },
         args.json,
     )
@@ -588,6 +678,25 @@ def parse_args() -> argparse.Namespace:
     id_parser.add_argument("slug")
     id_parser.set_defaults(handler=command_id)
 
+    initiative_id_parser = subparsers.add_parser(
+        "initiative-id", help="generate a stable Initiative identifier"
+    )
+    initiative_id_parser.add_argument("slug")
+    initiative_id_parser.set_defaults(handler=command_initiative_id)
+
+    initiative_new_parser = subparsers.add_parser(
+        "initiative-new", help="create a thin local coordination Initiative"
+    )
+    initiative_new_parser.add_argument("slug")
+    initiative_new_parser.add_argument("--id", dest="initiative_id")
+    initiative_new_parser.add_argument("--title")
+    initiative_new_parser.add_argument(
+        "--next-action", default="define independently deliverable child work"
+    )
+    initiative_new_parser.add_argument("--root", type=Path, default=Path.cwd())
+    initiative_new_parser.add_argument("--json", action="store_true")
+    initiative_new_parser.set_defaults(handler=command_initiative_new)
+
     new_parser = subparsers.add_parser("new", help="create a WORK on the current task branch")
     new_parser.add_argument("slug")
     new_parser.add_argument("--id", dest="work_id")
@@ -597,6 +706,15 @@ def parse_args() -> argparse.Namespace:
     new_parser.add_argument("--worktree", choices=("current", "dedicated"), default="current")
     new_parser.add_argument("--next-action", default="clarify acceptance criteria")
     new_parser.add_argument("--owned-path", action="append", default=[])
+    parent_group = new_parser.add_mutually_exclusive_group()
+    parent_group.add_argument("--initiative", dest="initiative_id")
+    parent_group.add_argument("--external-parent")
+    new_parser.add_argument(
+        "--depends-on",
+        action="append",
+        default=[],
+        help="existing WORK ID that must complete first; repeat for multiple dependencies",
+    )
     new_parser.add_argument("--root", type=Path, default=Path.cwd())
     new_parser.add_argument("--json", action="store_true")
     new_parser.set_defaults(handler=command_new)

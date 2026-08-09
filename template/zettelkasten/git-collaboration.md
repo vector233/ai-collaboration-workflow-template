@@ -19,6 +19,7 @@ related:
 - Give every concurrently active task or write-capable agent one worktree.
 - Never share one worktree or branch between concurrent write-capable agents.
 - Do not parallelize dependent tasks or tasks with materially overlapping owned paths without an integration plan.
+- For a local Initiative, give every child WORK its own task branch and worktree as usual. The Initiative is coordination state, not a shared implementation branch; update its rollup serially at planning or integration boundaries instead of making every child a concurrent writer.
 
 Read-only delegated agents may inspect the current task worktree without a second checkout when their scopes are independent. A write-capable delegated agent works serially in the current task worktree; any concurrent write task gets its own task branch and worktree.
 
@@ -55,5 +56,6 @@ Every agent context that produces persistent changes, or each coherent implement
 
 - Rebase or merge the latest default branch before final validation when repository policy requires it.
 - Task branches should normally record experience candidates before editing shared rules. At promotion or integration, add the selected shared destination to `owned_paths`, check active overlap, and coordinate one writer; other tasks defer or consume the integrated result.
+- Initiative children integrate according to the parent constraint and their explicit `depends_on` relationships. Do not treat sibling membership as permission to merge dependent or overlapping changes concurrently.
 - Preserve per-context commits with a normal or no-fast-forward merge when traceability is required. Squash only when the repository explicitly prefers a compact integration history.
 - Close the work item, validate, and remove the worktree only after integration is confirmed.

@@ -11,6 +11,7 @@ Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
 - **接着做，而不是重新开始。** 新 Agent 不依赖聊天历史，也能恢复当前目标、决策、验证、风险和下一步。
 - **只读取真正需要的知识。** 链接式知识和按需 Project Skills 避免每次加载完整项目历史。
 - **小任务保持轻量。** Direct、Tracked、Governed 只在持续时间、协作或风险需要时增加流程。
+- **大型需求保持有界。** 已有 Epic 继续作为权威父级；没有外部父级时，只用一个轻量本地 Initiative 协调独立子 WORK，不建立递归任务树。
 - **让项目从开发中持续学习。** 已验证的修复和重复流程会固化为规则、笔记、runbook 或 Project Skills，而不是遗失在会话里。
 - **让并行 Agent 安全协作。** Task branch、worktree、owned paths 和稳定 WORK 避免不同任务静默覆盖彼此。
 
@@ -119,6 +120,36 @@ Agent 自行选择：
 | Direct | 本地、可逆、低风险、一个上下文 | 无 WORK，验证后提交 |
 | Tracked | 行为改动、调试连续性、多上下文 | 一个稳定 `WORK-*` |
 | Governed | 高风险、重要不确定性、独立审批、迁移、发布、多人协调 | 同一个 `WORK-*`，增加明确门禁和证据 |
+
+## 大型需求不等于大型 WORK
+
+不要让一个 WORK 变成无限增长的 Epic 日志。如果结果仍然只有一个紧密耦合的验收和回滚边界，就继续使用一个 WORK；如果多个结果可以分别验收、路由、分配、验证、回滚或发布，则拆成独立 WORK。
+
+只允许下面这种有界层级：
+
+```text
+已有外部 Epic / Issue / Milestone（优先）
+└── 多个独立 WORK
+
+或者，在没有合适外部父级时：
+
+一个可选的本地 INITIATIVE
+├── 独立 WORK-A
+├── 独立 WORK-B
+└── 独立 WORK-C
+```
+
+不存在第三层。WORK 不能成为另一个 WORK 或 Initiative 的父级。每个子 WORK 保留自己的路径选择、task branch 或 worktree、验收、`depends_on` 依赖、验证、checkpoint、Learning Check 和关闭状态。`depends_on` 是严格前置条件：所有依赖完成前，子 WORK 必须保持 backlog 或 blocked；如果只是最终集成顺序不同，应使用协调说明而不是 `depends_on`。Initiative 只保存总体目标、共享门禁、集成顺序、派生汇总和下一项协调动作。长期事实仍写入链接的 Zettel、Decision、Runbook 或项目 Skill。
+
+如果 Jira、GitHub、GitLab 或其他项目原生系统已经管理父级生命周期，则在每个子 WORK 中设置 `external_parent`，不要在仓库内镜像 Epic。确实需要仓库内协调时，可以复制 `zettelkasten/templates/initiative.md`，或使用可选 helper：
+
+```bash
+python3 skills/repo-continuity/scripts/workflow_task.py initiative-new <slug>
+python3 skills/repo-continuity/scripts/workflow_task.py new <child-slug> \
+  --initiative <INITIATIVE-ID> --depends-on <WORK-ID>
+```
+
+外部记录是权威父级时，使用 `--external-parent <tracker-ref>` 代替 `--initiative`。恢复任务时从子分支和子 WORK 开始；只有共享门禁、依赖或集成约束影响当前切片时才加载 Initiative，默认不加载兄弟 WORK。
 
 恢复长任务：
 

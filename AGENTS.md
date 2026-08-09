@@ -21,6 +21,7 @@ This repository develops and distributes Repo Continuity. The core product knowl
 - The downstream core must remain usable with Markdown and Git alone. Companion-Skill scripts are optional automation and must not be copied into or required by `template/`.
 - Optional vendor adapters must stay outside `template/`, require explicit installation opt-in, and preserve the user's root-session model unless a separately approved profile says otherwise.
 - Downstream workflow feedback is opt-in, evidence-backed, sanitized, and user-approved before publication. Never add telemetry or automatic cross-project collection.
+- Large requirements use bounded decomposition: prefer an external Epic, Issue, or Milestone; otherwise allow one thin local Initiative above independent child WORK records. Preserve one stable WORK per branch-bound delivery, forbid recursive Initiative or parent-WORK trees, and keep child status and validation authoritative in each WORK.
 - When workflow behavior changes, align the canonical payload, Skill, documentation, examples, and validation as applicable.
 - Never put repository-specific release, publishing, or maintenance material in `template/`.
 
@@ -34,7 +35,7 @@ This repository develops and distributes Repo Continuity. The core product knowl
 6. End each agent context that produces persistent changes, or each coherent slice, with a task-scoped commit. Do not create empty commits for read-only analysis. Keep incomplete checkpoints off `main`.
 7. Run a Rule Promotion Check for long tasks, fixes, and review corrections: if the lesson would prevent a likely repeat mistake, record durable maintainer guidance in `AGENTS.md`, `CONTRIBUTING.md`, or `docs/`.
 
-The Direct/Tracked/Governed routing model, single stable WORK record, governed gates, project-Skill promotion, and Git isolation policy are the product being distributed. Downstream WORK records are not required for routine maintenance of this template repository itself.
+The Direct/Tracked/Governed routing model, one stable WORK per delivery, bounded Initiative-to-WORK decomposition, governed gates, project-Skill promotion, and Git isolation policy are the product being distributed. Downstream WORK records are not required for routine maintenance of this template repository itself.
 
 ## Review Rules
 

@@ -46,15 +46,28 @@ Hard governed triggers include schema or data migration, security and permission
 
 The user may override a route. Record the reason in the work item.
 
+## Bounded Initiative Decomposition
+
+A large requirement is not automatically one large WORK. Run a decomposition check before creating the delivery record:
+
+- keep one WORK when the result has one tightly coupled acceptance and rollback boundary;
+- split into independent WORK records when outcomes can be accepted, routed, assigned, validated, rolled back, or released separately;
+- move durable facts, decisions, runbooks, and procedures into linked knowledge instead of using WORK as an append-only history;
+- prefer the existing Jira, GitHub, GitLab, or other project-native Epic, Issue, or Milestone as the coordination parent;
+- create one local `INITIATIVE-*` only when repository-local coordination must survive without a suitable external parent.
+
+The local hierarchy is deliberately limited to Initiative -> WORK. An Initiative is a thin coordination and rollup record, not a branch-bound implementation task. Each child WORK keeps its own route, acceptance, branch or worktree, owned paths, validation, checkpoint, Learning Check, and closure. Do not create recursive Initiatives or parent-WORK trees, and do not load sibling WORK records merely to resume one child.
+
 ## Stable Work Record
 
 Tracked and governed work has one canonical record under [[work/README]]:
 
 - `WORK-YYYYMMDDHHMMSS-short-name.md`: scope, route, context, gates, implementation slices, validation, review, checkpoint, and experience writeback.
+- `INITIATIVE-YYYYMMDDHHMMSS-short-name.md`: optional overall goal, shared gates, derived child rollup, integration order, and coordination checkpoint for multiple independent WORK records.
 
 Use frontmatter status and update the file in place. Stable paths prevent link churn and make parallel branches easier to merge.
 
-Write durable architecture facts, decisions, runbooks, and gotchas to their knowledge notes. Link project-native Issues, pull requests, release records, or external approvals instead of duplicating their lifecycle in workflow-specific files.
+Write durable architecture facts, decisions, runbooks, and gotchas to their knowledge notes. Link project-native Issues, pull requests, release records, or external approvals instead of duplicating their lifecycle in workflow-specific files. A child WORK records either one local `initiative_id` or one authoritative `external_parent`, never both. `depends_on` expresses execution order between sibling or standalone WORK records without creating another parent level.
 
 ## Context Preservation
 
@@ -165,3 +178,5 @@ Tracked or governed work is complete when:
 - experience candidates have explicit promotion decisions;
 - durable knowledge and project Skills are updated where required;
 - the work item has `status: done` and the task worktree is clean.
+
+A local Initiative is complete only when its overall acceptance and shared gates are resolved, every discovered child WORK is terminal, the integration result is recorded, and its frontmatter is `status: done`. A cancelled child is terminal but does not by itself satisfy an Initiative outcome; record the accepted replacement, scope change, or residual gap in the Initiative.

@@ -39,6 +39,7 @@ REQUIRED_FILES = (
     Path("zettelkasten/workflow.md"),
     Path("zettelkasten/skill-lifecycle.md"),
     Path("zettelkasten/git-collaboration.md"),
+    Path("zettelkasten/templates/initiative.md"),
     Path("zettelkasten/templates/work-item.md"),
     Path("zettelkasten/templates/project-skill.md"),
     Path("zettelkasten/templates/workflow-observations.md"),
@@ -168,6 +169,9 @@ def validate_payload() -> None:
     workflow = (PAYLOAD / "zettelkasten/workflow.md").read_text()
     for expected in (
         "## Route Decision",
+        "## Bounded Initiative Decomposition",
+        "Initiative -> WORK",
+        "external parent",
         "Direct",
         "Tracked",
         "Governed",
@@ -188,6 +192,22 @@ def validate_payload() -> None:
         "a repeated promotion should record a no-op",
     ):
         require(expected in work_template, f"WORK template is missing continuity contract: {expected}")
+
+    initiative_template = (
+        PAYLOAD / "zettelkasten/templates/initiative.md"
+    ).read_text()
+    for expected in (
+        "initiative_id: INITIATIVE-YYYYMMDDHHMMSS-short-name",
+        "## Goal And Boundaries",
+        "## Decomposition Contract",
+        "one Initiative level followed by independent WORK records",
+        "do not create this local Initiative",
+        "Child status remains authoritative in each WORK",
+    ):
+        require(
+            expected in initiative_template,
+            f"Initiative template is missing bounded hierarchy contract: {expected}",
+        )
 
     validation_policy = (PAYLOAD / "zettelkasten/validation-policy.md").read_text()
     for expected in (
@@ -248,13 +268,24 @@ def validate_payload() -> None:
         "--all-worktrees",
         "--json",
         "scope_overlaps",
+        "initiative_rollups",
+        "WORK dependency cycle",
         "review_after_days",
         "EXPERIENCE_DECISIONS",
     ):
         require(expected in doctor, f"doctor is missing {expected}")
 
     workflow_task = WORKFLOW_TASK.read_text()
-    for expected in ("learn-add", "learn-none", "learn-decide", "learn-status"):
+    for expected in (
+        "initiative-new",
+        "--initiative",
+        "--external-parent",
+        "--depends-on",
+        "learn-add",
+        "learn-none",
+        "learn-decide",
+        "learn-status",
+    ):
         require(expected in workflow_task, f"WORK helper is missing {expected}")
 
     for path in PAYLOAD.rglob("*.md"):
@@ -549,6 +580,161 @@ def create_tracked_work_with_cli(target: Path) -> str:
         "Tracked work created more than one workflow record",
     )
     return work_id
+
+
+def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
+    initiative_id = "INITIATIVE-20260712121900-auth-modernization"
+    initiative_result = run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "initiative-new",
+            "auth-modernization",
+            "--id",
+            initiative_id,
+            "--next-action",
+            "deliver the first independent child",
+            "--json",
+        ],
+        cwd=target,
+    )
+    require(
+        json.loads(initiative_result.stdout)["initiative_id"] == initiative_id,
+        "Initiative CLI returned the wrong ID",
+    )
+    initiative_path = target / f"zettelkasten/work/{initiative_id}.md"
+    require(initiative_path.is_file(), "Initiative CLI did not create the local parent")
+
+    child_id = "WORK-20260712121910-auth-api"
+    child_result = run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "new",
+            "auth-api",
+            "--id",
+            child_id,
+            "--initiative",
+            initiative_id,
+            "--depends-on",
+            dependency_id,
+            "--owned-path",
+            "src/auth",
+            "--json",
+        ],
+        cwd=target,
+    )
+    child_payload = json.loads(child_result.stdout)
+    require(
+        child_payload["initiative_id"] == initiative_id
+        and child_payload["depends_on"] == [dependency_id],
+        "child WORK did not retain Initiative and dependency metadata",
+    )
+    child_path = target / f"zettelkasten/work/{child_id}.md"
+    child_text = child_path.read_text().replace("status: active", "status: backlog")
+    child_path.write_text(child_text)
+
+    valid = run([sys.executable, str(WORKFLOW_DOCTOR), "--strict"], cwd=target)
+    require("0 error(s)" in valid.stdout, "Doctor rejected a valid bounded Initiative")
+    status = run(
+        [sys.executable, str(WORKFLOW_DOCTOR), "--status", "--json"],
+        cwd=target,
+    )
+    rollup = next(
+        item
+        for item in json.loads(status.stdout)["initiatives"]
+        if item["initiative_id"] == initiative_id
+    )
+    require(
+        rollup["children"] == [
+            {"work_id": child_id, "status": "backlog", "depends_on": [dependency_id]}
+        ],
+        "Initiative rollup did not derive child state from WORK frontmatter",
+    )
+
+    child_path.write_text(child_text.replace("status: backlog", "status: active"))
+    premature_start = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    require(
+        f"active WORK has incomplete dependency: {dependency_id}" in premature_start.stdout,
+        "Doctor allowed a dependent WORK to become active before its prerequisite was done",
+    )
+    child_path.write_text(child_text)
+
+    child_path.write_text(child_text.replace(initiative_id, "INITIATIVE-20260712121900-missing"))
+    orphan = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    require("local Initiative does not exist" in orphan.stdout, "Doctor accepted an orphan child WORK")
+    child_path.write_text(child_text)
+
+    dependency_path = target / f"zettelkasten/work/{dependency_id}.md"
+    dependency_text = dependency_path.read_text()
+    dependency_path.write_text(
+        dependency_text.replace("depends_on: []", f'depends_on: ["{child_id}"]')
+    )
+    cycle = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    require("WORK dependency cycle" in cycle.stdout, "Doctor accepted a dependency cycle")
+    dependency_path.write_text(dependency_text)
+
+    initiative_text = initiative_path.read_text()
+    pending_gate_text = initiative_text.replace(
+        "|  |  |  |  |  |",
+        "| Backward compatibility | Platform lead | all children | review pending | pending |",
+    )
+    initiative_path.write_text(pending_gate_text.replace("status: active", "status: done"))
+    premature_done = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    require(
+        "done Initiative has nonterminal children" in premature_done.stdout,
+        "Doctor accepted a completed Initiative with an unfinished child",
+    )
+    require(
+        "done Initiative has a pending shared gate" in premature_done.stdout,
+        "Doctor accepted a completed Initiative with a pending shared gate",
+    )
+    initiative_path.write_text(initiative_text)
+
+    conflicting_parent = run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "new",
+            "invalid-parent",
+            "--id",
+            "WORK-20260712121920-invalid-parent",
+            "--initiative",
+            initiative_id,
+            "--external-parent",
+            "JIRA-100",
+        ],
+        cwd=target,
+        expected=2,
+    )
+    require(
+        "not allowed with argument" in conflicting_parent.stderr,
+        "WORK helper accepted both local and external parents",
+    )
+
+    child_path.unlink()
+    initiative_path.unlink()
+
+    external_id = "WORK-20260712121930-external-epic"
+    run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "new",
+            "external-epic",
+            "--id",
+            external_id,
+            "--external-parent",
+            "JIRA-200",
+        ],
+        cwd=target,
+    )
+    external_path = target / f"zettelkasten/work/{external_id}.md"
+    require(
+        'external_parent: "JIRA-200"' in external_path.read_text(),
+        "WORK helper did not retain the authoritative external parent",
+    )
+    external_path.unlink()
 
 
 def exercise_work_cli(target: Path, work_id: str) -> None:
@@ -1683,6 +1869,7 @@ def validate_bootstrap_lifecycle() -> None:
         initialize_git(target)
         tracked_id = create_tracked_work_with_cli(target)
         exercise_work_cli(target, tracked_id)
+        exercise_initiative_cli(target, tracked_id)
         create_governed_and_done_state(target)
         create_project_skill(target)
         validate_doctor_regressions(target, tracked_id)
@@ -1999,6 +2186,9 @@ def validate_repository_layout() -> None:
         "three-way reconciliation",
         "docs/upgrading.md",
         "## Daily Use",
+        "## Large Requirements Without Large WORK Files",
+        "one optional local INITIATIVE",
+        "--external-parent <tracker-ref>",
         "Checkpoint only at meaningful boundaries",
         "## Repository Learning Loop",
         "learn-status <WORK-ID> --require-complete",
@@ -2031,6 +2221,9 @@ def validate_repository_layout() -> None:
         "三方协调",
         "upgrading.zh-CN.md",
         "## 日常使用",
+        "## 大型需求不等于大型 WORK",
+        "一个可选的本地 INITIATIVE",
+        "--external-parent <tracker-ref>",
         "只在有意义的边界记录 checkpoint",
         "## 仓库学习闭环",
         "learn-status <WORK-ID> --require-complete",
@@ -2089,6 +2282,22 @@ def validate_repository_layout() -> None:
             f"Fresh-Agent evaluation is missing evidence contract: {expected}",
         )
     cases = json.loads((ROOT / "examples/evaluations/workflow-cases.json").read_text())
+    decomposition_cases = [
+        case for case in cases if case["expected"]["decomposition"] != "none"
+    ]
+    require(
+        {case["expected"]["decomposition"] for case in decomposition_cases}
+        == {"external-parent", "local-initiative"},
+        "behavior cases must cover external and local bounded decomposition",
+    )
+    require(
+        all(
+            case["expected"]["hierarchy_depth"] == 2
+            and case["expected"]["load_siblings"] is False
+            for case in decomposition_cases
+        ),
+        "decomposition cases must stay two-level and avoid sibling loading",
+    )
     feedback_cases = [case for case in cases if case["expected"]["feedback_action"] != "none"]
     require(len(feedback_cases) == 1, "behavior cases need exactly one positive workflow-feedback case")
     require(

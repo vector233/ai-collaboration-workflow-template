@@ -40,6 +40,7 @@ PAYLOAD_REQUIRED_FILES = (
     Path("zettelkasten/workflow.md"),
     Path("zettelkasten/skill-lifecycle.md"),
     Path("zettelkasten/git-collaboration.md"),
+    Path("zettelkasten/templates/initiative.md"),
     Path("zettelkasten/templates/work-item.md"),
     Path("zettelkasten/templates/workflow-observations.md"),
     Path("zettelkasten/work/README.md"),

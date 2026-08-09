@@ -21,6 +21,22 @@ create one WORK -> task branch -> implement one slice -> test -> inline review
 
 The WORK contains the root cause, affected paths, acceptance, validation, commit, and next action. No separate artifact is needed.
 
+## Large Multi-Deliverable Requirement
+
+An authentication modernization request contains an independently releasable token service, admin migration UI, client SDK change, and production cutover. One WORK would mix different owners, risk routes, branches, validation environments, and rollback boundaries.
+
+If Jira already owns the Epic, each child WORK records that Epic as `external_parent`. Repo Continuity does not copy the Epic lifecycle. Without a suitable external tracker, create one thin local Initiative and link independent children through `initiative_id`:
+
+```text
+INITIATIVE-auth-modernization
+├── WORK-token-service          governed; security and compatibility gates
+├── WORK-admin-migration-ui     tracked; depends_on token service
+├── WORK-client-sdk             governed; public compatibility gate
+└── WORK-production-cutover     governed; depends_on all delivery children
+```
+
+Each child has its own branch or worktree, acceptance, validation, checkpoint, experience decisions, and closure. The Initiative stores only overall acceptance, cross-child gates, integration order, derived rollup, and the next coordination action. Child status remains authoritative in child frontmatter, and agents do not load sibling WORK records to resume one child. Architecture decisions and reusable migration procedures remain linked knowledge rather than Initiative or WORK history.
+
 ## Context Preservation And Resume
 
 After a bounded slice, the agent must pause for another task. It updates the existing WORK with the completed step and commit, exact validation, unresolved risk, next allowed action, and experience candidates, then commits the checkpoint. It does not create a new handoff file.

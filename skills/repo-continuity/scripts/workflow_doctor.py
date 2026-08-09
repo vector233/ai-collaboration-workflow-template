@@ -20,6 +20,7 @@ CORE_FILES = (
     Path("zettelkasten/workflow.md"),
     Path("zettelkasten/skill-lifecycle.md"),
     Path("zettelkasten/git-collaboration.md"),
+    Path("zettelkasten/templates/initiative.md"),
     Path("zettelkasten/templates/work-item.md"),
     Path("zettelkasten/templates/workflow-observations.md"),
     Path("zettelkasten/work/README.md"),
@@ -29,9 +30,17 @@ CORE_FILES = (
 CORE_DIRECTORIES = (Path("zettelkasten/work"), Path("project-skills"))
 
 WORK_STATES = {"backlog", "active", "blocked", "review", "done", "cancelled"}
+INITIATIVE_STATES = WORK_STATES
 
 ACTIVE_WORK_STATES = {"active", "blocked", "review"}
+ACTIVE_INITIATIVE_STATES = {"active", "blocked", "review"}
+TERMINAL_STATES = {"done", "cancelled"}
+WORK_ID_RE = re.compile(r"^WORK-[0-9]{14}-[a-z0-9][a-z0-9-]*$")
+INITIATIVE_ID_RE = re.compile(
+    r"^INITIATIVE-[0-9]{14}-[a-z0-9][a-z0-9-]*$"
+)
 WORK_REQUIRED_SECTIONS = (
+    "## Parent Coordination",
     "## Goal And Acceptance",
     "## Route Decision",
     "## Context Pack",
@@ -39,6 +48,14 @@ WORK_REQUIRED_SECTIONS = (
     "## Validation",
     "## Experience Candidates",
     "## Context Checkpoint",
+)
+INITIATIVE_REQUIRED_SECTIONS = (
+    "## Goal And Boundaries",
+    "## Overall Acceptance",
+    "## Shared Decisions And Gates",
+    "## Decomposition Contract",
+    "## Integration And Closure",
+    "## Coordination Checkpoint",
 )
 SKILL_REQUIRED_SECTIONS = (
     "## Use",
@@ -78,6 +95,9 @@ class WorkRecord:
     worktree: str
     file: str
     next_action: str
+    initiative_id: str
+    external_parent: str
+    depends_on: tuple[str, ...]
     owned_paths: tuple[str, ...]
     dirty: bool
     last_commit: str
@@ -387,11 +407,52 @@ def has_pending_governed_gate(text: str) -> bool:
     return False
 
 
+def has_pending_initiative_gate(text: str) -> bool:
+    for line in section_body(text, "Shared Decisions And Gates").splitlines():
+        cells = split_markdown_table_row(line)
+        if len(cells) >= 5 and cells[0] not in {"Decision or gate", "---"}:
+            if cells[0].strip() and cells[4].strip().lower() == "pending":
+                return True
+    return False
+
+
 def check_artifacts(root: Path, findings: list[Finding]) -> None:
+    artifacts = workflow_artifacts(root)
+    initiative_paths: dict[str, Path] = {}
+    work_paths: dict[str, Path] = {}
+    work_texts: dict[str, str] = {}
+    work_statuses: dict[str, str] = {}
+    dependencies: dict[str, tuple[str, ...]] = {}
     active_branches: dict[str, Path] = {}
-    for path in workflow_artifacts(root):
+    for path in artifacts:
         rel_path = relative(root, path)
-        if not path.name.startswith("WORK-") or path.suffix != ".md":
+        if path.suffix != ".md":
+            add(findings, "ERROR", "unexpected work artifact name", rel_path)
+            continue
+        if path.name.startswith("INITIATIVE-"):
+            text = read_text(path)
+            status = field_value(text, "status")
+            initiative_id = field_value(text, "initiative_id")
+            if not INITIATIVE_ID_RE.fullmatch(path.stem):
+                add(findings, "ERROR", "invalid Initiative filename", rel_path)
+            if initiative_id != path.stem:
+                add(findings, "ERROR", "initiative_id must match the stable filename", rel_path)
+            elif initiative_id in initiative_paths:
+                add(findings, "ERROR", "duplicate Initiative ID", rel_path)
+            else:
+                initiative_paths[initiative_id] = path
+            if status not in INITIATIVE_STATES:
+                add(findings, "ERROR", f"invalid Initiative status {status!r}", rel_path)
+            for section in INITIATIVE_REQUIRED_SECTIONS:
+                if section not in text:
+                    add(findings, "ERROR", f"Initiative is missing {section}", rel_path)
+            if status in ACTIVE_INITIATIVE_STATES:
+                next_action = field_value(text, "next_action")
+                if not next_action:
+                    add(findings, "ERROR", "active Initiative is missing next_action", rel_path)
+                add(findings, "INFO", f"active Initiative: status={status}", rel_path)
+            continue
+        if not path.name.startswith("WORK-"):
             add(findings, "ERROR", "unexpected work artifact name", rel_path)
             continue
         text = read_text(path)
@@ -400,8 +461,28 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
             add(findings, "ERROR", f"invalid WORK status {status!r}", rel_path)
 
         work_id = field_value(text, "work_id")
+        if not WORK_ID_RE.fullmatch(path.stem):
+            add(findings, "ERROR", "invalid WORK filename", rel_path)
         if work_id != path.stem:
             add(findings, "ERROR", "work_id must match the stable filename", rel_path)
+        elif work_id in work_paths:
+            add(findings, "ERROR", "duplicate WORK ID", rel_path)
+        else:
+            work_paths[work_id] = path
+            work_texts[work_id] = text
+            work_statuses[work_id] = status or "unknown"
+            dependencies[work_id] = field_list(text, "depends_on")
+        initiative_id = field_value(text, "initiative_id")
+        external_parent = field_value(text, "external_parent")
+        if initiative_id and external_parent:
+            add(
+                findings,
+                "ERROR",
+                "WORK must use either initiative_id or external_parent, not both",
+                rel_path,
+            )
+        if initiative_id and not INITIATIVE_ID_RE.fullmatch(initiative_id):
+            add(findings, "ERROR", f"invalid initiative_id {initiative_id!r}", rel_path)
         route = field_value(text, "route")
         if route not in {"tracked", "governed"}:
             add(findings, "ERROR", f"invalid WORK route {route!r}", rel_path)
@@ -446,6 +527,83 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
                 add(findings, "ERROR", "closed work has a pending experience candidate", rel_path)
             if route == "governed" and has_pending_governed_gate(text):
                 add(findings, "ERROR", "closed governed work has a pending gate", rel_path)
+
+    for work_id, path in work_paths.items():
+        rel_path = relative(root, path)
+        initiative_id = field_value(work_texts[work_id], "initiative_id")
+        if initiative_id and initiative_id not in initiative_paths:
+            add(findings, "ERROR", f"local Initiative does not exist: {initiative_id}", rel_path)
+        for dependency in dependencies[work_id]:
+            if not WORK_ID_RE.fullmatch(dependency):
+                add(findings, "ERROR", f"invalid WORK dependency {dependency!r}", rel_path)
+            elif dependency == work_id:
+                add(findings, "ERROR", "WORK cannot depend on itself", rel_path)
+            elif dependency not in work_paths:
+                add(findings, "ERROR", f"WORK dependency does not exist: {dependency}", rel_path)
+            elif (
+                work_statuses[work_id] in {"active", "review", "done"}
+                and work_statuses[dependency] != "done"
+            ):
+                add(
+                    findings,
+                    "ERROR",
+                    f"{work_statuses[work_id]} WORK has incomplete dependency: {dependency}",
+                    rel_path,
+                )
+
+    visiting: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(work_id: str, trail: tuple[str, ...]) -> None:
+        if work_id in visited:
+            return
+        if work_id in visiting:
+            cycle = trail[trail.index(work_id) :] + (work_id,)
+            add(
+                findings,
+                "ERROR",
+                "WORK dependency cycle: " + " -> ".join(cycle),
+                relative(root, work_paths[work_id]),
+            )
+            return
+        visiting.add(work_id)
+        for dependency in dependencies.get(work_id, ()):
+            if dependency in work_paths:
+                visit(dependency, trail + (work_id,))
+        visiting.remove(work_id)
+        visited.add(work_id)
+
+    for work_id in work_paths:
+        visit(work_id, ())
+
+    for initiative_id, path in initiative_paths.items():
+        text = read_text(path)
+        status = field_value(text, "status")
+        children = sorted(
+            work_id
+            for work_id, work_text in work_texts.items()
+            if field_value(work_text, "initiative_id") == initiative_id
+        )
+        if status == "done":
+            nonterminal = [
+                work_id for work_id in children if work_statuses[work_id] not in TERMINAL_STATES
+            ]
+            if not children:
+                add(findings, "ERROR", "done Initiative has no child WORK", relative(root, path))
+            if nonterminal:
+                add(
+                    findings,
+                    "ERROR",
+                    "done Initiative has nonterminal children: " + ", ".join(nonterminal),
+                    relative(root, path),
+                )
+            if has_pending_initiative_gate(text):
+                add(
+                    findings,
+                    "ERROR",
+                    "done Initiative has a pending shared gate",
+                    relative(root, path),
+                )
 
 
 def parse_iso_date(value: str) -> date | None:
@@ -586,6 +744,9 @@ def collect_work_records(root: Path) -> list[WorkRecord]:
                 worktree=str(root),
                 file=str(path),
                 next_action=field_value(text, "next_action") or "",
+                initiative_id=field_value(text, "initiative_id") or "",
+                external_parent=field_value(text, "external_parent") or "",
+                depends_on=field_list(text, "depends_on"),
                 owned_paths=field_list(text, "owned_paths"),
                 dirty=dirty,
                 last_commit=commit,
@@ -638,9 +799,40 @@ def status_payload(root: Path, all_worktrees: bool) -> dict[str, object]:
                 detached_worktrees.append(str(candidate))
                 continue
             records.extend(collect_work_records(candidate))
+    initiative_rollups: list[dict[str, object]] = []
+    current_artifacts = workflow_artifacts(root)
+    current_works = {
+        field_value(read_text(path), "work_id") or path.stem: read_text(path)
+        for path in current_artifacts
+        if path.name.startswith("WORK-")
+    }
+    for path in current_artifacts:
+        if not path.name.startswith("INITIATIVE-"):
+            continue
+        text = read_text(path)
+        initiative_id = field_value(text, "initiative_id") or path.stem
+        children = [
+            {
+                "work_id": work_id,
+                "status": field_value(work_text, "status") or "unknown",
+                "depends_on": list(field_list(work_text, "depends_on")),
+            }
+            for work_id, work_text in sorted(current_works.items())
+            if field_value(work_text, "initiative_id") == initiative_id
+        ]
+        initiative_rollups.append(
+            {
+                "initiative_id": initiative_id,
+                "status": field_value(text, "status") or "unknown",
+                "next_action": field_value(text, "next_action") or "",
+                "file": str(path),
+                "children": children,
+            }
+        )
     return {
         "repository": str(root),
         "all_worktrees": all_worktrees,
+        "initiatives": initiative_rollups,
         "active_work": [asdict(record) for record in records],
         "scope_overlaps": find_scope_overlaps(records),
         "unscoped_work": [record.work_id for record in records if not record.owned_paths],
@@ -654,6 +846,17 @@ def print_status(root: Path, all_worktrees: bool, as_json: bool) -> None:
         print(json.dumps(payload, indent=2, ensure_ascii=False))
         return
     print(f"Workflow Status: {root}")
+    for initiative in payload["initiatives"]:
+        child_counts: dict[str, int] = {}
+        for child in initiative["children"]:
+            child_counts[child["status"]] = child_counts.get(child["status"], 0) + 1
+        rollup = ", ".join(
+            f"{status}={count}" for status, count in sorted(child_counts.items())
+        ) or "no children"
+        print(
+            f"- {initiative['initiative_id']}: {initiative['status']}; {rollup}; "
+            f"next={initiative['next_action'] or 'unspecified'}"
+        )
     records = payload["active_work"]
     if not records:
         print("Active work: none")

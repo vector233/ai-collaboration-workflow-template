@@ -6,6 +6,7 @@
 - Tracked or governed work uses a dedicated task branch.
 - Concurrent tasks, delegated write-capable agents, long-lived tasks, or work that must preserve another dirty checkout use separate Git worktrees. Independent read-only specialists may inspect the current task worktree without a second checkout; they do not edit or claim that worktree.
 - Dependent tasks or materially overlapping owned paths should run serially or define an explicit integration plan.
+- Children of one Initiative still use independent task branches and worktrees. Treat the Initiative as serially updated coordination state, not a shared branch for parallel implementation.
 
 Use normal Git or the bundled guarded helper:
 

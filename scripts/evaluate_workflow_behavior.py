@@ -22,6 +22,9 @@ FIELDS = (
     "requires_helper",
     "feedback_action",
     "feedback_scope",
+    "decomposition",
+    "hierarchy_depth",
+    "load_siblings",
 )
 
 

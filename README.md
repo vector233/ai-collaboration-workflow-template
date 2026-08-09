@@ -11,6 +11,7 @@ Repo Continuity makes the repository their shared source of truth:
 - **Resume, do not restart.** A fresh agent can recover the active goal, decisions, validation, risks, and next action without chat history.
 - **Load only what matters.** Linked knowledge and on-demand project Skills keep context focused instead of loading the whole repository story.
 - **Keep small work small.** Direct, Tracked, and Governed routes add process only when duration, coordination, or risk requires it.
+- **Keep large work bounded.** Existing Epics stay authoritative; without one, a thin local Initiative coordinates independent child WORK records without recursive task trees.
 - **Make the project learn.** Verified fixes and repeated procedures become durable rules, notes, runbooks, or project Skills instead of being forgotten in a conversation.
 - **Run parallel work safely.** Task branches, worktrees, owned paths, and stable WORK records keep agents from silently overwriting one another.
 
@@ -119,6 +120,36 @@ The agent chooses:
 | Direct | local, reversible, low-risk, one context | none; validate and commit |
 | Tracked | behavior change, debugging continuity, multiple contexts | one stable `WORK-*` |
 | Governed | high risk, important uncertainty, independent approval, migration, release, multi-owner coordination | the same `WORK-*` with explicit gates and evidence |
+
+## Large Requirements Without Large WORK Files
+
+Do not turn one WORK into an unbounded Epic log. Keep one WORK when the result still has one tightly coupled acceptance and rollback boundary. Split it when outcomes can be accepted, routed, assigned, validated, rolled back, or released independently.
+
+Use this bounded hierarchy:
+
+```text
+existing external Epic / Issue / Milestone (preferred)
+└── independent WORK records
+
+or, when no suitable external parent exists:
+
+one optional local INITIATIVE
+├── independent WORK-A
+├── independent WORK-B
+└── independent WORK-C
+```
+
+There is no third level. A WORK never parents another WORK or Initiative. Each child keeps its own route, task branch or worktree, acceptance, `depends_on` relationships, validation, checkpoint, Learning Check, and closure. `depends_on` is strict: keep the dependent child in backlog or blocked until every prerequisite is done; use prose coordination when only final integration order matters. The Initiative remains a thin coordination record for the overall goal, shared gates, integration order, derived rollup, and next coordination action. Durable facts still belong in linked Zettels, decisions, runbooks, or project Skills.
+
+When Jira, GitHub, GitLab, or another project-native tracker already owns the parent lifecycle, set `external_parent` in each child WORK and do not mirror the Epic locally. For repository-local coordination, copy `zettelkasten/templates/initiative.md` or use the optional helper:
+
+```bash
+python3 skills/repo-continuity/scripts/workflow_task.py initiative-new <slug>
+python3 skills/repo-continuity/scripts/workflow_task.py new <child-slug> \
+  --initiative <INITIATIVE-ID> --depends-on <WORK-ID>
+```
+
+Use `--external-parent <tracker-ref>` instead of `--initiative` when the external record is authoritative. Resume from the child branch and WORK; load the Initiative only when a shared gate, dependency, or integration constraint affects that slice, and do not load sibling WORK records by default.
 
 Resume a long-running task:
 
