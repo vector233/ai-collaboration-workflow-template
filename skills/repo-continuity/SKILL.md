@@ -1,6 +1,6 @@
 ---
 name: repo-continuity
-description: Initialize, inspect, safely compare upgrades for, and operate Repo Continuity. Use when an agent needs to install the repository-owned knowledge layer; produce a read-only three-way upgrade report without overwriting project files; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; run the evidence-backed Learning Check and idempotently promote repository experience into rules, knowledge, runbooks, or an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize, inspect, safely reconcile upgrades for, and operate Repo Continuity. Use when an agent needs to install the repository-owned knowledge layer; produce a read-only three-way upgrade report or apply only conflict-free upstream changes without overwriting project customization; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; run the evidence-backed Learning Check and idempotently promote repository experience into rules, knowledge, runbooks, or an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # Repo Continuity
@@ -42,17 +42,26 @@ Use `--source <checkout-or-template>` for local or offline core installation. Mo
 
 If `INIT.md` exists, follow it completely. Preserve stricter local rules, replace all placeholders, initialize only verified project facts, remove initialization files, and verify the knowledge links and required fields.
 
-## Compare An Upgrade
+## Reconcile An Upgrade
 
-For an initialized project, generate a read-only three-way report before adopting a newer installed release:
+Treat an initialized project as three inputs: its recorded old upstream baseline, its current repository-owned customization, and the newer upstream release. Start with a read-only preview:
 
 ```bash
 python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --upgrade-report
+python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --upgrade-apply --dry-run
 ```
 
-The report reads the recorded `Template baseline` from `zettelkasten/AI.md`, compares that old upstream payload with the project and the Skill's pinned target release, and classifies files as added, unchanged, local-modified, upstream-modified, or both-modified. It prints local and upstream diffs but never changes the target. Use `--baseline-ref <tag>` if the recorded baseline is unavailable, `--json` for machine-readable output, and `--with-model-routing codex`, `claude`, or `all` only when the corresponding optional overlay should also be compared.
+The report classifies files as added, unchanged, local-modified, upstream-modified, or both-modified and prints both sides of the diff. The apply preview maps them to concrete actions: add-upstream, apply-upstream, merge-clean, preserve-local, unchanged, pending-removal, or conflict.
 
-Review every both-modified path deliberately. Preserve project facts and stricter local policy, merge only applicable upstream changes, validate the result, and update the recorded baseline only after reconciliation is complete. Do not re-add `INIT.md` or a payload marker to an initialized project.
+Upgrade is a Tracked or Governed repository change. Create a task branch, record and commit the pre-upgrade WORK checkpoint, and require a clean worktree before applying:
+
+```bash
+python3 "$SKILL_ROOT/scripts/bootstrap_template.py" --target <repo-root> --upgrade-apply
+```
+
+The helper transactionally writes only upstream additions, upstream-only modifications, and clean text three-way merges. It preserves local-only changes. It does not delete a path removed upstream, overwrite a true conflict, follow target symlinks, run on `main` or `master`, or advance the `Template baseline`. A result with pending removals or conflicts exits with status 2 after applying the safe subset; resolve those paths deliberately in the same task branch.
+
+Preserve project facts and stricter local policy, run repository validation, review the final Git diff, and only then update `Template baseline` in `zettelkasten/AI.md` to the target release and commit the upgrade. Do not re-add `INIT.md` or a payload marker to an initialized project. Use `--baseline-ref <tag>` if the recorded baseline is unavailable, `--json` for machine-readable output, and `--with-model-routing codex`, `claude`, or `all` only when the corresponding optional overlay should also be reconciled.
 
 ## Load Minimal Context
 

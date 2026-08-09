@@ -7,6 +7,7 @@ import argparse
 import difflib
 import filecmp
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -95,6 +96,14 @@ class UpgradeEntry:
     upstream_diff: str
 
 
+@dataclass(frozen=True)
+class UpgradeAction:
+    path: Path
+    category: str
+    action: str
+    content: bytes | None = None
+
+
 class BootstrapError(RuntimeError):
     """Raised when the template source or target cannot be used safely."""
 
@@ -152,10 +161,18 @@ def parse_args() -> argparse.Namespace:
             "selected upstream version without changing any files."
         ),
     )
+    mode.add_argument(
+        "--upgrade-apply",
+        action="store_true",
+        help=(
+            "Safely apply conflict-free changes from the selected upstream "
+            "version using the recorded template baseline."
+        ),
+    )
     parser.add_argument(
         "--baseline-ref",
         help=(
-            "Baseline Git branch or tag for --upgrade-report. When omitted, "
+            "Baseline Git branch or tag for an upgrade operation. When omitted, "
             "read the version from target/zettelkasten/AI.md."
         ),
     )
@@ -164,13 +181,16 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help=(
             "Local checkout or payload for the old upstream baseline. "
-            "Valid only with --upgrade-report."
+            "Valid only with --upgrade-report or --upgrade-apply."
         ),
     )
     parser.add_argument(
         "--json",
         action="store_true",
-        help="Emit the upgrade report as JSON. Valid only with --upgrade-report.",
+        help=(
+            "Emit the upgrade report or apply result as JSON. Valid only with "
+            "--upgrade-report or --upgrade-apply."
+        ),
     )
     parser.add_argument(
         "--with-model-routing",
@@ -181,8 +201,12 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     args = parser.parse_args()
-    if (args.baseline_ref or args.baseline_source or args.json) and not args.upgrade_report:
-        parser.error("--baseline-ref, --baseline-source, and --json require --upgrade-report")
+    upgrading = args.upgrade_report or args.upgrade_apply
+    if (args.baseline_ref or args.baseline_source or args.json) and not upgrading:
+        parser.error(
+            "--baseline-ref, --baseline-source, and --json require "
+            "--upgrade-report or --upgrade-apply"
+        )
     if args.upgrade_report and args.dry_run:
         parser.error("--upgrade-report is already read-only; omit --dry-run")
     return args
@@ -680,7 +704,304 @@ def print_upgrade_report(
             if entry.upstream_diff:
                 print(f"\n# Target upstream versus baseline: {entry.path}")
                 print(entry.upstream_diff, end="" if entry.upstream_diff.endswith("\n") else "\n")
-    print("\nNo files were changed. Merge applicable upstream changes manually.")
+    print(
+        "\nNo files were changed. Preview safe reconciliation with "
+        "--upgrade-apply --dry-run."
+    )
+
+
+def merge_upgrade_content(
+    local: bytes,
+    baseline: bytes,
+    upstream: bytes,
+) -> bytes | None:
+    if any(b"\0" in content for content in (local, baseline, upstream)):
+        return None
+    try:
+        for content in (local, baseline, upstream):
+            content.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+
+    with tempfile.TemporaryDirectory(prefix="repo-continuity-merge-") as temp_dir:
+        temporary = Path(temp_dir)
+        local_path = temporary / "local"
+        baseline_path = temporary / "baseline"
+        upstream_path = temporary / "upstream"
+        local_path.write_bytes(local)
+        baseline_path.write_bytes(baseline)
+        upstream_path.write_bytes(upstream)
+        try:
+            result = subprocess.run(
+                [
+                    "git",
+                    "merge-file",
+                    "--stdout",
+                    str(local_path),
+                    str(baseline_path),
+                    str(upstream_path),
+                ],
+                check=False,
+                capture_output=True,
+            )
+        except FileNotFoundError as exc:
+            raise BootstrapError("git is required to apply a three-way upgrade") from exc
+    if result.returncode == 0:
+        return result.stdout
+    if result.returncode == 1:
+        return None
+    message = result.stderr.decode("utf-8", errors="replace").strip()
+    raise BootstrapError(f"git merge-file failed: {message or result.returncode}")
+
+
+def preserve_baseline_gate(
+    relative: Path,
+    content: bytes | None,
+    local: ProjectFile,
+) -> bytes | None:
+    if (
+        relative != Path("zettelkasten/AI.md")
+        or content is None
+        or local.state != "present"
+        or local.content is None
+    ):
+        return content
+    try:
+        local_text = local.content.decode("utf-8")
+        target_text = content.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise BootstrapError("zettelkasten/AI.md must remain UTF-8 text") from exc
+    local_match = BASELINE_PATTERN.search(local_text)
+    target_match = BASELINE_PATTERN.search(target_text)
+    if local_match is None or target_match is None:
+        raise BootstrapError(
+            "cannot preserve the Template baseline gate in zettelkasten/AI.md"
+        )
+    preserved = (
+        target_text[: target_match.start(1)]
+        + local_match.group(1)
+        + target_text[target_match.end(1) :]
+    )
+    return preserved.encode("utf-8")
+
+
+def build_upgrade_actions(
+    entries: tuple[UpgradeEntry, ...],
+    baseline_files: dict[Path, Path],
+    upstream_files: dict[Path, Path],
+    target: Path,
+) -> tuple[UpgradeAction, ...]:
+    actions: list[UpgradeAction] = []
+    for entry in entries:
+        relative = entry.path
+        baseline_path = baseline_files.get(relative)
+        upstream_path = upstream_files.get(relative)
+        baseline = baseline_path.read_bytes() if baseline_path is not None else None
+        upstream = upstream_path.read_bytes() if upstream_path is not None else None
+        local = read_project_file(target, relative)
+
+        if entry.category == "unchanged":
+            action = "unchanged"
+            content = None
+        elif entry.category == "local-modified":
+            action = "preserve-local"
+            content = None
+        elif entry.category == "added":
+            action = "add-upstream"
+            content = upstream
+        elif entry.category == "upstream-modified" and upstream is not None:
+            action = "apply-upstream"
+            content = upstream
+        elif entry.category == "upstream-modified":
+            action = "pending-removal"
+            content = None
+        elif (
+            local.state == "present"
+            and local.content is not None
+            and baseline is not None
+            and upstream is not None
+        ):
+            content = merge_upgrade_content(local.content, baseline, upstream)
+            action = "merge-clean" if content is not None else "conflict"
+        else:
+            action = "conflict"
+            content = None
+        content = preserve_baseline_gate(relative, content, local)
+        actions.append(UpgradeAction(relative, entry.category, action, content))
+    return tuple(actions)
+
+
+def ensure_upgrade_target_ready(target: Path) -> None:
+    try:
+        root_result = subprocess.run(
+            ["git", "-C", str(target), "rev-parse", "--show-toplevel"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        branch_result = subprocess.run(
+            ["git", "-C", str(target), "branch", "--show-current"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        status_result = subprocess.run(
+            ["git", "-C", str(target), "status", "--porcelain"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError as exc:
+        raise BootstrapError("git is required to apply an upgrade") from exc
+    except subprocess.CalledProcessError as exc:
+        raise BootstrapError(
+            "--upgrade-apply requires the target to be a Git repository"
+        ) from exc
+
+    repository_root = Path(root_result.stdout.strip()).resolve()
+    if repository_root != target:
+        raise BootstrapError(
+            "--upgrade-apply target must be the Git repository root: "
+            f"{repository_root}"
+        )
+    branch = branch_result.stdout.strip()
+    if not branch:
+        raise BootstrapError("--upgrade-apply requires a named task branch")
+    if branch in {"main", "master"}:
+        raise BootstrapError(
+            "--upgrade-apply refuses the default branch; create an upgrade task "
+            "branch first"
+        )
+    if status_result.stdout:
+        raise BootstrapError(
+            "--upgrade-apply requires a clean worktree; commit the upgrade WORK "
+            "checkpoint before applying changes"
+        )
+
+
+def atomic_write(path: Path, content: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".upgrade", dir=path.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(content)
+        if path.exists():
+            shutil.copymode(path, temporary)
+        temporary.replace(path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def apply_upgrade_actions(
+    target: Path,
+    actions: tuple[UpgradeAction, ...],
+) -> None:
+    writable = tuple(action for action in actions if action.content is not None)
+    originals = {
+        action.path: read_project_file(target, action.path)
+        for action in writable
+    }
+    completed: list[UpgradeAction] = []
+    try:
+        for action in writable:
+            if has_symlink_component(target, action.path):
+                raise BootstrapError(
+                    f"upgrade target became unsafe before write: {target / action.path}"
+                )
+            atomic_write(target / action.path, action.content or b"")
+            completed.append(action)
+    except BaseException:
+        for action in reversed(completed):
+            original = originals[action.path]
+            destination = target / action.path
+            if original.state == "present" and original.content is not None:
+                atomic_write(destination, original.content)
+            elif original.state == "absent":
+                destination.unlink(missing_ok=True)
+        raise
+
+
+def print_upgrade_apply_result(
+    target: Path,
+    baseline_ref: str,
+    target_ref: str,
+    actions: tuple[UpgradeAction, ...],
+    *,
+    dry_run: bool,
+    as_json: bool,
+) -> None:
+    action_names = (
+        "add-upstream",
+        "apply-upstream",
+        "merge-clean",
+        "preserve-local",
+        "unchanged",
+        "pending-removal",
+        "conflict",
+    )
+    counts = {
+        action: sum(item.action == action for item in actions)
+        for action in action_names
+    }
+    blocked = counts["pending-removal"] + counts["conflict"]
+    if as_json:
+        print(
+            json.dumps(
+                {
+                    "dry_run": dry_run,
+                    "target": str(target),
+                    "baseline_ref": baseline_ref,
+                    "target_ref": target_ref,
+                    "summary": counts,
+                    "blocked": blocked,
+                    "baseline_updated": False,
+                    "files": [
+                        {
+                            "path": item.path.as_posix(),
+                            "category": item.category,
+                            "action": item.action,
+                        }
+                        for item in actions
+                    ],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    heading = (
+        "Repo Continuity upgrade preview"
+        if dry_run
+        else "Repo Continuity upgrade result"
+    )
+    print(heading)
+    print(f"Target: {target}")
+    print(f"Baseline: {baseline_ref}")
+    print(f"Target release: {target_ref}")
+    print("Summary:")
+    for action in action_names:
+        print(f"  {action}: {counts[action]}")
+    for item in actions:
+        if item.action in {"pending-removal", "conflict"}:
+            print(f"  {item.action}: {item.path}")
+    if dry_run:
+        print("\nNo files were changed. Rerun without --dry-run to apply safe changes.")
+    elif blocked:
+        print(
+            "\nSafe changes were applied. Resolve each pending removal or conflict, "
+            "then validate the project."
+        )
+    else:
+        print("\nAll conflict-free changes were applied. Validate the project.")
+    print(
+        f"After review and validation, record Template baseline `{target_ref}` in "
+        "zettelkasten/AI.md. The helper never advances that gate automatically."
+    )
 
 
 def resolve_adapters_root(source: Path, payload: Path) -> Path:
@@ -832,10 +1153,12 @@ def install(
         )
 
 
-def upgrade_report(
+def upgrade_operation(
     args: argparse.Namespace,
     target: Path,
     adapters: tuple[str, ...],
+    *,
+    apply: bool,
 ) -> int:
     baseline_ref = args.baseline_ref or recorded_baseline_ref(target)
     with tempfile.TemporaryDirectory(prefix="repo-continuity-upgrade-") as temp_dir:
@@ -882,14 +1205,38 @@ def upgrade_report(
             baseline_label=f"baseline-{baseline_ref}",
             target_label=f"upstream-{args.ref}",
         )
-        print_upgrade_report(
+        if not apply:
+            print_upgrade_report(
+                target,
+                baseline_ref,
+                args.ref,
+                entries,
+                as_json=args.json,
+            )
+            return 0
+
+        actions = build_upgrade_actions(
+            entries,
+            baseline_files,
+            upstream_files,
+            target,
+        )
+        if not args.dry_run:
+            ensure_upgrade_target_ready(target)
+            apply_upgrade_actions(target, actions)
+        print_upgrade_apply_result(
             target,
             baseline_ref,
             args.ref,
-            entries,
+            actions,
+            dry_run=args.dry_run,
             as_json=args.json,
         )
-    return 0
+        blocked = any(
+            action.action in {"pending-removal", "conflict"}
+            for action in actions
+        )
+        return 2 if blocked else 0
 
 
 def main() -> int:
@@ -898,11 +1245,13 @@ def main() -> int:
         target = normalize_directory(
             args.target,
             "target",
-            must_exist=args.upgrade_report,
+            must_exist=args.upgrade_report or args.upgrade_apply,
         )
         adapters = selected_model_routing(args.with_model_routing)
         if args.upgrade_report:
-            return upgrade_report(args, target, adapters)
+            return upgrade_operation(args, target, adapters, apply=False)
+        if args.upgrade_apply:
+            return upgrade_operation(args, target, adapters, apply=True)
         if args.inspect:
             return inspect_target(target, adapters)
         return install(args, target, adapters)

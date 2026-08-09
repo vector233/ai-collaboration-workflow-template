@@ -18,7 +18,7 @@ Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
 
 ## 快速开始
 
-以下命令固定到当前版本 `v4.2.0`。已经初始化的项目不会被自动修改，可以按需人工采用新版改进。
+以下命令固定到当前版本 `v4.2.0`。已经初始化的项目不会被自动修改，需要升级时使用三方协调流程采用新版改进。
 
 > [!TIP]
 > **从 `v4.1.1` 或更早版本升级：** Companion Skill 已从 `ai-collaboration-workflow` 更名为 `repo-continuity`。
@@ -88,18 +88,19 @@ cp -R repo-continuity/template/. /path/to/your-project/
 
 初始化后，项目只依赖 Markdown、Git 和项目自身的验证系统。移除 Companion Skill 不会丢失项目知识或工作状态。
 
-## 安全检查升级
+## 安全协调升级
 
-Companion Skill 更新后，不会自动覆盖已经初始化的项目。先安装目标版本 Skill，进入项目后告诉 Agent：
+已经初始化的项目不是可随时覆盖的模板副本，而是“旧上游基线 + 项目事实、规则和持续沉淀的 Skill”。安装目标版本 Skill 后，进入项目告诉 Agent：
 
 ```text
-使用 $repo-continuity 为当前仓库生成只读升级报告。
-比较仓库记录的模板基线与 Skill 固定的目标版本，显示三方差异，不修改任何项目文件。
+使用 $repo-continuity 把这个已初始化仓库升级到 Skill 固定的目标版本。
+创建隔离的升级任务分支，预览三方协调，只应用安全变更，保留本地定制，
+解决剩余冲突，完成验证，最后再推进模板基线。
 ```
 
-报告会比较旧版上游基线、当前项目和目标上游版本，把核心文件分类为新增、未修改、本地修改、上游修改或双方修改。它不会复制、删除或覆盖文件；只有显式要求时才会把 Codex 或 Claude Code overlay 纳入比较。
+Companion Skill 会真正比较旧版上游、当前项目和目标上游。可以先生成只读报告和 dry-run。执行应用后，它会自动加入上游新增文件、采用纯上游修改并完成无冲突的文本三方合并，同时保留纯本地修改；真实冲突和上游删除仍留给显式检查。
 
-检查报告后，应有意识地合并适用的上游变化，保留项目事实和更严格的本地规则，运行项目验证，并且只在协调完成后更新 `Template baseline`。完整 CLI 参数见 [Companion Skill](../../skills/repo-continuity/SKILL.md#compare-an-upgrade)。
+应用过程要求干净的任务分支，并以事务方式写入；不会在 `main` 或 `master` 上执行，不会跟随目标 symlink，也不会自行修改 `Template baseline`。解决剩余路径后，运行项目验证、检查最终 Git Diff，最后才推进基线。详见[升级指南](../upgrading.zh-CN.md)和 [Companion Skill](../../skills/repo-continuity/SKILL.md#reconcile-an-upgrade)。
 
 ## 日常使用
 

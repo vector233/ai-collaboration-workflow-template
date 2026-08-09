@@ -212,9 +212,12 @@ def validate_payload() -> None:
         "companion Skill description violates Skill metadata limits",
     )
     for expected in (
-        "## Compare An Upgrade",
+        "## Reconcile An Upgrade",
         "--upgrade-report",
-        "never changes the target",
+        "--upgrade-apply",
+        "preserves local-only changes",
+        "does not delete a path removed upstream",
+        "advance the `Template baseline`",
         "## Preserve Context",
         "Do not checkpoint every turn",
         "## Close With The Learning Loop",
@@ -1132,6 +1135,18 @@ def validate_upgrade_report(base: Path) -> None:
     (upstream_payload / "zettelkasten/quick-reference.md").write_text(
         "# Upstream quick reference\n"
     )
+    (baseline_payload / "zettelkasten/workflow.md").write_text(
+        "alpha\nshared\nomega\n"
+    )
+    (upstream_payload / "zettelkasten/workflow.md").write_text(
+        "alpha upstream\nshared\nomega\n"
+    )
+    removed_relative = Path("zettelkasten/gotchas.md")
+    require(
+        (baseline_payload / removed_relative).is_file(),
+        "upgrade removal fixture is missing",
+    )
+    (upstream_payload / removed_relative).unlink()
 
     shutil.copytree(baseline_payload, target)
     shutil.copytree(
@@ -1142,6 +1157,9 @@ def validate_upgrade_report(base: Path) -> None:
     (target / "CLAUDE.md").write_text("# Local Claude rules\n")
     (target / "zettelkasten/quick-reference.md").write_text(
         "# Local quick reference\n"
+    )
+    (target / "zettelkasten/workflow.md").write_text(
+        "alpha\nshared\nomega local\n"
     )
     before = snapshot_files(target)
     report = run(
@@ -1217,6 +1235,199 @@ def validate_upgrade_report(base: Path) -> None:
         "text upgrade report omitted its read-only guarantee",
     )
     require(snapshot_files(target) == before, "text upgrade report changed target files")
+
+    preview = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--source",
+            str(upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-apply",
+            "--with-model-routing",
+            "codex",
+            "--dry-run",
+            "--json",
+        ],
+        expected=2,
+    )
+    preview_payload = json.loads(preview.stdout)
+    preview_actions = {
+        item["path"]: item["action"] for item in preview_payload["files"]
+    }
+    require(preview_payload["dry_run"] is True, "upgrade preview omitted dry-run state")
+    require(
+        preview_actions["zettelkasten/glossary.md"] == "add-upstream",
+        "upgrade preview did not plan an upstream addition",
+    )
+    require(
+        preview_actions["AGENTS.md"] == "apply-upstream",
+        "upgrade preview did not plan an upstream-only update",
+    )
+    require(
+        preview_actions["CLAUDE.md"] == "preserve-local",
+        "upgrade preview did not preserve a local-only change",
+    )
+    require(
+        preview_actions["zettelkasten/workflow.md"] == "merge-clean",
+        "upgrade preview did not detect a clean three-way merge",
+    )
+    require(
+        preview_actions["zettelkasten/quick-reference.md"] == "conflict",
+        "upgrade preview did not preserve a true merge conflict",
+    )
+    require(
+        preview_actions[removed_relative.as_posix()] == "pending-removal",
+        "upgrade preview did not gate an upstream removal",
+    )
+    require(snapshot_files(target) == before, "upgrade preview changed target files")
+
+    no_git_apply = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--source",
+            str(upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-apply",
+        ],
+        expected=1,
+    )
+    require(
+        "requires the target to be a Git repository" in no_git_apply.stderr,
+        "upgrade apply did not require Git isolation",
+    )
+    require(snapshot_files(target) == before, "rejected upgrade apply changed files")
+
+    run(["git", "init", "-b", "main"], cwd=target)
+    run(["git", "config", "user.name", "Repo Continuity Validation"], cwd=target)
+    run(["git", "config", "user.email", "validation@example.invalid"], cwd=target)
+    run(["git", "add", "."], cwd=target)
+    run(["git", "commit", "-m", "test: baseline fixture"], cwd=target)
+    default_branch_apply = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--source",
+            str(upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-apply",
+        ],
+        expected=1,
+    )
+    require(
+        "refuses the default branch" in default_branch_apply.stderr,
+        "upgrade apply did not require a task branch",
+    )
+    run(["git", "switch", "-c", "upgrade/v4-test"], cwd=target)
+
+    applied = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(target),
+            "--source",
+            str(upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-apply",
+            "--with-model-routing",
+            "codex",
+            "--json",
+        ],
+        expected=2,
+    )
+    applied_payload = json.loads(applied.stdout)
+    require(applied_payload["dry_run"] is False, "upgrade apply reported dry-run")
+    require(
+        applied_payload["baseline_updated"] is False,
+        "upgrade apply advanced the validation gate automatically",
+    )
+    require(
+        (target / "zettelkasten/glossary.md").read_bytes()
+        == (upstream_payload / "zettelkasten/glossary.md").read_bytes(),
+        "upgrade apply omitted an upstream addition",
+    )
+    require(
+        (target / "AGENTS.md").read_text() == "# Upstream agents\n",
+        "upgrade apply omitted an upstream-only update",
+    )
+    require(
+        (target / "CLAUDE.md").read_text() == "# Local Claude rules\n",
+        "upgrade apply overwrote a local-only change",
+    )
+    require(
+        (target / "zettelkasten/workflow.md").read_text()
+        == "alpha upstream\nshared\nomega local\n",
+        "upgrade apply produced an incorrect clean merge",
+    )
+    require(
+        (target / "zettelkasten/quick-reference.md").read_text()
+        == "# Local quick reference\n",
+        "upgrade apply overwrote a true conflict",
+    )
+    require(
+        (target / removed_relative).is_file(),
+        "upgrade apply automatically deleted an upstream removal",
+    )
+    require(
+        "Template baseline: `v4.1.1`" in (target / "zettelkasten/AI.md").read_text(),
+        "upgrade apply changed the recorded baseline before validation",
+    )
+
+    clean_upstream_source = base / "upgrade-clean-upstream-source"
+    shutil.copytree(upstream_source, clean_upstream_source)
+    clean_upstream_payload = clean_upstream_source / "template"
+    shutil.copy2(
+        baseline_payload / removed_relative,
+        clean_upstream_payload / removed_relative,
+    )
+    shutil.copy2(
+        baseline_payload / "zettelkasten/quick-reference.md",
+        clean_upstream_payload / "zettelkasten/quick-reference.md",
+    )
+    clean_target = base / "upgrade-clean-target"
+    shutil.copytree(baseline_payload, clean_target)
+    run(["git", "init", "-b", "upgrade/v4-clean"], cwd=clean_target)
+    run(["git", "config", "user.name", "Repo Continuity Validation"], cwd=clean_target)
+    run(["git", "config", "user.email", "validation@example.invalid"], cwd=clean_target)
+    run(["git", "add", "."], cwd=clean_target)
+    run(["git", "commit", "-m", "test: clean baseline fixture"], cwd=clean_target)
+    clean_apply = run(
+        [
+            sys.executable,
+            str(BOOTSTRAP),
+            "--target",
+            str(clean_target),
+            "--source",
+            str(clean_upstream_source),
+            "--baseline-source",
+            str(baseline_source),
+            "--upgrade-apply",
+            "--json",
+        ]
+    )
+    clean_payload = json.loads(clean_apply.stdout)
+    require(clean_payload["blocked"] == 0, "clean upgrade reported blocked paths")
+    require(
+        (clean_target / "AGENTS.md").read_text() == "# Upstream agents\n",
+        "clean upgrade did not adopt an upstream-only change",
+    )
+    require(
+        "Template baseline: `v4.1.1`"
+        in (clean_target / "zettelkasten/AI.md").read_text(),
+        "clean upgrade advanced the baseline gate automatically",
+    )
 
     outside = base / "upgrade-outside.md"
     outside.write_text("outside must remain untouched\n")
@@ -1782,8 +1993,9 @@ def validate_repository_layout() -> None:
         "npx skills add` installs the Companion Skill only",
         "npx skills remove ai-collaboration-workflow -g -y",
         "## Initialization Is Complete When",
-        "## Safely Review An Upgrade",
-        "read-only upgrade report",
+        "## Safely Reconcile An Upgrade",
+        "three-way reconciliation",
+        "docs/upgrading.md",
         "## Daily Use",
         "Checkpoint only at meaningful boundaries",
         "## Repository Learning Loop",
@@ -1813,8 +2025,9 @@ def validate_repository_layout() -> None:
         "npx skills add` 只会安装 Companion Skill",
         "npx skills remove ai-collaboration-workflow -g -y",
         "## 初始化完成标准",
-        "## 安全检查升级",
-        "只读升级报告",
+        "## 安全协调升级",
+        "三方协调",
+        "upgrading.zh-CN.md",
         "## 日常使用",
         "只在有意义的边界记录 checkpoint",
         "## 仓库学习闭环",

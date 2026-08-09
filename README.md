@@ -18,7 +18,7 @@ Everything required stays in reviewable Markdown and Git. The Companion Skill ca
 
 ## Quick Start
 
-The commands below are pinned to the current release, `v4.2.0`. Existing initialized projects are not modified automatically; adopt selected updates manually when useful.
+The commands below are pinned to the current release, `v4.2.0`. Existing initialized projects are not modified automatically; use the three-way upgrade workflow to reconcile a newer release when useful.
 
 > [!TIP]
 > **Upgrading from `v4.1.1` or earlier:** the Companion Skill was renamed from `ai-collaboration-workflow` to `repo-continuity`.
@@ -88,19 +88,19 @@ Do not use the raw copy command over an existing `AGENTS.md`, `CLAUDE.md`, `zett
 
 After initialization, the repository remains usable with only Markdown, Git, and project-native validation. Removing the companion Skill must not remove project knowledge or workflow state.
 
-## Safely Review An Upgrade
+## Safely Reconcile An Upgrade
 
-An initialized project is not overwritten when the Companion Skill changes. Install the target Skill release, enter the project, and ask:
+An initialized project is not a disposable template copy. It is the recorded old upstream baseline plus repository facts, rules, and learned Skills that may have diverged intentionally. Install the target Skill release, enter the project, and ask:
 
 ```text
-Use $repo-continuity to generate a read-only upgrade report for this repository.
-Compare its recorded template baseline with the Skill's pinned release, show the three-way diffs,
-and do not change any project file.
+Use $repo-continuity to upgrade this initialized repository to the Skill's pinned release.
+Create an isolated upgrade task branch, preview the three-way reconciliation, apply only safe changes,
+preserve local customization, resolve remaining conflicts, validate, and advance the baseline last.
 ```
 
-The report compares the old upstream baseline, the current project, and the target upstream release. It classifies each core file as added, unchanged, local-modified, upstream-modified, or both-modified. It never copies, removes, or overwrites a file. Optional Codex or Claude Code overlays are included only when explicitly requested.
+The Companion Skill uses a true three-way reconciliation: old upstream, current project, and target upstream. A read-only report and dry-run are available first. The apply command automatically installs upstream additions, adopts upstream-only changes, and performs clean text merges while preserving local-only changes. True conflicts and upstream removals stay untouched for explicit review.
 
-After reviewing the report, merge applicable upstream changes deliberately, preserve project facts and stricter local rules, run project validation, and update the `Template baseline` only after reconciliation is complete. See the exact CLI options in the [Companion Skill](skills/repo-continuity/SKILL.md#compare-an-upgrade).
+Application requires a clean task branch and is transactional. It refuses to run on `main` or `master`, never follows target symlinks, and never updates the `Template baseline` itself. After resolving the remaining paths, run project validation, review the Git diff, and advance the baseline as the final gate. See the [upgrade guide](docs/upgrading.md) and exact [Companion Skill workflow](skills/repo-continuity/SKILL.md#reconcile-an-upgrade).
 
 ## Daily Use
 
