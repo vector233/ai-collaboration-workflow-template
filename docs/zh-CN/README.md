@@ -18,7 +18,7 @@ Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
 
 ## 快速开始
 
-以下命令固定到当前版本 `v4.2.0`。已经初始化的项目不会被自动修改，需要升级时使用三方协调流程采用新版改进。
+以下命令固定到当前版本 `v4.3.0`。已经初始化的项目不会被自动修改，需要升级时使用三方协调流程采用新版改进。
 
 > [!TIP]
 > **从 `v4.1.1` 或更早版本升级：** Companion Skill 已从 `ai-collaboration-workflow` 更名为 `repo-continuity`。
@@ -31,7 +31,7 @@ Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.2.0/skills/repo-continuity \
+  https://github.com/vector233/repo-continuity/tree/v4.3.0/skills/repo-continuity \
   --skill repo-continuity \
   -a claude-code \
   -g -y
@@ -41,7 +41,7 @@ npx skills add \
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.2.0/skills/repo-continuity \
+  https://github.com/vector233/repo-continuity/tree/v4.3.0/skills/repo-continuity \
   --skill repo-continuity \
   -a codex \
   -g -y
@@ -61,7 +61,7 @@ npx skills add \
 Companion Skill 不是必需项。如果是一个尚不存在 Agent 指令或知识目录冲突的新仓库，可以复制固定版本的 payload：
 
 ```bash
-git clone --branch v4.2.0 --depth 1 \
+git clone --branch v4.3.0 --depth 1 \
   https://github.com/vector233/repo-continuity.git
 
 cp -R repo-continuity/template/. /path/to/your-project/
