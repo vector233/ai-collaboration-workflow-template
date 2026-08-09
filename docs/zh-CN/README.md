@@ -16,15 +16,6 @@ Repo Continuity 让仓库成为所有 Agent 共享的可信上下文：
 
 所有必要状态都保存在可 Review 的 Markdown 和 Git 中。Companion Skill 可以自动完成初始化与检查，但项目不依赖服务、数据库、隐藏记忆或自主执行 runtime。
 
-## 产品方向
-
-Repo Continuity 现在明确区分两个可以独立使用的产品层：
-
-- **当前已经交付的 Core：** 本指南描述的仓库自有知识与交付契约。
-- **已经接受的 Control Plane 设计方向：** 未来可选的 Runtime，负责跨平台任务状态、确定性 Workflow、策略、审批、审计，以及向 API、代码、浏览器、桌面、CI/CD 和 Kubernetes Worker 调度任务。
-
-目标采用混合架构。Codex、Claude Code、其他 Coding Agent 和未来自有 Web Agent 都是可替换的宿主或客户端；可选控制面持有长期 Workflow 状态，Worker 只暴露受限 Capability。这个方向不会让默认模板依赖 Runtime，也不表示 Hub 或连接器已经实现。详细设计见 [控制面架构](control-plane-architecture.md)。
-
 ## 快速开始
 
 以下命令固定到当前版本 `v4.2.0`。已经初始化的项目不会被自动修改，可以按需人工采用新版改进。
@@ -247,13 +238,11 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 
 ## 产品边界
 
-当前已经交付的 Core 是可链接、可 Review 的仓库知识，以及面向交付结果的轻量契约。它规定交接时必须保留什么，不规定 Agent 必须如何思考或运行哪个命令。
+核心产品是可链接、可 Review 的仓库知识，以及面向交付结果的轻量契约。它规定交接时必须保留什么，不规定 Agent 必须如何思考或运行哪个命令。
 
 - **核心**：`AGENTS.md`、`zettelkasten/` 知识入口和链接、按需记录的稳定工作意图、验证证据与经验写回。
 - **可选**：Companion Skill 提供的知识检查、WORK 更新和受保护的 worktree 辅助脚本；以及从 `adapters/` 显式安装的专业 Agent 模型路由 overlay。
-- **非目标**：对 Core 而言，包括自主循环、任务调度、隐藏记忆、强制 CLI，以及替代 Git、Issue Tracker、CI 和项目测试系统。
-
-可选 Control Plane 在不改变 Core 契约的前提下扩展产品。它可以协调自主或后台执行，但必须可独立部署，继续让拥有生命周期的外部系统保持权威，并且不能让仓库状态依赖某个宿主、模型或服务。已经接受的职责、安全、协议、部署和阶段交付设计见 [控制面架构](control-plane-architecture.md)。
+- **非目标**：自主循环、任务调度、隐藏记忆、强制 CLI，以及替代 Git、Issue Tracker、CI 和项目测试系统。
 
 知识网络使用纯 Markdown 和 Wiki 链接，可以作为兼容 Obsidian 的 vault 打开；Obsidian 只是可选编辑器，不是 runtime 或插件依赖。
 
@@ -305,12 +294,9 @@ template/                          默认安装的核心模板
 adapters/
   codex/.codex/                    Codex 显式启用的模型路由 overlay
   claude/.claude/                  Claude Code 显式启用的模型路由 overlay
-docs/
-  control-plane-architecture.md    控制面 canonical 架构设计
-  zh-CN/control-plane-architecture.md 中文架构说明
 ```
 
-`template/` 是 canonical 默认下游核心；`adapters/` 保存独立的显式 opt-in overlay，默认安装不会复制它们；`docs/` 保存维护者和未来 Runtime 设计，不复制到下游项目。维护仓库不会再保存第二套根级知识库。
+`template/` 是 canonical 默认下游核心；`adapters/` 保存独立的显式 opt-in overlay，默认安装不会复制它们。维护仓库不会再保存第二套根级知识库。
 
 ## 验证
 

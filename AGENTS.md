@@ -20,8 +20,6 @@ This repository develops and distributes Repo Continuity. The core product knowl
 - Keep the Quick Start release tag, payload baseline, distribution validator version, and Companion Skill `DEFAULT_REF` identical. Never describe an installation as pinned while its bootstrap defaults to a moving branch.
 - The downstream core must remain usable with Markdown and Git alone. Companion-Skill scripts are optional automation and must not be copied into or required by `template/`.
 - Optional vendor adapters must stay outside `template/`, require explicit installation opt-in, and preserve the user's root-session model unless a separately approved profile says otherwise.
-- The optional Control Plane, clients, workers, connectors, credentials, task event store, and autonomous runtime must stay outside `template/`. They may link to repository WORK records but must not become the hidden authority required to understand or resume repository work. Keep their protocol and workflow contracts host- and model-neutral; treat Codex, Claude Code, and first-party agents as interchangeable clients or bounded execution hosts.
-- Prefer documented APIs, SDKs, and CLIs for platform workers. Browser automation is a compatibility fallback, desktop automation is the final fallback, and neither may silently expand its identity, network, environment, or action scope.
 - Downstream workflow feedback is opt-in, evidence-backed, sanitized, and user-approved before publication. Never add telemetry or automatic cross-project collection.
 - When workflow behavior changes, align the canonical payload, Skill, documentation, examples, and validation as applicable.
 - Never put repository-specific release, publishing, or maintenance material in `template/`.
