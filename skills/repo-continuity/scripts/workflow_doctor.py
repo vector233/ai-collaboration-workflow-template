@@ -49,6 +49,7 @@ SKILL_REQUIRED_SECTIONS = (
     "## Provenance",
 )
 SKILL_STATES = {"active", "needs-verification", "deprecated"}
+EXPERIENCE_DECISIONS = {"pending", "promoted", "updated", "no-op", "not-promoted"}
 
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z_]+\}\}")
 WIKI_LINK_RE = re.compile(r"(?<!!)\[\[([^\]|#]+)")
@@ -361,13 +362,20 @@ def split_markdown_table_row(line: str) -> list[str]:
     return cells
 
 
-def has_pending_experience_decision(text: str) -> bool:
+def experience_candidate_rows(text: str) -> list[list[str]]:
+    rows: list[list[str]] = []
     for line in section_body(text, "Experience Candidates").splitlines():
         cells = split_markdown_table_row(line)
         if len(cells) >= 5 and cells[0] not in {"Candidate", "---"}:
-            if cells[2].strip().lower() == "pending":
-                return True
-    return False
+            rows.append(cells)
+    return rows
+
+
+def has_pending_experience_decision(text: str) -> bool:
+    return any(
+        cells[2].strip().lower() == "pending"
+        for cells in experience_candidate_rows(text)
+    )
 
 
 def has_pending_governed_gate(text: str) -> bool:
@@ -400,6 +408,16 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
         for section in WORK_REQUIRED_SECTIONS:
             if section not in text:
                 add(findings, "ERROR", f"work item is missing {section}", rel_path)
+        for cells in experience_candidate_rows(text):
+            decision = cells[2].strip().lower()
+            if decision not in EXPERIENCE_DECISIONS:
+                add(findings, "ERROR", f"invalid experience decision {decision!r}", rel_path)
+            if decision != "pending" and not cells[0].strip():
+                add(findings, "ERROR", "decided experience candidate is missing its lesson", rel_path)
+            if decision in {"promoted", "updated", "no-op"} and not cells[3].strip():
+                add(findings, "ERROR", "promoted experience is missing its destination", rel_path)
+            if decision != "pending" and not cells[4].strip():
+                add(findings, "ERROR", "decided experience is missing evidence or outcome", rel_path)
         if status in ACTIVE_WORK_STATES:
             branch = field_value(text, "branch")
             next_action = field_value(text, "next_action")

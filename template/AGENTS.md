@@ -36,7 +36,9 @@ For Tracked or Governed work, update the active WORK so a fresh agent can recove
 
 Project Skills are durable, on-demand procedures under `project-skills/`. Scan `project-skills/INDEX.md` for matching triggers before rediscovering a known procedure, then read only the matched `SKILL.md`.
 
-At each context checkpoint, record reusable experience candidates in the active work item. Before closing tracked or governed work, run the Experience Promotion Check:
+After validation, run a lightweight Learning Check before completing every task. Direct work with no verified reusable lesson creates no artifact. If Direct work exposes a verified reusable lesson that should change shared knowledge, re-route it to Tracked before durable writeback. Tracked and Governed work records every candidate and final decision in the active WORK.
+
+The Learning Loop is: detect a lesson, capture evidence, search existing knowledge, classify the smallest durable destination, write or record a no-op, validate retrieval, and commit the resulting diff. At each context checkpoint, preserve unresolved candidates. Before closing tracked or governed work, run the Experience Promotion Check:
 
 - repository-wide must/never/check-before behavior -> `AGENTS.md`;
 - bug roots and false assumptions -> `zettelkasten/gotchas.md`;
@@ -47,6 +49,8 @@ At each context checkpoint, record reusable experience candidates in the active 
 Do not create a Skill from a one-off incident, an unverified guess, or a procedure that is simpler as a short rule or runbook entry. Follow `zettelkasten/skill-lifecycle.md`.
 
 Before durable writeback, search the intended destination and `project-skills/INDEX.md`. Update the existing canonical rule, note, runbook, or Skill instead of creating a duplicate. For Tracked or Governed work, the active WORK owns each pending candidate; add a shared destination to `owned_paths` and check active WORK overlap before editing it. If another task owns that destination, coordinate or defer the promotion. Re-running the promotion must update the same destination or record a no-op, not create a second copy.
+
+Learning writeback is repository change, not hidden agent memory. Make it on the task branch as a reviewable Git diff. Do not silently change repository-wide rules, architecture constraints, security or permission behavior, release procedures, or an existing Skill's contract on the default branch. Require evidence and the same review or Governed gates that an equivalent code or policy change would need.
 
 ## Workflow Feedback
 

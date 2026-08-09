@@ -28,7 +28,7 @@ Do not replace generic workflow examples with invented project facts.
 
 Rewrite these files with verified repository-specific content:
 
-- `AGENTS.md`: merge existing instructions; keep Direct/Tracked/Governed routing, context preservation, idempotent experience promotion, Git isolation, context commits, validation, and cross-agent rules.
+- `AGENTS.md`: merge existing instructions; keep Direct/Tracked/Governed routing, context preservation, the evidence-backed Learning Loop and idempotent experience promotion, Git isolation, context commits, validation, and cross-agent rules.
 - `zettelkasten/project.md`: purpose, stack, modules, constraints.
 - `zettelkasten/quick-reference.md`: commands, ports, URLs, repository locations.
 - `zettelkasten/architecture.md`: verified current or planned flow.

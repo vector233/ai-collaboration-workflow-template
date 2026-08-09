@@ -1,4 +1,4 @@
 interface:
   display_name: "Repo Continuity"
-  short_description: "Install or upgrade safely, route work, and preserve knowledge"
-  default_prompt: "Use $repo-continuity to inspect, initialize, or safely compare an upgrade for this repository as needed; then route the task, load only required project knowledge, preserve recoverable context at meaningful boundaries, and write back reusable experience idempotently."
+  short_description: "Install safely, route work, and grow project knowledge"
+  default_prompt: "Use $repo-continuity to inspect, initialize, or safely compare an upgrade for this repository as needed; then route the task, load only required project knowledge, preserve recoverable context at meaningful boundaries, and run the evidence-backed Learning Check before completion."

@@ -137,6 +137,8 @@ Commit the checkpoint; do not create another handoff file.
 
 Checkpoint only at meaningful boundaries: after each bounded Tracked or Governed slice, and before an unfinished task crosses a handoff, long pause, agent or session switch, detectable context compaction, or a yield that would leave decisions only in chat. Direct work that completes, validates, and commits in the current context still needs no WORK; otherwise it becomes Tracked. Runtime context telemetry is optional, never a core dependency.
 
+After validation, every route runs a lightweight Learning Check. Direct work with no verified reusable lesson creates no artifact. If a Direct task discovers a lesson that should change shared project knowledge, it becomes Tracked before writeback so the evidence and decision remain recoverable.
+
 Start work that must run in parallel:
 
 ```text
@@ -148,7 +150,7 @@ Close tracked or governed work:
 
 ```text
 Validate the accepted behavior, record the final commit and evidence, close all governed gates,
-run the Experience Promotion Check, update durable knowledge, and then close the WORK.
+run the Learning Check, decide every candidate, validate durable writeback, and then close the WORK.
 ```
 
 Without the Skill, create a WORK manually only when the selected route is Tracked or Governed:
@@ -159,6 +161,20 @@ cp zettelkasten/templates/work-item.md \
 ```
 
 Update frontmatter and checkpoints in place. A WORK never moves for a status change.
+
+When the Companion Skill is active, ask the agent to use its bundled WORK helper; its absolute installation path is host-specific. From a Repo Continuity source checkout, the equivalent commands are:
+
+```bash
+python3 skills/repo-continuity/scripts/workflow_task.py learn-add <WORK-ID> \
+  --candidate "<lesson>" --shape project-skill --evidence "<verified evidence>"
+python3 skills/repo-continuity/scripts/workflow_task.py learn-decide <WORK-ID> \
+  --candidate "<lesson>" --decision promoted \
+  --destination "project-skills/<name>/SKILL.md; project-skills/INDEX.md" \
+  --reason "<writeback and validation result>"
+python3 skills/repo-continuity/scripts/workflow_task.py learn-status <WORK-ID> --require-complete
+```
+
+Use `learn-none <WORK-ID> --reason "<why no verified reusable lesson exists>"` for a Tracked or Governed task with no candidate. These commands manage Markdown rows and closure checks; the agent still judges relevance, writes the destination, and validates retrieval.
 
 ## Optional Codex Model Routing
 
@@ -233,7 +249,7 @@ Task
   -> Implement, validate, and review as required
   -> Preserve recoverable state at meaningful context boundaries
   -> Commit every context that produces persistent changes or a coherent slice
-  -> Promote reusable experience into rules, notes, runbooks, or project Skills
+  -> Run the Learning Check and promote verified experience into rules, notes, runbooks, or project Skills
 ```
 
 Routing considers scope, uncertainty, risk, reversibility, duration, coordination, and verification. A small security or data change can be Governed even when its diff is tiny.
@@ -243,14 +259,14 @@ Routing considers scope, uncertainty, risk, reversibility, duration, coordinatio
 The core product is linked, reviewable repository knowledge plus a lightweight delivery contract. It defines what must remain true at handoff, not how an agent must think or which command it must run.
 
 - **Core**: `AGENTS.md`, the `zettelkasten/` entry and links, stable work intent when needed, validation evidence, and durable experience writeback.
-- **Optional**: companion-Skill scripts for knowledge checks, WORK edits, and guarded worktree creation; explicitly installed model-routing overlays from `adapters/` for specialist agents.
+- **Optional**: companion-Skill scripts for knowledge checks, WORK and Learning Candidate edits, and guarded worktree creation; explicitly installed model-routing overlays from `adapters/` for specialist agents.
 - **Non-goals**: autonomous loops, task scheduling, hidden memory, mandatory CLIs, or replacing Git, issue trackers, CI, and project test systems.
 
 The knowledge network uses plain Markdown and wiki links. It can be opened as an Obsidian-compatible vault, but Obsidian is an optional editor rather than a runtime or plugin dependency.
 
-## Durable Experience
+## Repository Learning Loop
 
-Each WORK records Experience Candidates. At checkpoints and closeout, agents decide whether each lesson stays local or is promoted:
+After validation, every task checks for a correction, repeatable root cause, missing invariant, reusable command sequence, or stable procedure. Direct work with no verified candidate remains artifact-free; a Direct task with a durable candidate becomes Tracked before shared writeback. Each Tracked or Governed WORK records candidate evidence and the final `promoted`, `updated`, `no-op`, or `not-promoted` decision.
 
 | Experience | Destination |
 |---|---|
@@ -263,6 +279,8 @@ Each WORK records Experience Candidates. At checkpoints and closeout, agents dec
 Project Skills include concrete triggers, exclusions, procedure, validation, recovery, and provenance. One-off incidents and unverified guesses do not become Skills.
 
 Promotion is idempotent. Search existing destinations first, update the canonical rule, note, runbook, or Skill in place, and record a no-op when it is already current. For Tracked or Governed work, add shared destinations to `owned_paths`; when another active WORK owns the same destination, coordinate one writer or defer the promotion.
+
+Writeback is always a task-branch Git diff, never hidden model memory. Repository-wide instructions, architecture constraints, security or permission behavior, release procedures, and existing Skill contracts require evidence and the same review or Governed gates as equivalent code or policy changes. Project Skills keep the portable `SKILL.md` core; host-specific activation metadata stays in explicit adapters.
 
 Knowledge health has two levels. Normal handoff checks structure: branch-to-WORK mapping, checkpoint fields, links, ownership, and Skill routing. For important multi-context handoffs or changes to resume semantics, a real fresh agent with no chat history performs a semantic resume probe and reports the route, acceptance state, checkpoint, validation, risk, and next action before editing. Synthetic expected responses test only the evaluator, not Agent recovery; see [docs/fresh-agent-resume-evaluation.md](docs/fresh-agent-resume-evaluation.md).
 

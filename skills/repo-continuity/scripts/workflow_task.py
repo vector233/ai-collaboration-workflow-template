@@ -15,6 +15,15 @@ from pathlib import Path
 SAFE_SLUG_RE = re.compile(r"[^a-z0-9-]+")
 WORK_ID_RE = re.compile(r"^WORK-[0-9]{14}-[a-z0-9][a-z0-9-]*$")
 FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|\Z)", re.DOTALL)
+EXPERIENCE_SHAPES = (
+    "rule",
+    "gotcha",
+    "fact",
+    "runbook",
+    "project-skill",
+    "workflow-feedback",
+)
+EXPERIENCE_DECISIONS = ("promoted", "updated", "no-op", "not-promoted")
 
 
 class WorkflowTaskError(RuntimeError):
@@ -195,6 +204,67 @@ def section_body(text: str, heading: str) -> str:
     return text.split(marker, 1)[1].split("\n## ", 1)[0]
 
 
+def markdown_cell(value: str) -> str:
+    return single_line(value).replace("|", r"\|")
+
+
+def experience_rows(text: str) -> list[tuple[int, list[str]]]:
+    lines = text.splitlines()
+    try:
+        section_start = lines.index("## Experience Candidates")
+    except ValueError as exc:
+        raise WorkflowTaskError("WORK file is missing ## Experience Candidates") from exc
+    section_end = next(
+        (index for index in range(section_start + 1, len(lines)) if lines[index].startswith("## ")),
+        len(lines),
+    )
+    rows: list[tuple[int, list[str]]] = []
+    for index in range(section_start + 1, section_end):
+        cells = split_markdown_table_row(lines[index])
+        if len(cells) < 5 or cells[0] == "Candidate":
+            continue
+        if all(not cell or set(cell) <= {"-", ":"} for cell in cells):
+            continue
+        rows.append((index, cells))
+    return rows
+
+
+def experience_row(
+    candidate: str,
+    shape: str,
+    decision: str,
+    destination: str,
+    result: str,
+) -> str:
+    return "| " + " | ".join(
+        markdown_cell(value)
+        for value in (candidate, shape, decision, destination, result)
+    ) + " |"
+
+
+def replace_or_append_experience_row(text: str, row: str) -> str:
+    lines = text.splitlines()
+    rows = experience_rows(text)
+    placeholder = next(
+        (index for index, cells in rows if not cells[0] and cells[2].lower() == "pending"),
+        None,
+    )
+    if placeholder is not None:
+        lines[placeholder] = row
+    elif rows:
+        lines.insert(rows[-1][0] + 1, row)
+    else:
+        raise WorkflowTaskError("Experience Candidates table is missing its writable row")
+    return "\n".join(lines) + ("\n" if text.endswith("\n") else "")
+
+
+def destination_paths(value: str) -> list[str]:
+    raw_paths = [item.strip() for item in value.split(";") if item.strip()]
+    if not raw_paths:
+        raise WorkflowTaskError("a promoted, updated, or no-op candidate needs a destination")
+    return validate_owned_paths(raw_paths)
+
+
 def has_pending_experience_decision(text: str) -> bool:
     for line in section_body(text, "Experience Candidates").splitlines():
         cells = split_markdown_table_row(line)
@@ -313,6 +383,166 @@ def command_checkpoint(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_learn_add(args: argparse.Namespace) -> int:
+    root = repository_root(args.root)
+    path = require_work(root, args.work_id)
+    text = path.read_text(encoding="utf-8")
+    candidate = single_line(args.candidate)
+    if not candidate:
+        raise WorkflowTaskError("candidate must not be empty")
+    evidence = single_line(args.evidence)
+    if not evidence:
+        raise WorkflowTaskError("evidence must not be empty")
+    for _, cells in experience_rows(text):
+        if cells[0] == candidate:
+            raise WorkflowTaskError(f"experience candidate already exists: {candidate}")
+    destination = ""
+    if args.destination:
+        destination = "; ".join(destination_paths(args.destination))
+    row = experience_row(
+        candidate,
+        args.shape,
+        "pending",
+        destination,
+        f"Evidence: {evidence}",
+    )
+    path.write_text(replace_or_append_experience_row(text, row), encoding="utf-8")
+    write_result(
+        {
+            "work_id": args.work_id,
+            "candidate": candidate,
+            "decision": "pending",
+            "path": str(path.relative_to(root)),
+        },
+        args.json,
+    )
+    return 0
+
+
+def command_learn_none(args: argparse.Namespace) -> int:
+    root = repository_root(args.root)
+    path = require_work(root, args.work_id)
+    text = path.read_text(encoding="utf-8")
+    substantive = [cells for _, cells in experience_rows(text) if cells[0]]
+    if substantive:
+        raise WorkflowTaskError("cannot record no reusable lesson after candidates exist")
+    reason = single_line(args.reason)
+    if not reason:
+        raise WorkflowTaskError("reason must not be empty")
+    row = experience_row(
+        "No reusable lesson",
+        "fact",
+        "not-promoted",
+        "work item",
+        f"Learning Check: {reason}",
+    )
+    path.write_text(replace_or_append_experience_row(text, row), encoding="utf-8")
+    write_result(
+        {
+            "work_id": args.work_id,
+            "candidate": "No reusable lesson",
+            "decision": "not-promoted",
+            "path": str(path.relative_to(root)),
+        },
+        args.json,
+    )
+    return 0
+
+
+def command_learn_decide(args: argparse.Namespace) -> int:
+    root = repository_root(args.root)
+    path = require_work(root, args.work_id)
+    text = path.read_text(encoding="utf-8")
+    candidate = single_line(args.candidate)
+    if not candidate:
+        raise WorkflowTaskError("candidate must not be empty")
+    reason = single_line(args.reason)
+    if not reason:
+        raise WorkflowTaskError("reason must not be empty")
+    matches = [
+        (index, cells)
+        for index, cells in experience_rows(text)
+        if cells[0] == candidate
+    ]
+    if not matches:
+        raise WorkflowTaskError(f"experience candidate does not exist: {candidate}")
+    if len(matches) > 1:
+        raise WorkflowTaskError(f"experience candidate is duplicated: {candidate}")
+    index, cells = matches[0]
+    if cells[2].lower() != "pending":
+        raise WorkflowTaskError(
+            f"experience candidate already has decision {cells[2]!r}: {candidate}"
+        )
+    if args.decision == "not-promoted":
+        destination = single_line(args.destination or "work item")
+        if destination != "work item":
+            raise WorkflowTaskError("a not-promoted candidate must remain in the work item")
+    else:
+        destination = "; ".join(destination_paths(args.destination or ""))
+        missing = [
+            value
+            for value in destination_paths(destination)
+            if not (root / value).exists()
+        ]
+        if missing:
+            raise WorkflowTaskError(
+                "durable destination does not exist after writeback: " + ", ".join(missing)
+            )
+    previous = cells[4]
+    outcome = f"{previous}; Outcome: {reason}" if previous else reason
+    lines = text.splitlines()
+    lines[index] = experience_row(candidate, cells[1], args.decision, destination, outcome)
+    updated = "\n".join(lines) + ("\n" if text.endswith("\n") else "")
+    path.write_text(updated, encoding="utf-8")
+    write_result(
+        {
+            "work_id": args.work_id,
+            "candidate": candidate,
+            "decision": args.decision,
+            "destination": destination,
+            "path": str(path.relative_to(root)),
+        },
+        args.json,
+    )
+    return 0
+
+
+def command_learn_status(args: argparse.Namespace) -> int:
+    root = repository_root(args.root)
+    path = require_work(root, args.work_id)
+    rows = experience_rows(path.read_text(encoding="utf-8"))
+    candidates = [
+        {
+            "candidate": cells[0] or "<learning-check-required>",
+            "shape": cells[1],
+            "decision": cells[2],
+            "destination": cells[3],
+            "evidence_and_outcome": cells[4],
+        }
+        for _, cells in rows
+    ]
+    pending = [item for item in candidates if item["decision"].lower() == "pending"]
+    payload = {
+        "work_id": args.work_id,
+        "path": str(path.relative_to(root)),
+        "complete": not pending,
+        "pending": len(pending),
+        "candidates": candidates,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(f"work_id: {args.work_id}")
+        print(f"complete: {'yes' if not pending else 'no'}")
+        print(f"pending: {len(pending)}")
+        for item in candidates:
+            print(
+                f"candidate: {item['candidate']} | shape={item['shape']} | "
+                f"decision={item['decision']} | destination={item['destination'] or '-'}"
+            )
+    return 1 if args.require_complete and pending else 0
+
+
 def command_close(args: argparse.Namespace) -> int:
     required_flags = {
         "--acceptance-complete": args.acceptance_complete,
@@ -387,6 +617,54 @@ def parse_args() -> argparse.Namespace:
     checkpoint_parser.add_argument("--root", type=Path, default=Path.cwd())
     checkpoint_parser.add_argument("--json", action="store_true")
     checkpoint_parser.set_defaults(handler=command_checkpoint)
+
+    learn_add_parser = subparsers.add_parser(
+        "learn-add", help="record an evidence-backed experience candidate"
+    )
+    learn_add_parser.add_argument("work_id")
+    learn_add_parser.add_argument("--candidate", required=True)
+    learn_add_parser.add_argument("--shape", choices=EXPERIENCE_SHAPES, required=True)
+    learn_add_parser.add_argument("--evidence", required=True)
+    learn_add_parser.add_argument(
+        "--destination",
+        help="optional repository-relative destination hint; separate multiple paths with ';'",
+    )
+    learn_add_parser.add_argument("--root", type=Path, default=Path.cwd())
+    learn_add_parser.add_argument("--json", action="store_true")
+    learn_add_parser.set_defaults(handler=command_learn_add)
+
+    learn_none_parser = subparsers.add_parser(
+        "learn-none", help="record that the Learning Check found no reusable lesson"
+    )
+    learn_none_parser.add_argument("work_id")
+    learn_none_parser.add_argument("--reason", required=True)
+    learn_none_parser.add_argument("--root", type=Path, default=Path.cwd())
+    learn_none_parser.add_argument("--json", action="store_true")
+    learn_none_parser.set_defaults(handler=command_learn_none)
+
+    learn_decide_parser = subparsers.add_parser(
+        "learn-decide", help="record the final promotion decision for a candidate"
+    )
+    learn_decide_parser.add_argument("work_id")
+    learn_decide_parser.add_argument("--candidate", required=True)
+    learn_decide_parser.add_argument("--decision", choices=EXPERIENCE_DECISIONS, required=True)
+    learn_decide_parser.add_argument(
+        "--destination",
+        help="repository-relative destination; separate multiple paths with ';'",
+    )
+    learn_decide_parser.add_argument("--reason", required=True)
+    learn_decide_parser.add_argument("--root", type=Path, default=Path.cwd())
+    learn_decide_parser.add_argument("--json", action="store_true")
+    learn_decide_parser.set_defaults(handler=command_learn_decide)
+
+    learn_status_parser = subparsers.add_parser(
+        "learn-status", help="show whether every Learning Check candidate has a final decision"
+    )
+    learn_status_parser.add_argument("work_id")
+    learn_status_parser.add_argument("--require-complete", action="store_true")
+    learn_status_parser.add_argument("--root", type=Path, default=Path.cwd())
+    learn_status_parser.add_argument("--json", action="store_true")
+    learn_status_parser.set_defaults(handler=command_learn_status)
 
     close_parser = subparsers.add_parser("close", help="close a WORK after explicit gates")
     close_parser.add_argument("work_id")

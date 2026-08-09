@@ -1,6 +1,6 @@
 ---
 name: repo-continuity
-description: Initialize, inspect, safely compare upgrades for, and operate Repo Continuity. Use when an agent needs to install the repository-owned knowledge layer; produce a read-only three-way upgrade report without overwriting project files; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; discover or idempotently promote repository experience into an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
+description: Initialize, inspect, safely compare upgrades for, and operate Repo Continuity. Use when an agent needs to install the repository-owned knowledge layer; produce a read-only three-way upgrade report without overwriting project files; route work into Direct, Tracked, or Governed delivery; preserve, resume, or verify a stable WORK record across context boundaries; run the evidence-backed Learning Check and idempotently promote repository experience into rules, knowledge, runbooks, or an on-demand project Skill; identify, sanitize, or prepare evidence-backed template feedback; isolate parallel Git work; use optional Codex or Claude Code specialist model routing; optionally automate knowledge checks and Markdown updates; or hand off durable project context across agents.
 ---
 
 # Repo Continuity
@@ -79,6 +79,20 @@ python3 "$SKILL_ROOT/scripts/workflow_task.py" new <slug> --root <repo-root>
 
 The helpers read and write the same repository files and Git state. They are optional, own no hidden state, and must not become project requirements.
 
+When a Tracked or Governed task reaches its Learning Check, the WORK helper can manage the same Markdown candidate table deterministically:
+
+```bash
+python3 "$SKILL_ROOT/scripts/workflow_task.py" learn-add <WORK-ID> \
+  --candidate "<lesson>" --shape <shape> --evidence "<verified evidence>" --root <repo-root>
+python3 "$SKILL_ROOT/scripts/workflow_task.py" learn-decide <WORK-ID> \
+  --candidate "<lesson>" --decision <promoted|updated|no-op|not-promoted> \
+  --destination "<repo-relative-path[; second-path]>" --reason "<result>" --root <repo-root>
+python3 "$SKILL_ROOT/scripts/workflow_task.py" learn-status <WORK-ID> \
+  --require-complete --root <repo-root>
+```
+
+Use `learn-none <WORK-ID> --reason "<why no verified lesson exists>"` when a Tracked or Governed task has no reusable lesson. The helper records decisions; the agent still judges relevance, writes the selected destination, and validates the result.
+
 ## Route The Task
 
 Read [routing.md](references/routing.md) when classifying new work or reconsidering its route.
@@ -107,11 +121,15 @@ Do not checkpoint every turn. Update the active WORK after each bounded Tracked 
 
 Persist the route, acceptance state, completed step and commit, exact validation, risks or unresolved decisions, next allowed action, and experience candidates. Optional vendor telemetry may signal context pressure, but never require it and never store project state outside the repository.
 
-## Promote Experience
+## Close With The Learning Loop
 
 Read [experience-promotion.md](references/experience-promotion.md) when a task exposes a repeatable lesson, before closeout, or when creating/updating a project Skill.
 
-Record candidates in the active work item first. Search all likely destinations, update the smallest canonical destination, and make repeated promotion a no-op rather than a duplicate. For tracked or governed work, declare shared destinations in `owned_paths` and coordinate a single writer. Create a project Skill only for a stable conditional procedure with concrete triggers, validation, and recovery. Update the existing `project-skills/INDEX.md` row so future agents can wake it without loading every Skill.
+After validation, run a lightweight Learning Check before completing every task. Direct work with no verified candidate creates no artifact. If Direct work exposes a reusable lesson that should change shared knowledge, re-route it to Tracked before writeback. For Tracked and Governed work, record candidates and evidence in the active work item first.
+
+Search all likely destinations, update the smallest canonical destination, and make repeated promotion a no-op rather than a duplicate. Declare shared destinations in `owned_paths` and coordinate a single writer. Create a project Skill only for a stable conditional procedure with concrete triggers, validation, and recovery. Update the existing `project-skills/INDEX.md` row so future agents can wake it without loading every Skill.
+
+All writeback is a reviewable task-branch Git diff. Do not use vendor memory or chat history as the durable destination, and do not silently change repository-wide instructions, architecture, security, permission, release, or existing Skill contracts without the evidence and review or Governed gates that an equivalent repository change requires.
 
 ## Improve The Template
 

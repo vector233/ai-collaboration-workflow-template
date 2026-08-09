@@ -53,3 +53,9 @@ Use the smallest durable form:
 - conditional multi-step behavior -> project Skill.
 
 Repository-specific Skills remain in the repository. Do not copy them into the shared workflow Skill unless the lesson is genuinely reusable across unrelated projects and separately reviewed.
+
+## Host Portability
+
+Use the portable `SKILL.md` core: `name`, a trigger-rich `description`, instructions, optional `references/`, and optional `scripts/`. Keep Codex-, Claude Code-, Hermes-, model-, or tool-specific activation metadata in explicit adapters rather than the repository procedure. A host may expose a project Skill through native Skill discovery or may follow `project-skills/INDEX.md`; either path must read the same repository-owned procedure and write durable results back through the active task.
+
+Agent-generated Skill changes are proposals, not private self-modification. Create or update them on a task branch, run structural and retrieval checks, and require the same review or Governed gate as any equivalent workflow-policy change.

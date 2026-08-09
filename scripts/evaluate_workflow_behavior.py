@@ -18,6 +18,7 @@ FIELDS = (
     "isolation",
     "project_skills",
     "promote_project_skill",
+    "learning_action",
     "requires_helper",
     "feedback_action",
     "feedback_scope",

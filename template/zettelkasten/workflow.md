@@ -75,8 +75,22 @@ Direct work that completes, validates, and commits in the current context needs 
 5. Run the smallest meaningful validation.
 6. Record review evidence and link any project-native review or approval.
 7. At a preservation boundary, record a context checkpoint and commit all current-task changes.
-8. Record experience candidates.
-9. Repeat until acceptance and validation pass, then run Experience Promotion and close the work item.
+8. Run the Learning Check and record experience candidates with evidence.
+9. Repeat until acceptance and validation pass, then decide every candidate, perform durable writeback, validate retrieval, and close the work item.
+
+## Learning Loop
+
+Run a lightweight Learning Check after validation and before completing every task:
+
+1. Detect a correction, repeatable root cause, missing invariant, reusable command sequence, or stable multi-step procedure.
+2. Capture concrete evidence. Do not promote guesses or story-specific detail.
+3. Search rules, notes, runbooks, decisions, and the project Skill index before writing.
+4. Classify the smallest durable destination and decide `promoted`, `updated`, `no-op`, or `not-promoted`.
+5. Write on the task branch, validate the destination and retrieval path, and commit the reviewable diff.
+
+Direct work with no verified candidate creates no artifact. If a Direct task discovers a candidate that should change shared knowledge, re-route it to Tracked before writeback so the evidence and decision remain recoverable. Tracked and Governed work records all candidates in its stable WORK, including an explicit `not-promoted` result when the check found no reusable lesson.
+
+The loop is repository-owned procedural learning, not private model memory. It never depends on chat history, a vendor memory service, or an autonomous runtime. Changes to repository-wide instructions, architecture constraints, security or permission behavior, release procedures, and existing Skill contracts receive the same evidence, review, and Governed gates as equivalent code or policy changes.
 
 Edit the Markdown state directly. If the companion Skill is installed, its optional helpers may create or update the same file. The helper is never the source of truth.
 
@@ -100,7 +114,7 @@ Run this check at context handoff and before closing tracked or governed work.
 | Evidence-backed workflow-template friction | `workflow-observations.md` | repeated, high-impact, or a user correction identified reusable template behavior; sanitized |
 | One-off observation or low-confidence guess | active `WORK-*` only | do not promote |
 
-For every candidate, record the decision, reason, destination, and exact content written.
+For every candidate, record the evidence, decision, reason, destination, and exact content written.
 
 ### Idempotent Writeback
 
@@ -109,6 +123,7 @@ For every candidate, record the decision, reason, destination, and exact content
 3. For Tracked or Governed work, treat the active WORK as the candidate owner. Add any shared destination to `owned_paths` and check active WORK overlap before editing it.
 4. When another active task owns the same destination, coordinate a single writer or defer promotion until integration.
 5. Record a no-op decision when the destination already contains the current verified knowledge. Re-running promotion must not create duplicate notes, Skills, or index rows.
+6. Keep the writeback on the task branch and review it as a normal repository change; the agent may propose the diff but owns no hidden rule store.
 
 ## Template Feedback Check
 

@@ -95,9 +95,9 @@ Leave this section empty for tracked work. For governed work, each gate needs an
 
 ## Experience Candidates
 
-The active WORK owns each pending candidate. Before editing a shared destination, add its path to `owned_paths` and check overlap with active work. Search first and update the canonical destination; a repeated promotion should record a no-op instead of creating a duplicate.
+The active WORK owns each pending candidate. During the Learning Check, capture evidence before promotion. Before editing a shared destination, add its path to `owned_paths` and check overlap with active work. Search first and update the canonical destination; a repeated promotion should record a no-op instead of creating a duplicate. Write durable learning as a reviewable task-branch diff, never as hidden agent memory.
 
-| Candidate | Reuse shape | Decision | Destination | Content written or reason not promoted |
+| Candidate | Reuse shape | Decision | Destination | Evidence and content written or reason not promoted |
 |---|---|---|---|---|
 |  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |
 

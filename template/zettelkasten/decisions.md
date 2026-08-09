@@ -41,3 +41,11 @@ Append durable decisions. Supersede historical decisions with a new entry instea
 **Why**: branch-only context switching does not isolate simultaneous agents or dirty working trees.
 
 **Impact**: every context commits task-scoped changes; shared knowledge is promoted near integration to reduce conflicts. See [[git-collaboration]].
+
+## AD-006: Learn Through Reviewed Repository Writeback
+
+**Decision**: every completed task runs a lightweight Learning Check, but only verified reusable lessons become repository rules, knowledge, runbooks, or project Skills through a task-branch Git diff.
+
+**Why**: project learning should survive agent and model changes without allowing hidden memory or unreviewed self-modification to become authoritative.
+
+**Impact**: Direct tasks stay artifact-free when no lesson exists and become Tracked before shared learning writeback. Sensitive policy and existing Skill changes retain their normal review or Governed gates. See [[workflow]] and [[skill-lifecycle]].

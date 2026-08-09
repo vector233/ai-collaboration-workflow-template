@@ -56,7 +56,7 @@
 
 - Route work through Direct, Tracked, or Governed mode using [[workflow]].
 - Keep tracked and governed state in one stable `WORK-*` under [[work/README]].
-- Promote repeatable procedures through [[skill-lifecycle]].
+- Run the evidence-backed Learning Check after validation and promote repeatable procedures through [[skill-lifecycle]].
 - Use task branches and dedicated worktrees for parallel work as defined in [[git-collaboration]].
 - Write architecture facts, validation procedures, gotchas, and project rules back to their durable destinations.
 

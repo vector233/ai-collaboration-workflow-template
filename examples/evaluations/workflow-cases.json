@@ -10,6 +10,7 @@
       "isolation": "current-branch",
       "project_skills": [],
       "promote_project_skill": false,
+      "learning_action": "none",
       "requires_helper": false,
       "feedback_action": "none",
       "feedback_scope": "none"
@@ -26,6 +27,7 @@
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,
+      "learning_action": "record-no-reusable-lesson",
       "requires_helper": false,
       "feedback_action": "none",
       "feedback_scope": "none"
@@ -42,6 +44,7 @@
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,
+      "learning_action": "record-no-reusable-lesson",
       "requires_helper": false,
       "feedback_action": "none",
       "feedback_scope": "none"
@@ -58,6 +61,7 @@
       "isolation": "dedicated-worktree",
       "project_skills": [],
       "promote_project_skill": false,
+      "learning_action": "record-no-reusable-lesson",
       "requires_helper": false,
       "feedback_action": "none",
       "feedback_scope": "none"
@@ -74,6 +78,7 @@
       "isolation": "task-branch",
       "project_skills": ["reset-provider-sandbox"],
       "promote_project_skill": false,
+      "learning_action": "no-op-existing-knowledge",
       "requires_helper": false,
       "feedback_action": "none",
       "feedback_scope": "none"
@@ -90,6 +95,7 @@
       "isolation": "current-branch",
       "project_skills": [],
       "promote_project_skill": false,
+      "learning_action": "none",
       "requires_helper": false,
       "feedback_action": "none",
       "feedback_scope": "none"
@@ -106,9 +112,27 @@
       "isolation": "task-branch",
       "project_skills": [],
       "promote_project_skill": false,
+      "learning_action": "promote-workflow-feedback",
       "requires_helper": false,
       "feedback_action": "record-local",
       "feedback_scope": "template-wide"
+    }
+  },
+  {
+    "id": "promote-repeatable-project-skill",
+    "prompt": "During a tracked bug fix, current evidence and two prior WORK records verify the same provider sandbox reset sequence, including its validation and safe recovery. Preserve it for future tasks.",
+    "available_project_skills": [],
+    "expected": {
+      "route": "tracked",
+      "artifacts": ["WORK", "PROJECT_SKILL"],
+      "gates": [],
+      "isolation": "task-branch",
+      "project_skills": [],
+      "promote_project_skill": true,
+      "learning_action": "promote-project-skill",
+      "requires_helper": false,
+      "feedback_action": "none",
+      "feedback_scope": "none"
     }
   }
 ]

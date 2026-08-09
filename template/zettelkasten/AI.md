@@ -55,7 +55,7 @@ Do not write a checkpoint after every turn. Update the active work item after ea
 
 A checkpoint must let a fresh agent recover the route, acceptance state, completed step and commit, exact validation, risks or unresolved decisions, next allowed action, and experience candidates. Optional adapters may detect context pressure, but Markdown and Git remain sufficient.
 
-At closeout, promote only durable knowledge to rules, gotchas, architecture notes, runbooks, decisions, or project Skills. Search first, update the canonical destination in place, and make repeated promotion a no-op when the knowledge is already current. For tracked or governed work, declare a shared destination in `owned_paths` and resolve overlap before editing it.
+After validation, run the Learning Check for every route. Direct work with no verified reusable lesson creates no artifact; if it finds a durable candidate, re-route it to Tracked before shared writeback. At closeout, promote only evidence-backed knowledge to rules, gotchas, architecture notes, runbooks, decisions, or project Skills. Search first, update the canonical destination in place, and make repeated promotion a no-op when the knowledge is already current. For tracked or governed work, declare a shared destination in `owned_paths` and resolve overlap before editing it. Keep every writeback as a reviewable task-branch Git diff rather than hidden agent memory.
 
 When the workflow itself caused repeatable friction, route a sanitized observation through the Template Feedback Check. Normal work produces no feedback artifact.
 

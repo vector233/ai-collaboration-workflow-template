@@ -84,6 +84,23 @@ A third-party sandbox reset procedure repeatedly causes failed tests:
 5. Add or update trigger metadata in `project-skills/INDEX.md` without duplicating its row.
 6. Check the index entry and test whether a fresh agent selects it for the next sandbox failure; use the optional Doctor when installed.
 
+The Learning Loop runs after validation for every route. A Direct task with no verified reusable lesson leaves no workflow artifact. If the Direct fix reveals this repeatable reset procedure, the task becomes Tracked before shared writeback. With the optional helper, the same evidence and decision can be recorded without hand-editing the table:
+
+```bash
+python3 skills/repo-continuity/scripts/workflow_task.py learn-add "$work_id" \
+  --candidate "Provider sandbox reset order is stable" \
+  --shape project-skill \
+  --evidence "The focused regression reproduced before reset and passed after the documented sequence"
+
+python3 skills/repo-continuity/scripts/workflow_task.py learn-decide "$work_id" \
+  --candidate "Provider sandbox reset order is stable" \
+  --decision promoted \
+  --destination "project-skills/reset-provider-sandbox/SKILL.md; project-skills/INDEX.md" \
+  --reason "Skill structure, reset validation, and trigger retrieval passed"
+```
+
+The commands update repository Markdown only. The Agent still selects and writes the destination, and the resulting Skill remains a normal task-branch Git diff that must pass the applicable review.
+
 ## Template Feedback Without Telemetry
 
 The user corrects a workflow instruction that made an optional helper necessary, and the same workaround recurs in another task:

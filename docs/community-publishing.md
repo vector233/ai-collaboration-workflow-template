@@ -98,8 +98,8 @@ Task
   -> [WORK]    keep stable task state when tracking is useful
   -> Build     implement, validate, and commit one bounded context
   -> [Gates]   close required decisions and approvals in the WORK
-  -> Check     validate behavior and inspect changed knowledge
-  -> Promote   write recurring lessons to rules, notes, runbooks, or project Skills
+  -> Learn     detect and verify reusable experience
+  -> Promote   write reviewed lessons to rules, notes, runbooks, or project Skills
 ```
 
 It uses Obsidian-style wiki links like `[[workflow]]` for note-to-note navigation, while keeping standard Markdown links and images for GitHub compatibility.

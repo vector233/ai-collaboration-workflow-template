@@ -135,6 +135,8 @@ Agent 自行选择：
 
 只在有意义的边界记录 checkpoint：每个 Tracked 或 Governed 有限切片完成后，以及未完成任务将要交接、长时间暂停、切换 Agent 或会话、发生可检测的上下文压缩之前，或者继续依赖聊天会丢失决策时。能在当前上下文完成、验证并提交的 Direct 工作仍然不需要 WORK；否则升级为 Tracked。运行时上下文遥测始终是可选能力，不是核心依赖。
 
+验证完成后，每条路径都执行一次轻量 Learning Check。Direct 工作没有已验证的可复用经验时不创建任何产物；如果发现应该改变共享项目知识的经验，则先升级为 Tracked，再进行固化，使证据和决策可恢复。
+
 启动并行任务：
 
 ```text
@@ -146,7 +148,7 @@ Agent 自行选择：
 
 ```text
 验证验收行为，记录最终提交和证据，关闭所有 Governed 门禁，
-执行 Experience Promotion Check，更新长期知识，然后关闭 WORK。
+执行 Learning Check，决定所有候选，验证长期知识写回，然后关闭 WORK。
 ```
 
 没有安装 Skill 时，仅在 Tracked 或 Governed 路径下手工创建 WORK：
@@ -157,6 +159,20 @@ cp zettelkasten/templates/work-item.md \
 ```
 
 直接更新 frontmatter 和 checkpoint。WORK 不会因为状态变化而移动。
+
+启用 Companion Skill 后，可以让 Agent 调用其内置 WORK helper；实际绝对路径由宿主安装位置决定。在 Repo Continuity 源码 checkout 中，对应命令如下：
+
+```bash
+python3 skills/repo-continuity/scripts/workflow_task.py learn-add <WORK-ID> \
+  --candidate "<经验>" --shape project-skill --evidence "<已验证证据>"
+python3 skills/repo-continuity/scripts/workflow_task.py learn-decide <WORK-ID> \
+  --candidate "<经验>" --decision promoted \
+  --destination "project-skills/<name>/SKILL.md; project-skills/INDEX.md" \
+  --reason "<写回和验证结果>"
+python3 skills/repo-continuity/scripts/workflow_task.py learn-status <WORK-ID> --require-complete
+```
+
+Tracked 或 Governed 任务没有候选时，使用 `learn-none <WORK-ID> --reason "<没有已验证可复用经验的原因>"`。辅助命令只管理 Markdown 行和关闭检查；经验价值判断、目标写入和检索验证仍由 Agent 完成。
 
 ## 可选的 Codex 模型路由
 
@@ -241,14 +257,14 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 核心产品是可链接、可 Review 的仓库知识，以及面向交付结果的轻量契约。它规定交接时必须保留什么，不规定 Agent 必须如何思考或运行哪个命令。
 
 - **核心**：`AGENTS.md`、`zettelkasten/` 知识入口和链接、按需记录的稳定工作意图、验证证据与经验写回。
-- **可选**：Companion Skill 提供的知识检查、WORK 更新和受保护的 worktree 辅助脚本；以及从 `adapters/` 显式安装的专业 Agent 模型路由 overlay。
+- **可选**：Companion Skill 提供的知识检查、WORK 和 Learning Candidate 更新、受保护的 worktree 辅助脚本；以及从 `adapters/` 显式安装的专业 Agent 模型路由 overlay。
 - **非目标**：自主循环、任务调度、隐藏记忆、强制 CLI，以及替代 Git、Issue Tracker、CI 和项目测试系统。
 
 知识网络使用纯 Markdown 和 Wiki 链接，可以作为兼容 Obsidian 的 vault 打开；Obsidian 只是可选编辑器，不是 runtime 或插件依赖。
 
-## 经验固化
+## 仓库学习闭环
 
-每个 WORK 都记录 Experience Candidates。在 checkpoint 和关闭任务时，根据经验形态选择最小目标：
+每个任务在验证后检查用户纠正、可重复根因、缺失不变量、可复用命令序列或稳定流程。Direct 工作没有已验证候选时保持零产物；存在长期候选时，先升级为 Tracked 再写共享知识。每个 Tracked 或 Governed WORK 记录候选证据和最终的 `promoted`、`updated`、`no-op` 或 `not-promoted` 决策。
 
 | 经验 | 固化位置 |
 |---|---|
@@ -261,6 +277,8 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 项目 Skill 必须说明何时使用、何时不用、执行步骤、验证、恢复和来源。单次事故、低置信猜测和普通编码常识不升级成 Skill。
 
 经验固化必须是幂等的：先搜索已有目标，原位更新 canonical 规则、笔记、runbook 或 Skill；内容已经是最新时记录 no-op。Tracked 或 Governed 工作先把共享目标加入 `owned_paths`；其他活跃 WORK 已拥有同一目标时，只保留一个写入者，或者延后固化。
+
+写回始终表现为 task branch 上可 Review 的 Git Diff，而不是模型隐藏记忆。仓库级指令、架构约束、安全或权限行为、发布流程和已有 Skill 契约，需要和等价代码或策略变更相同的证据、Review 或 Governed 门禁。项目 Skill 保留可移植的 `SKILL.md` 核心，宿主特有的激活元数据放入显式 adapter。
 
 知识健康分为两层。普通交接只检查结构：分支与 WORK 的映射、checkpoint 字段、链接、所有权和 Skill 路由。重要的多上下文交接或恢复协议发生变化时，再让一个没有聊天历史的真实 Fresh Agent 执行语义恢复探针，在修改前报告路径、验收状态、checkpoint、验证、风险和下一步。手写预期响应只能测试 evaluator，不能证明 Agent 可以恢复；详见 [Fresh-Agent Resume Evaluation](../fresh-agent-resume-evaluation.md)。
 

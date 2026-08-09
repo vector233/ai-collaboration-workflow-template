@@ -173,8 +173,10 @@ def validate_payload() -> None:
         "Governed",
         "## Stable Work Record",
         "## Context Preservation",
+        "## Learning Loop",
         "## Experience Promotion Check",
         "### Idempotent Writeback",
+        "Direct work with no verified candidate creates no artifact",
     ):
         require(expected in workflow, f"workflow is missing {expected}")
 
@@ -182,6 +184,7 @@ def validate_payload() -> None:
     for expected in (
         "fresh agent to resume without prior conversation",
         "The active WORK owns each pending candidate",
+        "capture evidence before promotion",
         "a repeated promotion should record a no-op",
     ):
         require(expected in work_template, f"WORK template is missing continuity contract: {expected}")
@@ -200,12 +203,23 @@ def validate_payload() -> None:
         skill.startswith("---\nname: repo-continuity\n"),
         "companion Skill metadata uses a stale ID",
     )
+    skill_description = re.search(r"^description:\s*(.+)$", skill, re.MULTILINE)
+    require(skill_description is not None, "companion Skill metadata is missing description")
+    require(
+        len(skill_description.group(1).strip()) <= 1024
+        and "<" not in skill_description.group(1)
+        and ">" not in skill_description.group(1),
+        "companion Skill description violates Skill metadata limits",
+    )
     for expected in (
         "## Compare An Upgrade",
         "--upgrade-report",
         "never changes the target",
         "## Preserve Context",
         "Do not checkpoint every turn",
+        "## Close With The Learning Loop",
+        "learn-add",
+        "task-branch Git diff",
         "make repeated promotion a no-op rather than a duplicate",
         "a synthetic expected response tests only the evaluator",
     ):
@@ -225,8 +239,18 @@ def validate_payload() -> None:
         require(section in skill_template, f"project Skill template is missing {section}")
 
     doctor = WORKFLOW_DOCTOR.read_text()
-    for expected in ("--all-worktrees", "--json", "scope_overlaps", "review_after_days"):
+    for expected in (
+        "--all-worktrees",
+        "--json",
+        "scope_overlaps",
+        "review_after_days",
+        "EXPERIENCE_DECISIONS",
+    ):
         require(expected in doctor, f"doctor is missing {expected}")
+
+    workflow_task = WORKFLOW_TASK.read_text()
+    for expected in ("learn-add", "learn-none", "learn-decide", "learn-status"):
+        require(expected in workflow_task, f"WORK helper is missing {expected}")
 
     for path in PAYLOAD.rglob("*.md"):
         text = path.read_text()
@@ -401,6 +425,7 @@ def validate_tool_free_core(target: Path) -> None:
         "a repeated promotion should record a no-op" in text,
         "manual core path lost idempotent writeback guidance",
     )
+    require("Learning Check" in text, "manual core path lost the Learning Loop contract")
     work.unlink()
 
     observation_template = target / "zettelkasten/templates/workflow-observations.md"
@@ -551,6 +576,87 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     require('next=inspect "r\u00e9sum\u00e9" before implementing fix' in status.stdout, "status did not decode YAML string escapes")
     require("\\u00e9" not in status.stdout and '\\"' not in status.stdout, "status leaked serialized YAML escapes")
 
+    candidate = "Provider sandbox reset order is stable"
+    run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "learn-add",
+            work_id,
+            "--candidate",
+            candidate,
+            "--shape",
+            "runbook",
+            "--evidence",
+            "focused regression reproduced before reset and passed after the verified sequence",
+            "--destination",
+            "zettelkasten/gotchas.md",
+        ],
+        cwd=target,
+    )
+    duplicate_candidate = run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "learn-add",
+            work_id,
+            "--candidate",
+            candidate,
+            "--shape",
+            "runbook",
+            "--evidence",
+            "duplicate evidence",
+        ],
+        cwd=target,
+        expected=1,
+    )
+    require("already exists" in duplicate_candidate.stderr, "duplicate learning candidate was accepted")
+    incomplete_learning = run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "learn-status",
+            work_id,
+            "--require-complete",
+            "--json",
+        ],
+        cwd=target,
+        expected=1,
+    )
+    require(
+        json.loads(incomplete_learning.stdout)["pending"] == 1,
+        "Learning status did not report the pending candidate",
+    )
+    run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "learn-decide",
+            work_id,
+            "--candidate",
+            candidate,
+            "--decision",
+            "no-op",
+            "--destination",
+            "zettelkasten/gotchas.md",
+            "--reason",
+            "canonical gotcha already covers the verified behavior",
+        ],
+        cwd=target,
+    )
+    completed_learning = run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "learn-status",
+            work_id,
+            "--require-complete",
+            "--json",
+        ],
+        cwd=target,
+    )
+    require(json.loads(completed_learning.stdout)["complete"], "Learning status stayed incomplete")
+
     governed_id = "WORK-20260712122030-governed-cli"
     run(
         [
@@ -569,11 +675,16 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
     governed_text = governed_path.read_text()
     require("- Selected route: governed" in governed_text, "governed route bullet was not written")
     require("governed / governed" not in governed_text, "governed route replacement corrupted the template")
-    governed_path.write_text(
-        governed_text.replace(
-            "|  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |",
-            "| No reusable lesson | fact | not-promoted | work item | one-off sample |",
-        )
+    run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "learn-none",
+            governed_id,
+            "--reason",
+            "governed fixture exposes no reusable project lesson",
+        ],
+        cwd=target,
     )
     pending_gate_close = run(
         [
@@ -644,11 +755,16 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         expected=1,
     )
     require("pending decision" in pending_close.stderr, "pending Decision cell was not detected")
-    close_path.write_text(
-        close_path.read_text().replace(
-            "|  | rule / gotcha / fact / runbook / project-skill / workflow-feedback | pending |  |  |",
-            "| No reusable lesson | fact | not-promoted | pending destination | one-off sample |",
-        )
+    run(
+        [
+            sys.executable,
+            str(WORKFLOW_TASK),
+            "learn-none",
+            close_id,
+            "--reason",
+            "close fixture exposes no verified reusable lesson",
+        ],
+        cwd=target,
     )
     run(
         [
@@ -671,6 +787,38 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
 def validate_doctor_regressions(target: Path, work_id: str) -> None:
     work = target / f"zettelkasten/work/{work_id}.md"
     original = work.read_text()
+
+    work.write_text(
+        original.replace(
+            "| no-op | zettelkasten/gotchas.md |",
+            "| invented | zettelkasten/gotchas.md |",
+        )
+    )
+    invalid_learning = run(
+        [sys.executable, str(WORKFLOW_DOCTOR)],
+        cwd=target,
+        expected=1,
+    )
+    require(
+        "invalid experience decision 'invented'" in invalid_learning.stdout,
+        "doctor accepted an invalid Learning Check decision",
+    )
+    work.write_text(original)
+
+    work.write_text(
+        original.replace("| no-op | zettelkasten/gotchas.md |", "| no-op |  |")
+    )
+    missing_learning_destination = run(
+        [sys.executable, str(WORKFLOW_DOCTOR)],
+        cwd=target,
+        expected=1,
+    )
+    require(
+        "promoted experience is missing its destination" in missing_learning_destination.stdout,
+        "doctor accepted durable learning without a destination",
+    )
+    work.write_text(original)
+
     work.write_text(original.replace('branch: "task/tracked-bug"', "branch:"))
     blank_branch = run(
         [sys.executable, str(WORKFLOW_DOCTOR)],
@@ -1614,6 +1762,14 @@ def validate_repository_layout() -> None:
         "upgrade" in openai_metadata.lower(),
         "companion Skill UI metadata omits safe upgrades",
     )
+    short_description = re.search(
+        r'^\s*short_description:\s*"([^"]+)"\s*$', openai_metadata, re.MULTILINE
+    )
+    require(short_description is not None, "companion Skill UI metadata is missing short_description")
+    require(
+        25 <= len(short_description.group(1)) <= 64,
+        "companion Skill short_description must contain 25-64 characters",
+    )
     readme = (ROOT / "README.md").read_text()
     for expected in (
         "# Repo Continuity",
@@ -1630,6 +1786,9 @@ def validate_repository_layout() -> None:
         "read-only upgrade report",
         "## Daily Use",
         "Checkpoint only at meaningful boundaries",
+        "## Repository Learning Loop",
+        "learn-status <WORK-ID> --require-complete",
+        "Writeback is always a task-branch Git diff",
         "Promotion is idempotent",
         "Semantic Fresh-Agent recovery",
         "Do not use the raw copy command over an existing",
@@ -1658,6 +1817,9 @@ def validate_repository_layout() -> None:
         "只读升级报告",
         "## 日常使用",
         "只在有意义的边界记录 checkpoint",
+        "## 仓库学习闭环",
+        "learn-status <WORK-ID> --require-complete",
+        "写回始终表现为 task branch 上可 Review 的 Git Diff",
         "经验固化必须是幂等的",
         "Fresh-Agent 语义恢复",
         "不要直接执行覆盖式复制",
