@@ -70,6 +70,8 @@ EXPERIENCE_DECISIONS = {"pending", "promoted", "updated", "no-op", "not-promoted
 
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z_]+\}\}")
 WIKI_LINK_RE = re.compile(r"(?<!!)\[\[([^\]|#]+)")
+FENCED_CODE_RE = re.compile(r"^[ \t]*(`{3,}|~{3,})[^\n]*\n.*?(?:^[ \t]*\1[^\n]*$|\Z)", re.DOTALL | re.MULTILINE)
+INLINE_CODE_RE = re.compile(r"(`+)(?:.|\n)*?\1")
 FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|\Z)", re.DOTALL)
 TOP_LEVEL_FIELD_RE = re.compile(r"^([A-Za-z0-9_-]+):[ \t]*(.*)$")
 PROMOTION_COMPLETE_RE = re.compile(
@@ -122,6 +124,20 @@ def parse_args() -> argparse.Namespace:
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def strip_code(text: str) -> str:
+    """Blank out fenced blocks and inline code spans.
+
+    Wiki links are not links inside code. Without this, a documented shell
+    conditional such as [[ "$rc" == "0" ]] is reported as a broken wiki link.
+    Spans are replaced with blank lines rather than removed so that any
+    line-based reporting keeps its original line numbers.
+    """
+    def blank(match: re.Match[str]) -> str:
+        return "\n" * match.group(0).count("\n")
+
+    return INLINE_CODE_RE.sub(blank, FENCED_CODE_RE.sub(blank, text))
 
 
 def relative(root: Path, path: Path) -> Path:
@@ -331,7 +347,7 @@ def check_wiki_links(root: Path, findings: list[Finding]) -> None:
         exact[path.relative_to(vault).with_suffix("").as_posix()] = path
         by_stem.setdefault(path.stem, []).append(path)
     for path in sorted(vault.rglob("*.md")):
-        for raw_target in WIKI_LINK_RE.findall(read_text(path)):
+        for raw_target in WIKI_LINK_RE.findall(strip_code(read_text(path))):
             target = raw_target.strip().removesuffix(".md")
             if any(marker in target for marker in ("YYYY", "<", "{{")):
                 continue
