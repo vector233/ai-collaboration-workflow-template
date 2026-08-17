@@ -749,7 +749,7 @@ def merge_upgrade_content(
             raise BootstrapError("git is required to apply a three-way upgrade") from exc
     if result.returncode == 0:
         return result.stdout
-    if result.returncode == 1:
+    if 0 < result.returncode < 128:
         return None
     message = result.stderr.decode("utf-8", errors="replace").strip()
     raise BootstrapError(f"git merge-file failed: {message or result.returncode}")
