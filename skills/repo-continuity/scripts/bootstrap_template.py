@@ -468,8 +468,11 @@ def recorded_baseline_ref(target: Path) -> str:
     match = BASELINE_PATTERN.search(text)
     if match is None or not match.group(1).strip():
         raise BootstrapError(
-            "zettelkasten/AI.md does not contain a Template baseline; "
-            "pass --baseline-ref explicitly"
+            "zettelkasten/AI.md does not contain a Template baseline. "
+            "The line is a machine-parsed contract and must keep its literal "
+            "prefix, for example: Template baseline: `v4.4.0` "
+            "(`canonical-payload-v4`). Restore that prefix, or pass "
+            "--baseline-ref explicitly for this run."
         )
     return match.group(1).strip()
 

@@ -35,6 +35,14 @@ Rewrite these files with verified repository-specific content:
 - `zettelkasten/validation-runbook.md`: known validation commands and realistic-environment gaps.
 - `zettelkasten/git-collaboration.md`: preserve stricter local branch, PR, and merge policies.
 
+`zettelkasten/AI.md` may be adapted to the project, but its baseline line is a machine-parsed contract, not prose. Keep the literal `Template baseline:` prefix and the backticked version:
+
+```text
+Template baseline: `v4.4.0` (`canonical-payload-v4`).
+```
+
+Trailing detail such as an initialization date may be appended. Rewording the prefix — for example to `Repo Continuity baseline:` — leaves the repository unable to resolve its own baseline, so every later upgrade fails until it is passed by hand with `--baseline-ref`.
+
 Set every maintained note's `last_verified_at` to the initialization date. Notes with `review_after_days` must have a concrete ISO date before strict validation.
 
 Keep `project-skills/INDEX.md` empty unless the repository already has a verified repeatable procedure worth indexing. Do not invent initial Skills.
