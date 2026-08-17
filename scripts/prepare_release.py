@@ -81,6 +81,12 @@ ANCHORS = (
         1,
         "payload baseline",
     ),
+    VersionAnchor(
+        Path("template/INIT.md"),
+        re.compile(rf"Template baseline: `({VERSION_TEXT})`"),
+        1,
+        "initialization baseline example",
+    ),
 )
 
 

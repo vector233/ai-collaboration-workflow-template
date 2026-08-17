@@ -38,7 +38,7 @@ Rewrite these files with verified repository-specific content:
 `zettelkasten/AI.md` may be adapted to the project, but its baseline line is a machine-parsed contract, not prose. Keep the literal `Template baseline:` prefix and the backticked version:
 
 ```text
-Template baseline: `v4.4.0` (`canonical-payload-v4`).
+Template baseline: `v4.4.1` (`canonical-payload-v4`).
 ```
 
 Trailing detail such as an initialization date may be appended. Rewording the prefix — for example to `Repo Continuity baseline:` — leaves the repository unable to resolve its own baseline, so every later upgrade fails until it is passed by hand with `--baseline-ref`.
