@@ -470,7 +470,7 @@ def recorded_baseline_ref(target: Path) -> str:
         raise BootstrapError(
             "zettelkasten/AI.md does not contain a Template baseline. "
             "The line is a machine-parsed contract and must keep its literal "
-            "prefix, for example: Template baseline: `v4.4.0` "
+            f"prefix, for example: Template baseline: `{DEFAULT_REF}` "
             "(`canonical-payload-v4`). Restore that prefix, or pass "
             "--baseline-ref explicitly for this run."
         )
