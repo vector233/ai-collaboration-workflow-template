@@ -363,11 +363,56 @@ def check_wiki_links(root: Path, findings: list[Finding]) -> None:
                 add(findings, "ERROR", f"ambiguous wiki link [[{target}]]; use an explicit path: {choices}", relative(root, path))
 
 
+def heading_re(heading: str) -> re.Pattern[str]:
+    """Match one level-2 heading on a line of its own, ignoring case.
+
+    Anchoring matters in both directions. Substring matching let an inline
+    mention of a heading inside prose satisfy a required-section check, and it
+    let the same mention hijack where section_body() started reading.
+    """
+    title = heading.strip().removeprefix("##").strip()
+    return re.compile(
+        rf"^##[ \t]+(?P<title>{re.escape(title)}).*$", re.MULTILINE | re.IGNORECASE
+    )
+
+
+def find_heading(text: str, heading: str) -> re.Match[str] | None:
+    return heading_re(heading).search(text)
+
+
 def section_body(text: str, heading: str) -> str:
-    marker = f"## {heading}"
-    if marker not in text:
+    match = find_heading(text, heading)
+    if match is None:
         return ""
-    return text.split(marker, 1)[1].split("\n## ", 1)[0]
+    rest = text[match.end() :]
+    following = re.search(r"^## ", rest, re.MULTILINE)
+    return rest[: following.start()] if following else rest
+
+
+def report_heading(
+    findings: list,
+    text: str,
+    section: str,
+    subject: str,
+    rel_path: Path,
+) -> None:
+    """Report an absent required heading, and case drift separately.
+
+    A heading whose case differs from the template is present, so calling it
+    missing is factually wrong and trains readers to ignore the finding.
+    """
+    match = find_heading(text, section)
+    if match is None:
+        add(findings, "ERROR", f"{subject} is missing {section}", rel_path)
+        return
+    expected = section.strip().removeprefix("##").strip()
+    if match.group("title") != expected:
+        add(
+            findings,
+            "WARN",
+            f"{subject} heading {match.group('title')!r} differs in case from {expected!r}",
+            rel_path,
+        )
 
 
 def split_markdown_table_row(line: str) -> list[str]:
@@ -460,8 +505,7 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
             if status not in INITIATIVE_STATES:
                 add(findings, "ERROR", f"invalid Initiative status {status!r}", rel_path)
             for section in INITIATIVE_REQUIRED_SECTIONS:
-                if section not in text:
-                    add(findings, "ERROR", f"Initiative is missing {section}", rel_path)
+                report_heading(findings, text, section, "Initiative", rel_path)
             if status in ACTIVE_INITIATIVE_STATES:
                 next_action = field_value(text, "next_action")
                 if not next_action:
@@ -503,8 +547,7 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
         if route not in {"tracked", "governed"}:
             add(findings, "ERROR", f"invalid WORK route {route!r}", rel_path)
         for section in WORK_REQUIRED_SECTIONS:
-            if section not in text:
-                add(findings, "ERROR", f"work item is missing {section}", rel_path)
+            report_heading(findings, text, section, "work item", rel_path)
         for cells in experience_candidate_rows(text):
             decision = cells[2].strip().lower()
             if decision not in EXPERIENCE_DECISIONS:
@@ -703,8 +746,7 @@ def check_project_skills(root: Path, findings: list[Finding]) -> None:
         if not isinstance(description, str) or len(description) < 24:
             add(findings, "ERROR", "project Skill description must include concrete triggers", rel_path)
         for section in SKILL_REQUIRED_SECTIONS:
-            if section not in text:
-                add(findings, "ERROR", f"project Skill is missing {section}", rel_path)
+            report_heading(findings, text, section, "project Skill", rel_path)
         row = rows_by_name.get(directory.name)
         if row is None:
             add(findings, "ERROR", "project Skill is not routed from INDEX.md", rel_path)
