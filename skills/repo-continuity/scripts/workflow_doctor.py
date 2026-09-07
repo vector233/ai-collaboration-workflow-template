@@ -4,13 +4,19 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
 from datetime import date
 from pathlib import Path
+
+from workflow_archive import (ARCHIVE_ROOT, ArchiveError, archive_reference,
+                              open_artifacts, route_matches, route_path, safe_path,
+                              scoped_artifacts, validate_terminal_evidence)
 
 
 CORE_FILES = (
@@ -24,6 +30,7 @@ CORE_FILES = (
     Path("zettelkasten/templates/work-item.md"),
     Path("zettelkasten/templates/workflow-observations.md"),
     Path("zettelkasten/work/README.md"),
+    Path("zettelkasten/knowledge-lifecycle.md"),
     Path("project-skills/INDEX.md"),
 )
 
@@ -110,6 +117,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--strict", action="store_true", help="fail on warnings")
     parser.add_argument("--status", action="store_true", help="show active work without validation")
+    parser.add_argument("--full", action="store_true", help="explicitly audit all stable records and archived evidence")
     parser.add_argument(
         "--all-worktrees",
         action="store_true",
@@ -256,7 +264,9 @@ def field_list(text: str, field: str) -> tuple[str, ...]:
     return parse_inline_list(value)
 
 
-def workflow_artifacts(root: Path) -> list[Path]:
+def workflow_artifacts(root: Path, full: bool = False) -> list[Path]:
+    if not full:
+        return scoped_artifacts(root)
     directory = root / "zettelkasten/work"
     if not directory.is_dir():
         return []
@@ -298,7 +308,7 @@ def registered_worktrees(root: Path) -> list[Path]:
     return paths or [root]
 
 
-def markdown_files(root: Path) -> list[Path]:
+def markdown_files(root: Path, full: bool = False) -> list[Path]:
     files: list[Path] = []
     for relative_path in (Path("AGENTS.md"), Path("CLAUDE.md")):
         path = root / relative_path
@@ -306,7 +316,15 @@ def markdown_files(root: Path) -> list[Path]:
             files.append(path)
     for directory in (root / "zettelkasten", root / "project-skills"):
         if directory.is_dir():
-            files.extend(sorted(directory.rglob("*.md")))
+            for current, directories, names in os.walk(directory, followlinks=False):
+                directories[:] = sorted(name for name in directories
+                    if not (Path(current) / name).is_symlink()
+                    and (full or Path(current) / name not in {
+                        root / ARCHIVE_ROOT, root / "zettelkasten/work", root / "zettelkasten/templates"}))
+                files.extend(safe_path(root, (Path(current) / name).relative_to(root))
+                             for name in sorted(names) if name.endswith(".md"))
+    if not full:
+        files.extend(workflow_artifacts(root))
     return files
 
 
@@ -329,30 +347,32 @@ def check_core(root: Path, findings: list[Finding]) -> None:
             )
 
 
-def check_placeholders(root: Path, findings: list[Finding]) -> None:
-    for path in markdown_files(root):
+def check_placeholders(root: Path, findings: list[Finding], full: bool = False) -> None:
+    for path in markdown_files(root, full):
+        if path.is_relative_to(root / ARCHIVE_ROOT):
+            continue
         text = read_text(path)
         matches = sorted(set(PLACEHOLDER_RE.findall(text)))
         if matches:
             add(findings, "ERROR", "unresolved placeholders: " + ", ".join(matches), relative(root, path))
 
 
-def check_wiki_links(root: Path, findings: list[Finding]) -> None:
+def check_wiki_links(root: Path, findings: list[Finding], full: bool = False) -> None:
     vault = root / "zettelkasten"
     if not vault.is_dir():
         return
-    exact: dict[str, Path] = {}
     by_stem: dict[str, list[Path]] = {}
-    for path in sorted(vault.rglob("*.md")):
-        exact[path.relative_to(vault).with_suffix("").as_posix()] = path
+    paths = [path for path in markdown_files(root, full) if path.is_relative_to(vault)]
+    for path in paths:
         by_stem.setdefault(path.stem, []).append(path)
-    for path in sorted(vault.rglob("*.md")):
+    for path in paths:
         for raw_target in WIKI_LINK_RE.findall(strip_code(read_text(path))):
             target = raw_target.strip().removesuffix(".md")
             if any(marker in target for marker in ("YYYY", "<", "{{")):
                 continue
             if "/" in target:
-                if target not in exact:
+                candidate = safe_path(root, Path("zettelkasten") / (target + ".md"))
+                if not candidate.is_file():
                     add(findings, "ERROR", f"broken wiki link: [[{target}]]", relative(root, path))
                 continue
             candidates = by_stem.get(target, [])
@@ -477,8 +497,8 @@ def has_pending_initiative_gate(text: str) -> bool:
     return False
 
 
-def check_artifacts(root: Path, findings: list[Finding]) -> None:
-    artifacts = workflow_artifacts(root)
+def check_artifacts(root: Path, findings: list[Finding], full: bool = False) -> None:
+    artifacts = workflow_artifacts(root, full)
     initiative_paths: dict[str, Path] = {}
     work_paths: dict[str, Path] = {}
     work_texts: dict[str, str] = {}
@@ -504,8 +524,9 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
                 initiative_paths[initiative_id] = path
             if status not in INITIATIVE_STATES:
                 add(findings, "ERROR", f"invalid Initiative status {status!r}", rel_path)
-            for section in INITIATIVE_REQUIRED_SECTIONS:
-                report_heading(findings, text, section, "Initiative", rel_path)
+            if not field_value(text, "archive_ref"):
+                for section in INITIATIVE_REQUIRED_SECTIONS:
+                    report_heading(findings, text, section, "Initiative", rel_path)
             if status in ACTIVE_INITIATIVE_STATES:
                 next_action = field_value(text, "next_action")
                 if not next_action:
@@ -531,7 +552,7 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
             work_paths[work_id] = path
             work_texts[work_id] = text
             work_statuses[work_id] = status or "unknown"
-            dependencies[work_id] = field_list(text, "depends_on")
+            dependencies[work_id] = field_list(text, "depends_on") if full or status not in TERMINAL_STATES else ()
         initiative_id = field_value(text, "initiative_id")
         external_parent = field_value(text, "external_parent")
         if initiative_id and external_parent:
@@ -546,8 +567,9 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
         route = field_value(text, "route")
         if route not in {"tracked", "governed"}:
             add(findings, "ERROR", f"invalid WORK route {route!r}", rel_path)
-        for section in WORK_REQUIRED_SECTIONS:
-            report_heading(findings, text, section, "work item", rel_path)
+        if not field_value(text, "archive_ref"):
+            for section in WORK_REQUIRED_SECTIONS:
+                report_heading(findings, text, section, "work item", rel_path)
         for cells in experience_candidate_rows(text):
             decision = cells[2].strip().lower()
             if decision not in EXPERIENCE_DECISIONS:
@@ -579,7 +601,7 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
                     rel_path,
                 )
             add(findings, "INFO", f"active work: status={status}, branch={branch or 'unknown'}", rel_path)
-        if status == "done":
+        if status == "done" and not field_value(text, "archive_ref"):
             if not PROMOTION_COMPLETE_RE.search(text):
                 add(findings, "ERROR", "closed work has incomplete Experience Promotion", rel_path)
             if has_pending_experience_decision(text):
@@ -588,6 +610,8 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
                 add(findings, "ERROR", "closed governed work has a pending gate", rel_path)
 
     for work_id, path in work_paths.items():
+        if not full and work_statuses[work_id] in TERMINAL_STATES:
+            continue
         rel_path = relative(root, path)
         initiative_id = field_value(work_texts[work_id], "initiative_id")
         if initiative_id and initiative_id not in initiative_paths:
@@ -643,7 +667,7 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
             for work_id, work_text in work_texts.items()
             if field_value(work_text, "initiative_id") == initiative_id
         )
-        if status == "done":
+        if status == "done" and full:
             nonterminal = [
                 work_id for work_id in children if work_statuses[work_id] not in TERMINAL_STATES
             ]
@@ -656,13 +680,54 @@ def check_artifacts(root: Path, findings: list[Finding]) -> None:
                     "done Initiative has nonterminal children: " + ", ".join(nonterminal),
                     relative(root, path),
                 )
-            if has_pending_initiative_gate(text):
+            if not field_value(text, "archive_ref") and has_pending_initiative_gate(text):
                 add(
                     findings,
                     "ERROR",
                     "done Initiative has a pending shared gate",
                     relative(root, path),
                 )
+
+
+def check_lifecycle(root: Path, findings: list[Finding], full: bool = False) -> None:
+    routes = set(open_artifacts(root))
+    for path in workflow_artifacts(root, full):
+        text = read_text(path)
+        is_open = field_value(text, "status") in {"backlog", "active", "blocked", "review"}
+        if is_open != (path in routes):
+            add(findings, "ERROR", "open-work route disagrees with source; review reindex --dry-run", relative(root, path))
+        if path in routes and not route_matches(path, text, read_text(route_path(root, path))):
+            add(findings, "ERROR", "stale work routing hint; update the route with its source", relative(root, path))
+    for path in markdown_files(root, full):
+        if path.is_relative_to(root / ARCHIVE_ROOT):
+            continue
+        text = read_text(path)
+        if not field_value(text, "archive_ref"):
+            continue
+        rel_path = relative(root, path)
+        for field in ("archive_summary", "archive_reason", "archive_sha256", "archived_at"):
+            if not field_value(text, field):
+                add(findings, "ERROR", f"archived record is missing {field}", rel_path)
+        if field_value(text, "status") not in TERMINAL_STATES | {"superseded", "deprecated", "retired"}:
+            add(findings, "ERROR", "restore archived content before reopening or reactivating it", rel_path)
+        try:
+            snapshot = archive_reference(root, text)
+            if not re.fullmatch(r"[0-9a-f]{64}", field_value(text, "archive_sha256") or ""):
+                raise ArchiveError("invalid archive checksum")
+            if parse_iso_date(field_value(text, "archived_at") or "") is None:
+                raise ArchiveError("invalid archive date")
+            if full:
+                original = snapshot.read_bytes()
+                if hashlib.sha256(original).hexdigest() != field_value(text, "archive_sha256"):
+                    raise ArchiveError("archive checksum mismatch")
+                evidence = original.decode("utf-8")
+                for field in ("work_id", "initiative_id", "depends_on", "status", "route"):
+                    if field_value(text, field) != field_value(evidence, field):
+                        raise ArchiveError(f"archived {field} differs from original; restore before changing task state")
+                if path.parent == root / "zettelkasten/work":
+                    validate_terminal_evidence(path, evidence)
+        except (ArchiveError, UnicodeError) as exc:
+            add(findings, "ERROR", str(exc), rel_path)
 
 
 def parse_iso_date(value: str) -> date | None:
@@ -672,11 +737,13 @@ def parse_iso_date(value: str) -> date | None:
         return None
 
 
-def check_note_freshness(root: Path, findings: list[Finding]) -> None:
+def check_note_freshness(root: Path, findings: list[Finding], full: bool = False) -> None:
     today = date.today()
-    for path in markdown_files(root):
+    for path in markdown_files(root, full):
+        if path.is_relative_to(root / ARCHIVE_ROOT):
+            continue
         metadata = parse_frontmatter(read_text(path))
-        if not metadata or "review_after_days" not in metadata:
+        if not metadata or "archive_ref" in metadata or "review_after_days" not in metadata:
             continue
         rel_path = relative(root, path)
         try:
@@ -782,7 +849,7 @@ def collect_work_records(root: Path) -> list[WorkRecord]:
     dirty = worktree_is_dirty(root)
     commit = last_commit(root)
     records: list[WorkRecord] = []
-    for path in workflow_artifacts(root):
+    for path in open_artifacts(root):
         if not path.name.startswith("WORK-"):
             continue
         text = read_text(path)
@@ -847,7 +914,7 @@ def find_scope_overlaps(records: list[WorkRecord]) -> list[dict[str, object]]:
     return overlaps
 
 
-def status_payload(root: Path, all_worktrees: bool) -> dict[str, object]:
+def status_payload(root: Path, all_worktrees: bool, full: bool = False) -> dict[str, object]:
     roots = registered_worktrees(root) if all_worktrees else [root]
     records: list[WorkRecord] = []
     detached_worktrees: list[str] = []
@@ -858,7 +925,7 @@ def status_payload(root: Path, all_worktrees: bool) -> dict[str, object]:
                 continue
             records.extend(collect_work_records(candidate))
     initiative_rollups: list[dict[str, object]] = []
-    current_artifacts = workflow_artifacts(root)
+    current_artifacts = workflow_artifacts(root, full)
     current_works = {
         field_value(read_text(path), "work_id") or path.stem: read_text(path)
         for path in current_artifacts
@@ -889,6 +956,7 @@ def status_payload(root: Path, all_worktrees: bool) -> dict[str, object]:
         )
     return {
         "repository": str(root),
+        "scope": "full" if full else "open work and exact dependencies; Initiative rollups omit unreferenced historical children",
         "all_worktrees": all_worktrees,
         "initiatives": initiative_rollups,
         "active_work": [asdict(record) for record in records],
@@ -898,11 +966,12 @@ def status_payload(root: Path, all_worktrees: bool) -> dict[str, object]:
     }
 
 
-def print_status(root: Path, all_worktrees: bool, as_json: bool) -> None:
-    payload = status_payload(root, all_worktrees)
+def print_status(root: Path, all_worktrees: bool, as_json: bool, full: bool = False) -> None:
+    payload = status_payload(root, all_worktrees, full)
     if as_json:
         print(json.dumps(payload, indent=2, ensure_ascii=False))
         return
+    print(f"Scope: {payload['scope']}")
     print(f"Workflow Status: {root}")
     for initiative in payload["initiatives"]:
         child_counts: dict[str, int] = {}
@@ -946,27 +1015,38 @@ def print_findings(root: Path, findings: list[Finding]) -> None:
     print(f"Summary: {errors} error(s), {warnings} warning(s), {infos} info item(s)")
 
 
-def main() -> int:
-    args = parse_args()
+def run_checks(args: argparse.Namespace) -> int:
     root = args.root.expanduser().resolve()
     if not root.is_dir():
         print(f"ERROR: root is not a directory: {root}", file=sys.stderr)
         return 2
     if args.status:
-        print_status(root, args.all_worktrees, args.json)
+        print_status(root, args.all_worktrees, args.json, args.full)
         return 0
 
     findings: list[Finding] = []
     check_core(root, findings)
-    check_placeholders(root, findings)
-    check_wiki_links(root, findings)
-    check_artifacts(root, findings)
-    check_note_freshness(root, findings)
+    try:
+        check_placeholders(root, findings, args.full)
+        check_wiki_links(root, findings, args.full)
+        check_artifacts(root, findings, args.full)
+        check_note_freshness(root, findings, args.full)
+        check_lifecycle(root, findings, args.full)
+    except (ArchiveError, OSError) as exc:
+        add(findings, "ERROR", str(exc))
     check_project_skills(root, findings)
     print_findings(root, findings)
     has_errors = any(item.severity == "ERROR" for item in findings)
     has_warnings = any(item.severity == "WARN" for item in findings)
     return 1 if has_errors or (args.strict and has_warnings) else 0
+
+
+def main() -> int:
+    try:
+        return run_checks(parse_args())
+    except (ArchiveError, OSError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

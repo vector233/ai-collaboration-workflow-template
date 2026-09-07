@@ -19,7 +19,7 @@ This workflow keeps AI-assisted development resumable without forcing every task
 
 ## Minimal Context
 
-Start with `AGENTS.md` and [[AI]]. For active work, inspect the current branch and read its stable `WORK-*` document. Load only linked notes, runbooks, and matching project Skills. Do not scan the whole vault by default.
+Start with `AGENTS.md` and [[AI]]. For active work, inspect the current branch and [[work/active/README]], then read its stable `WORK-*` document. Ordinary discovery and search exclude archive bodies and unselected historical WORK records; repair missing routes explicitly. Load only linked notes, runbooks, and matching project Skills. Do not scan the whole vault by default.
 
 ## Route Decision
 
@@ -65,7 +65,7 @@ Tracked and governed work has one canonical record under [[work/README]]:
 - `WORK-YYYYMMDDHHMMSS-short-name.md`: scope, route, context, gates, implementation slices, validation, review, checkpoint, and experience writeback.
 - `INITIATIVE-YYYYMMDDHHMMSS-short-name.md`: optional overall goal, shared gates, derived child rollup, integration order, and coordination checkpoint for multiple independent WORK records.
 
-Use frontmatter status and update the file in place. Stable paths prevent link churn and make parallel branches easier to merge.
+Use frontmatter status and update the file in place. Maintain the record's individual open route in the same change. Closure removes that route. Archival keeps a compact source and retrievable evidence under [[archive/README]]; follow [[knowledge-lifecycle]]. Stable paths prevent link churn and make parallel branches easier to merge.
 
 Write durable architecture facts, decisions, runbooks, and gotchas to their knowledge notes. Link project-native Issues, pull requests, release records, or external approvals instead of duplicating their lifecycle in workflow-specific files. A child WORK records either one local `initiative_id` or one authoritative `external_parent`, never both. `depends_on` expresses execution order between sibling or standalone WORK records without creating another parent level.
 
@@ -89,7 +89,7 @@ Direct work that completes, validates, and commits in the current context needs 
 6. Record review evidence and link any project-native review or approval.
 7. At a preservation boundary, record a context checkpoint and commit all current-task changes.
 8. Run the Learning Check and record experience candidates with evidence.
-9. Repeat until acceptance and validation pass, then decide every candidate, perform durable writeback, validate retrieval, and close the work item.
+9. Repeat until acceptance and validation pass, then decide every candidate, perform durable writeback, validate retrieval, and close the work item. Remove its open route, check archival eligibility, and archive substantial history after useful facts and required evidence are preserved.
 
 ## Learning Loop
 

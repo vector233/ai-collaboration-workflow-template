@@ -18,7 +18,7 @@ from pathlib import Path
 
 
 DEFAULT_REPO_URL = "https://github.com/vector233/repo-continuity.git"
-DEFAULT_REF = "v4.4.1"
+DEFAULT_REF = "v4.5.0"
 PAYLOAD_MARKER = Path(".repo-continuity-template")
 LEGACY_PAYLOAD_MARKERS = (Path(".ai-collaboration-workflow-template"),)
 PAYLOAD_MARKERS = (PAYLOAD_MARKER, *LEGACY_PAYLOAD_MARKERS)
@@ -44,6 +44,9 @@ PAYLOAD_REQUIRED_FILES = (
     Path("zettelkasten/templates/work-item.md"),
     Path("zettelkasten/templates/workflow-observations.md"),
     Path("zettelkasten/work/README.md"),
+    Path("zettelkasten/knowledge-lifecycle.md"),
+    Path("zettelkasten/work/active/README.md"),
+    Path("zettelkasten/archive/README.md"),
     Path("project-skills/INDEX.md"),
 )
 

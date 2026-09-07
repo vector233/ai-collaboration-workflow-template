@@ -24,7 +24,8 @@ This repository does not initialize a second root knowledge base. Keep the produ
 ## Change Checklist
 
 - Name tracked and governed records `WORK-YYYYMMDDHHMMSS-short-name.md`.
-- Keep work records at stable paths under `template/zettelkasten/work/`; represent state in frontmatter.
+- Keep canonical work records at stable paths under `template/zettelkasten/work/`; represent state in frontmatter. Archive bodies behind stable summaries and maintain individual open-work routes.
+- For retrieval or archival changes, test filesystem reads and enumeration as well as displayed results. Filtering historical records after reading their bodies is not scoped discovery. Keep ordinary checks separate from explicit full audits, and test missing-route migration in a temporary project. Validate preserved closure evidence before compacting a record; a terminal status alone cannot conceal unchecked acceptance, learning or gates.
 - Use a task branch for non-trivial work and a dedicated worktree for concurrent work.
 - End each agent context that produces persistent changes, or each coherent slice, with a task-scoped commit; do not create empty commits for read-only analysis.
 - Run `git diff --check`.

@@ -56,3 +56,9 @@ Optional model-routing overlays participate only when `--with-model-routing code
 `--upgrade-apply` requires the repository root, a named branch other than `main` or `master`, and a clean worktree. Planned writes are transactional: if a write fails, earlier writes from that invocation are restored. Target symlinks and non-regular files are never followed.
 
 The task branch and pre-upgrade commit are the rollback boundary. Before the baseline is advanced, rerunning the report still compares against the old release. After a successful upgrade, the new baseline becomes the reference for the next three-way reconciliation; it does not erase the project's Git history or local ownership.
+
+## Migrate Open-Work Routing
+
+When upgrading a project that has no `zettelkasten/work/active/` routes, preserve its canonical WORK files and local policy. After reconciling the new lifecycle and entry rules, explicitly inventory the stable records once and create one `*.ref.md` for each open record. Do this manually or preview `workflow_archive.py reindex --root <repo-root> --dry-run`, then apply `reindex` on the upgrade task branch. Review source metadata errors and coordinate with other writers first.
+
+Run `workflow_doctor.py --root <repo-root> --full --strict` and review the Markdown routes before enabling ordinary scoped discovery. The full check covers omitted open routes as well as history. A normal status lookup must report missing routing instead of silently reading every old WORK. No upgrade or reindex operation archives, deletes or rewrites project evidence; archive selected terminal records separately after current knowledge is preserved. See the [knowledge lifecycle](../template/zettelkasten/knowledge-lifecycle.md).

@@ -32,7 +32,7 @@ The review handoff should include:
 - redacted sensitive values;
 - known gaps that remain untested.
 
-When work items, project Skills, workflow files, wiki links, or initialization state change, inspect their links, required fields, and routing entries before handoff. The optional companion Skill can automate this check, but validation evidence remains in repository files.
+When work items, project Skills, workflow files, wiki links, or initialization state change, inspect their links, required fields, and routing entries before handoff. Routine checks use current knowledge, open-work routes and exact dependencies; they do not read archived bodies or prove complete historical coverage. Use an explicit full audit for route completeness, final Initiative membership, archive checksums and historical links, including after a lifecycle migration. See [[knowledge-lifecycle]]. The optional companion Skill can automate this check, but validation evidence remains in repository files.
 
 ## Knowledge Recoverability
 

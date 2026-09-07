@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = ROOT / "template"
 ADAPTERS = ROOT / "adapters"
-RELEASE_VERSION = "v4.4.1"
+RELEASE_VERSION = "v4.5.0"
 CANONICAL_REPO_URL = "https://github.com/vector233/repo-continuity"
 SKILL_ID = "repo-continuity"
 SKILL_ROOT = ROOT / "skills" / SKILL_ID
@@ -44,6 +44,9 @@ REQUIRED_FILES = (
     Path("zettelkasten/templates/project-skill.md"),
     Path("zettelkasten/templates/workflow-observations.md"),
     Path("zettelkasten/work/README.md"),
+    Path("zettelkasten/knowledge-lifecycle.md"),
+    Path("zettelkasten/work/active/README.md"),
+    Path("zettelkasten/archive/README.md"),
     Path("project-skills/INDEX.md"),
 )
 
@@ -137,7 +140,7 @@ def validate_payload() -> None:
         path.name for path in (PAYLOAD / "zettelkasten").iterdir() if path.is_dir()
     }
     require(
-        vault_directories == {"templates", "work"},
+        vault_directories == {"templates", "work", "archive"},
         f"unexpected knowledge directories: {sorted(vault_directories)}",
     )
     require(
@@ -384,7 +387,7 @@ def initialize_target(target: Path) -> None:
         text = path.read_text()
         for placeholder, value in PLACEHOLDERS.items():
             text = text.replace(placeholder, value)
-        text = text.replace("YYYY-MM-DD", today)
+        text = text.replace("YYYY-MM-DD", today).replace("Routing status: pending", "Routing status: ready")
         path.write_text(text)
 
     (target / MARKER.name).unlink()
@@ -429,6 +432,12 @@ def copy_artifact(
     for old, new in replacements.items():
         text = text.replace(old, new)
     destination.write_text(text)
+    status = re.search(r"^status: (.*)$", text, re.MULTILINE)
+    if status and status.group(1).strip('"') in {"backlog", "active", "blocked", "review"}:
+        branch = re.search(r"^branch: (.*)$", text, re.MULTILINE)
+        hint = branch.group(1).strip('"') if branch else "coordination"
+        route = target / f"zettelkasten/work/active/{destination.stem}.ref.md"
+        route.write_text(f"# {destination.stem}\n\nBranch hint: `{hint}`\n\nSource: [[work/{destination.stem}]]\n\nRouting only; read the source for authoritative state.\n")
     return destination
 
 
@@ -463,6 +472,7 @@ def validate_tool_free_core(target: Path) -> None:
     )
     require("Learning Check" in text, "manual core path lost the Learning Loop contract")
     work.unlink()
+    (target / f"zettelkasten/work/active/{work.stem}.ref.md").unlink(missing_ok=True)
 
     observation_template = target / "zettelkasten/templates/workflow-observations.md"
     observation = target / "zettelkasten/workflow-observations.md"
@@ -634,10 +644,10 @@ def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
     child_text = child_path.read_text().replace("status: active", "status: backlog")
     child_path.write_text(child_text)
 
-    valid = run([sys.executable, str(WORKFLOW_DOCTOR), "--strict"], cwd=target)
+    valid = run([sys.executable, str(WORKFLOW_DOCTOR), "--full", "--strict"], cwd=target)
     require("0 error(s)" in valid.stdout, "Doctor rejected a valid bounded Initiative")
     status = run(
-        [sys.executable, str(WORKFLOW_DOCTOR), "--status", "--json"],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full", "--status", "--json"],
         cwd=target,
     )
     rollup = next(
@@ -653,7 +663,7 @@ def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
     )
 
     child_path.write_text(child_text.replace("status: backlog", "status: active"))
-    premature_start = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    premature_start = run([sys.executable, str(WORKFLOW_DOCTOR), "--full"], cwd=target, expected=1)
     require(
         f"active WORK has incomplete dependency: {dependency_id}" in premature_start.stdout,
         "Doctor allowed a dependent WORK to become active before its prerequisite was done",
@@ -661,7 +671,7 @@ def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
     child_path.write_text(child_text)
 
     child_path.write_text(child_text.replace(initiative_id, "INITIATIVE-20260712121900-missing"))
-    orphan = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    orphan = run([sys.executable, str(WORKFLOW_DOCTOR), "--full"], cwd=target, expected=1)
     require("local Initiative does not exist" in orphan.stdout, "Doctor accepted an orphan child WORK")
     child_path.write_text(child_text)
 
@@ -670,7 +680,7 @@ def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
     dependency_path.write_text(
         dependency_text.replace("depends_on: []", f'depends_on: ["{child_id}"]')
     )
-    cycle = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    cycle = run([sys.executable, str(WORKFLOW_DOCTOR), "--full"], cwd=target, expected=1)
     require("WORK dependency cycle" in cycle.stdout, "Doctor accepted a dependency cycle")
     dependency_path.write_text(dependency_text)
 
@@ -680,7 +690,7 @@ def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
         "| Backward compatibility | Platform lead | all children | review pending | pending |",
     )
     initiative_path.write_text(pending_gate_text.replace("status: active", "status: done"))
-    premature_done = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target, expected=1)
+    premature_done = run([sys.executable, str(WORKFLOW_DOCTOR), "--full"], cwd=target, expected=1)
     require(
         "done Initiative has nonterminal children" in premature_done.stdout,
         "Doctor accepted a completed Initiative with an unfinished child",
@@ -713,7 +723,9 @@ def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
     )
 
     child_path.unlink()
+    (target / f"zettelkasten/work/active/{child_path.stem}.ref.md").unlink(missing_ok=True)
     initiative_path.unlink()
+    (target / f"zettelkasten/work/active/{initiative_path.stem}.ref.md").unlink(missing_ok=True)
 
     external_id = "WORK-20260712121930-external-epic"
     run(
@@ -735,6 +747,7 @@ def exercise_initiative_cli(target: Path, dependency_id: str) -> None:
         "WORK helper did not retain the authoritative external parent",
     )
     external_path.unlink()
+    (target / f"zettelkasten/work/active/{external_path.stem}.ref.md").unlink(missing_ok=True)
 
 
 def exercise_work_cli(target: Path, work_id: str) -> None:
@@ -763,7 +776,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         'owned_paths: ["src/shared/module", "docs/runbooks"]' in text,
         "checkpoint did not replace owned paths",
     )
-    status = run([sys.executable, str(WORKFLOW_DOCTOR), "--status"], cwd=target)
+    status = run([sys.executable, str(WORKFLOW_DOCTOR), "--full", "--status"], cwd=target)
     require('next=inspect "r\u00e9sum\u00e9" before implementing fix' in status.stdout, "status did not decode YAML string escapes")
     require("\\u00e9" not in status.stdout and '\\"' not in status.stdout, "status leaked serialized YAML escapes")
 
@@ -898,6 +911,7 @@ def exercise_work_cli(target: Path, work_id: str) -> None:
         "WORK CLI closed governed work with a pending gate",
     )
     governed_path.unlink()
+    (target / f"zettelkasten/work/active/{governed_path.stem}.ref.md").unlink(missing_ok=True)
 
     invalid_id = "WORK-20260712122040-invalid-path"
     invalid_path = run(
@@ -986,7 +1000,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
         )
     )
     invalid_learning = run(
-        [sys.executable, str(WORKFLOW_DOCTOR)],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full"],
         cwd=target,
         expected=1,
     )
@@ -1000,7 +1014,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
         original.replace("| no-op | zettelkasten/gotchas.md |", "| no-op |  |")
     )
     missing_learning_destination = run(
-        [sys.executable, str(WORKFLOW_DOCTOR)],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full"],
         cwd=target,
         expected=1,
     )
@@ -1012,7 +1026,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
 
     work.write_text(original.replace('branch: "task/tracked-bug"', "branch:"))
     blank_branch = run(
-        [sys.executable, str(WORKFLOW_DOCTOR)],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full"],
         cwd=target,
         expected=1,
     )
@@ -1025,7 +1039,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     )
     work.write_text(block_list)
     list_status = run(
-        [sys.executable, str(WORKFLOW_DOCTOR), "--status", "--json"],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full", "--status", "--json"],
         cwd=target,
     )
     listed_work = next(
@@ -1060,7 +1074,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     ambiguous = target / "zettelkasten/ambiguous-link-test.md"
     ambiguous.write_text("# Ambiguous\n\n[[README]]\n")
     ambiguity = run(
-        [sys.executable, str(WORKFLOW_DOCTOR)],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full"],
         cwd=target,
         expected=1,
     )
@@ -1070,7 +1084,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
     unexpected_artifact = target / "zettelkasten/work/NOTE-invalid.md"
     unexpected_artifact.write_text("# Invalid work artifact\n")
     unexpected_result = run(
-        [sys.executable, str(WORKFLOW_DOCTOR)],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full"],
         cwd=target,
         expected=1,
     )
@@ -1085,7 +1099,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
         "---\ntitle: Stale Test\nstatus: active\nlast_verified_at: 2000-01-01\n"
         "review_after_days: 1\n---\n\n# Stale Test\n"
     )
-    stale_result = run([sys.executable, str(WORKFLOW_DOCTOR)], cwd=target)
+    stale_result = run([sys.executable, str(WORKFLOW_DOCTOR), "--full"], cwd=target)
     require("knowledge is stale" in stale_result.stdout, "stale knowledge was not reported")
     stale.unlink()
 
@@ -1095,7 +1109,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
         "review_after_days: 0\n---\n\n# Invalid Interval\n"
     )
     interval_result = run(
-        [sys.executable, str(WORKFLOW_DOCTOR)],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full"],
         cwd=target,
         expected=1,
     )
@@ -1120,7 +1134,7 @@ def validate_doctor_regressions(target: Path, work_id: str) -> None:
         },
     )
     pending_gate_result = run(
-        [sys.executable, str(WORKFLOW_DOCTOR)],
+        [sys.executable, str(WORKFLOW_DOCTOR), "--full"],
         cwd=target,
         expected=1,
     )
@@ -1229,7 +1243,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     status = run(
         [
             sys.executable,
-            str(WORKFLOW_DOCTOR),
+            str(WORKFLOW_DOCTOR), "--full",
             "--status",
             "--all-worktrees",
             "--json",
@@ -1246,7 +1260,7 @@ def validate_worktree_helper(target: Path, tracked_work_id: str) -> None:
     detached_status = run(
         [
             sys.executable,
-            str(WORKFLOW_DOCTOR),
+            str(WORKFLOW_DOCTOR), "--full",
             "--status",
             "--all-worktrees",
             "--json",
@@ -1818,7 +1832,7 @@ def validate_bootstrap_lifecycle() -> None:
             "bootstrap dropped the legacy interrupted-initialization marker",
         )
         legacy_doctor = run(
-            [sys.executable, str(WORKFLOW_DOCTOR), "--strict"],
+            [sys.executable, str(WORKFLOW_DOCTOR), "--full", "--strict"],
             cwd=legacy_target,
             expected=1,
         )
@@ -1863,7 +1877,7 @@ def validate_bootstrap_lifecycle() -> None:
         run([sys.executable, str(BOOTSTRAP), "--target", str(target), "--inspect"])
         initialize_target(target)
         validate_tool_free_core(target)
-        clean = run([sys.executable, str(WORKFLOW_DOCTOR), "--strict"], cwd=target)
+        clean = run([sys.executable, str(WORKFLOW_DOCTOR), "--full", "--strict"], cwd=target)
         require("PASS: workflow state looks consistent" in clean.stdout, "clean doctor failed")
 
         initialize_git(target)
@@ -1874,7 +1888,7 @@ def validate_bootstrap_lifecycle() -> None:
         create_project_skill(target)
         validate_doctor_regressions(target, tracked_id)
         validate_wiki_links(target / "zettelkasten")
-        active = run([sys.executable, str(WORKFLOW_DOCTOR), "--strict"], cwd=target)
+        active = run([sys.executable, str(WORKFLOW_DOCTOR), "--full", "--strict"], cwd=target)
         require("active work:" in active.stdout, "doctor did not report active WORK")
         validate_worktree_helper(target, tracked_id)
         validate_model_routing_bootstrap(base)
@@ -2305,7 +2319,7 @@ def validate_repository_layout() -> None:
         and feedback_cases[0]["expected"]["feedback_scope"] == "template-wide",
         "positive workflow-feedback case must remain local and template-wide",
     )
-    for helper in (WORKFLOW_DOCTOR, WORKFLOW_TASK, TASK_WORKTREE):
+    for helper in (WORKFLOW_DOCTOR, WORKFLOW_TASK, TASK_WORKTREE, SKILL_ROOT / "scripts/workflow_archive.py"):
         require(helper.is_file(), f"optional Skill helper is missing: {helper.relative_to(ROOT)}")
         require(helper.stat().st_mode & 0o111, f"optional Skill helper is not executable: {helper.relative_to(ROOT)}")
     for script in (MODEL_ROUTING_EVALUATOR, RELEASE_PREPARER):
@@ -2353,6 +2367,7 @@ def main() -> int:
         validate_behavior_evaluator()
         validate_model_routing_evaluator()
         validate_release_preparer()
+        run([sys.executable, str(ROOT / "scripts/test_knowledge_lifecycle.py")])
     except ValidationFailure as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1

@@ -38,7 +38,7 @@ Rewrite these files with verified repository-specific content:
 `zettelkasten/AI.md` may be adapted to the project, but its baseline line is a machine-parsed contract, not prose. Keep the literal `Template baseline:` prefix and the backticked version:
 
 ```text
-Template baseline: `v4.4.1` (`canonical-payload-v4`).
+Template baseline: `v4.5.0` (`canonical-payload-v4`).
 ```
 
 Trailing detail such as an initialization date may be appended. Rewording the prefix — for example to `Repo Continuity baseline:` — leaves the repository unable to resolve its own baseline, so every later upgrade fails until it is passed by hand with `--baseline-ref`.
@@ -56,7 +56,7 @@ zettelkasten/work/        stable WORK files
 project-skills/           on-demand repository procedures
 ```
 
-State is frontmatter. Files never move for status changes. Do not create empty work artifacts during initialization.
+State is frontmatter. Canonical files never move for status changes. Open records get individual routes under `zettelkasten/work/active/`; history lives under `zettelkasten/archive/`. Keep both navigation READMEs and follow `zettelkasten/knowledge-lifecycle.md`. For existing work, explicitly rebuild routes once before claiming scoped discovery; after verifying that all open work is routed (or none exists), set `Routing status: ready` in `work/active/README.md`; do not archive existing content during initialization. Do not create empty work artifacts during initialization.
 
 ## 5. Configure Git Defaults
 

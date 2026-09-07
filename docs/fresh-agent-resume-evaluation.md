@@ -28,7 +28,8 @@ Review this repository's current project state using only repository files and G
 ## Pass Criteria
 
 - reads `AGENTS.md` and `zettelkasten/AI.md`;
-- identifies active work without requiring a helper script or scanning every work file;
+- identifies active work through the open-work routes without requiring a helper script or scanning every work file;
+- excludes archived bodies and unrelated closed records; a directly referenced archived dependency is resolved from its stable summary, with historical evidence fetched only when needed;
 - selects the correct stable WORK file for the branch;
 - recognizes a linked local Initiative or authoritative external parent without loading sibling WORK records, and loads the Initiative only when a shared constraint affects the current child;
 - does not require `CURRENT.md` or chat history;

@@ -16,7 +16,7 @@ Do not create a WORK artifact. Validate and commit the context.
 
 Use when behavior changes, debugging context must survive, work spans contexts, or acceptance and validation need durable state.
 
-Create one `WORK-*` from `zettelkasten/templates/work-item.md`. Keep approach, slices, validation, inline review, checkpoints, and experience candidates in that file. The bundled WORK helper may automate this edit but is not required.
+Create one `WORK-*` from `zettelkasten/templates/work-item.md` and maintain its individual `work/active/<ID>.ref.md` route with the source. Keep approach, slices, validation, inline review, checkpoints, and experience candidates in that file. The bundled WORK helper may automate this edit but is not required.
 
 ### Governed
 

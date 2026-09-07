@@ -71,7 +71,7 @@ Leave this section empty for tracked work. For governed work, each gate needs an
 ## Scope And Ownership
 
 - Affected modules:
-- Owned paths:
+- Owned paths: include this stable WORK and its `work/active/<ID>.ref.md` route.
 - Interfaces or data affected:
 - Parallel work overlap:
 - Dependencies:

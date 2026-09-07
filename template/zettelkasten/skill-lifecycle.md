@@ -39,7 +39,7 @@ Do not promote story-specific implementation detail, temporary incidents, guesse
 6. Add or update the compact routing row in `project-skills/INDEX.md`, including status, verification date, and review interval.
 7. Check the Skill structure, index routing, trigger uniqueness, links, and verification date; use the optional companion validator when available.
 8. Retrieval-test with a fresh agent or a realistic prompt when the procedure is important or easy to misroute.
-9. Mark stale Skills `needs-verification` in the index. Deprecate superseded Skills and point to the replacement.
+9. Mark stale Skills `needs-verification` in the index. Deprecate superseded Skills and point to the replacement. Once live references are updated, remove retired procedures from the active index and archive their complete directories through [[knowledge-lifecycle]]. Never treat overdue verification as proof that a Skill is obsolete.
 
 For Tracked or Governed work, the active WORK owns the candidate. Add the Skill path and index to `owned_paths` before editing, and coordinate or defer when another active WORK owns either destination. Re-running the lifecycle must update the same Skill and index row or record that no change was needed.
 

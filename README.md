@@ -19,7 +19,7 @@ Everything required stays in reviewable Markdown and Git. The Companion Skill ca
 
 ## Quick Start
 
-The commands below are pinned to the current release, `v4.4.1`. Existing initialized projects are not modified automatically; use the three-way upgrade workflow to reconcile a newer release when useful.
+The commands below are pinned to the current release, `v4.5.0`. Existing initialized projects are not modified automatically; use the three-way upgrade workflow to reconcile a newer release when useful.
 
 > [!TIP]
 > **Upgrading from `v4.1.1` or earlier:** the Companion Skill was renamed from `ai-collaboration-workflow` to `repo-continuity`.
@@ -32,7 +32,7 @@ Install the pinned release for Claude Code:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.4.1/skills/repo-continuity \
+  https://github.com/vector233/repo-continuity/tree/v4.5.0/skills/repo-continuity \
   --skill repo-continuity \
   -a claude-code \
   -g -y
@@ -42,7 +42,7 @@ Or install it for Codex:
 
 ```bash
 npx skills add \
-  https://github.com/vector233/repo-continuity/tree/v4.4.1/skills/repo-continuity \
+  https://github.com/vector233/repo-continuity/tree/v4.5.0/skills/repo-continuity \
   --skill repo-continuity \
   -a codex \
   -g -y
@@ -62,7 +62,7 @@ Inspect existing project rules first, preserve stricter local policy, and comple
 The Skill is optional. For a new repository that has no conflicting agent or knowledge files, copy the pinned payload:
 
 ```bash
-git clone --branch v4.4.1 --depth 1 \
+git clone --branch v4.5.0 --depth 1 \
   https://github.com/vector233/repo-continuity.git
 
 cp -R repo-continuity/template/. /path/to/your-project/
@@ -295,6 +295,16 @@ The core product is linked, reviewable repository knowledge plus a lightweight d
 
 The knowledge network uses plain Markdown and wiki links. It can be opened as an Obsidian-compatible vault, but Obsidian is an optional editor rather than a runtime or plugin dependency.
 
+## Keep History Outside Routine Context
+
+Repo Continuity separates concise entry points, task-relevant current knowledge, and historical evidence. Open WORK and Initiative records each have a small Markdown route under `zettelkasten/work/active/`. The canonical source owns status and checkpoint state; closure removes its route. Ordinary discovery and search skip archive storage and unselected historical WORK bodies.
+
+After verified lessons are promoted and closure gates are resolved, archive substantial history while keeping a compact summary, original relationships and evidence link at the same source path. Snapshots preserve the original bytes and their checksum. Short closed records already leave routine discovery. Current constraints stay current regardless of age.
+
+The optional Companion Skill supports `workflow_archive.py archive`, `restore`, and a previewable `reindex` migration. Ordinary Doctor checks are scoped; use `workflow_doctor.py --full --strict` for complete historical integrity and route coverage. Existing installations must explicitly build open routes before using scoped discovery. Bootstrap and upgrade never automatically archive project content.
+
+See the [canonical knowledge lifecycle](template/zettelkasten/knowledge-lifecycle.md), [helper guide](skills/repo-continuity/references/knowledge-lifecycle.md), and [upgrade guide](docs/upgrading.md). Markdown and Git remain sufficient.
+
 ## Repository Learning Loop
 
 After validation, every task checks for a correction, repeatable root cause, missing invariant, reusable command sequence, or stable procedure. Direct work with no verified candidate remains artifact-free; a Direct task with a durable candidate becomes Tracked before shared writeback. Each Tracked or Governed WORK records candidate evidence and the final `promoted`, `updated`, `no-op`, or `not-promoted` decision.
@@ -348,10 +358,13 @@ template/
     decisions.md
     gotchas.md
     workflow.md
+    knowledge-lifecycle.md
     validation-policy.md
     validation-runbook.md
     templates/
     work/
+      active/
+    archive/
 adapters/
   codex/
     .codex/
@@ -374,7 +387,7 @@ For this distribution repository:
 python3 scripts/validate_distribution.py
 ```
 
-The distribution validator exercises tool-free core initialization, explicit model-routing opt-in, single-WORK routing, governed gates, project-Skill discovery, worktree isolation, wiki links, optional helpers, and bootstrap behavior in temporary repositories.
+The distribution validator exercises tool-free core initialization, explicit model-routing opt-in, single-WORK routing, governed gates, project-Skill discovery, worktree isolation, wiki links, archival and restore, scoped read boundaries, explicit route migration, optional helpers, and bootstrap behavior in temporary repositories.
 
 Fresh-agent routing behavior can be checked with [docs/workflow-behavior-evaluation.md](docs/workflow-behavior-evaluation.md).
 Actual model-routing quality and comparable quota evidence use [docs/model-routing-evaluation.md](docs/model-routing-evaluation.md); the evaluator never treats its synthetic regression fixture as Agent evidence.

@@ -56,3 +56,9 @@
 `--upgrade-apply` 要求目标是 Git 仓库根目录、当前位于非 `main`/`master` 的命名分支并且 worktree 干净。计划写入以事务方式执行：某次写入失败时，该次命令已经写入的文件会恢复。目标 symlink 和非普通文件永远不会被跟随。
 
 任务分支和升级前提交就是回滚边界。在推进基线前，重新生成报告仍会使用旧版本做三方比较。升级成功后，新基线成为下一次协调的参考，但不会抹除项目 Git 历史或本地所有权。
+
+## 迁移未结束任务入口
+
+旧项目没有 `zettelkasten/work/active/` 入口时，保留原 WORK 文件与本地规则。协调合并生命周期和阅读入口规则后，显式清点一次稳定任务文件，为每个未结束记录建立一个 `*.ref.md`。可以手工维护，也可以先运行 `workflow_archive.py reindex --root <repo-root> --dry-run`，检查预览并与其他写入者协调后，在升级分支运行 `reindex`。
+
+使用 `workflow_doctor.py --root <repo-root> --full --strict` 检查遗漏入口和历史完整性，审阅入口文件后再启用日常精简发现流程。普通状态查询发现入口缺失时必须报告修复需求，不能悄悄读取所有旧任务。升级和重建入口不会归档、删除或改写项目证据；历史正文需要在保留当前有效知识后单独归档。参见[知识生命周期](../template/zettelkasten/knowledge-lifecycle.md)。

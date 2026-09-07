@@ -127,3 +127,11 @@ verify evidence -> classify template-wide -> create local workflow-observations.
 ```
 
 A normal task, one-off model mistake, or project-specific lesson creates no template feedback entry.
+
+## Close A Long Investigation Without Loading It Next Time
+
+ExampleSaaS finishes a cache investigation. Its WORK has verified acceptance, decided experience candidates, a current gotcha, and detailed historical experiments. Close the WORK and remove its individual open route. Archive the long body with a summary pointing to the gotcha; keep identity, final status, dependencies and an evidence reference at the original WORK path. The snapshot preserves the original bytes and heading links still land on that stable source.
+
+A later cache task starts from its own branch and open route, then reads the current gotcha. It does not search closed experiments. If it depends on the earlier WORK, it reads the archived summary to confirm `done`. If the user asks why an old approach was rejected, it retrieves that exact snapshot. A full audit checks the snapshot checksum and route coverage separately from ordinary resume.
+
+A cancelled task with an unresolved lesson or gate remains ineligible for body archival until its disposition is recorded. A blocked task remains open even when old. Retiring an obsolete procedure also updates live callers and removes it from the active Skill index.

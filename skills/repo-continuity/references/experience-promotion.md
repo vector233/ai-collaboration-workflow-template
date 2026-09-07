@@ -10,7 +10,7 @@
 6. Write the rule, fact, procedure, no-op result, or non-promotion reason in the candidate row.
 7. Run structural checks and a retrieval test when an important project Skill changes.
 
-The flow must be idempotent: repeating it updates the same destination or records that the verified knowledge is already current. It must not create a second note, Skill directory, or index row. Deprecate and link superseded knowledge when replacement is safer than deletion.
+The flow must be idempotent: repeating it updates the same destination or records that the verified knowledge is already current. It must not create a second note, Skill directory, or index row. Deprecate and link superseded knowledge when replacement is safer than deletion. After current facts are promoted, retire historical bodies through the repository knowledge lifecycle. Update the task's individual open route with its source; closeout removes the route. Archive does not erase unresolved candidates or waive gates.
 
 Direct work with no verified reusable lesson creates no artifact. If Direct work discovers a candidate that should change shared knowledge, re-route it to Tracked before writeback. The active WORK then owns the evidence and promotion decision.
 
