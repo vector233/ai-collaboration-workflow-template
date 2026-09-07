@@ -56,7 +56,7 @@ zettelkasten/work/        stable WORK files
 project-skills/           on-demand repository procedures
 ```
 
-State is frontmatter. Files never move for status changes. Do not create empty work artifacts during initialization.
+State is frontmatter. Canonical files never move for status changes. Open records get individual routes under `zettelkasten/work/active/`; history lives under `zettelkasten/archive/`. Keep both navigation READMEs and follow `zettelkasten/knowledge-lifecycle.md`. For existing work, explicitly rebuild routes once before claiming scoped discovery; after verifying that all open work is routed (or none exists), set `Routing status: ready` in `work/active/README.md`; do not archive existing content during initialization. Do not create empty work artifacts during initialization.
 
 ## 5. Configure Git Defaults
 

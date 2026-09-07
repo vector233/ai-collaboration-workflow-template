@@ -12,7 +12,7 @@ related:
 
 # Work Items
 
-Tracked and governed work items live in this directory for their entire lifecycle. Never move a file to represent status; update frontmatter in place.
+Tracked and governed work items live in this directory for their entire lifecycle. Never move a canonical file to represent status; update frontmatter in place. Each open record has a small route under [[work/active/README]]. Remove its route on closure; archive long historical bodies into [[archive/README]] while retaining the stable source summary and relationships. Follow [[knowledge-lifecycle]].
 
 ## Artifact Types
 
@@ -44,7 +44,7 @@ Initiative membership is derived from child WORK frontmatter. The Initiative sta
 
 ## Resume Contract
 
-Inspect the current Git branch, select the matching active WORK, and read its context pack, checkpoint, validation, and next action. Load its Initiative only when the child links one and the parent contains a shared gate, dependency, or integration constraint needed for the current slice. Do not load sibling WORK records by default and do not maintain a second manual current-state document.
+Inspect the current Git branch and the open-work routes, select the matching active WORK, and read its context pack, checkpoint, validation, and next action. Load its Initiative only when the child links one and the parent contains a shared gate, dependency, or integration constraint needed for the current slice. Do not load sibling WORK records by default and do not maintain a second manual current-state document.
 
 A recoverable WORK lets an agent with no prior chat identify the selected route, acceptance state, latest completed step and commit, exact validation, unresolved risk or decision, next allowed action, pending or decided experience candidates, and matching project Skill while loading only linked knowledge. It distinguishes existing active knowledge from candidates that still need evidence or a promotion decision. That semantic result matters more than file existence alone.
 

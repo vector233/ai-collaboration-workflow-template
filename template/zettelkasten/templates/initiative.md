@@ -32,7 +32,7 @@ Record only decisions or gates that constrain more than one child. Keep child-sp
 
 ## Decomposition Contract
 
-Child membership is canonical in each `WORK-*` frontmatter through `initiative_id`. Do not copy child status or validation logs into this file. Discover children by searching for this initiative ID or by using an optional status helper.
+Child membership is canonical in each `WORK-*` frontmatter through `initiative_id`. Do not copy child status or validation logs into this file. For current coordination, use open-work routes; scoped rollups omit unreferenced historical children. For final closure, explicitly audit the full stable WORK set for this initiative ID. See [[knowledge-lifecycle]].
 
 - Decomposition rule: one Initiative level followed by independent WORK records; no recursive Initiative or parent-WORK tree.
 - Child independence: each child has its own route, acceptance, branch, validation, checkpoint, and closure.
@@ -46,7 +46,7 @@ Child membership is canonical in each `WORK-*` frontmatter through `initiative_i
 - Unresolved cross-child risk:
 - Final outcome:
 
-An Initiative may become `done` only after its discovered children are terminal and the overall acceptance and shared gates are resolved. Child status remains authoritative in each WORK.
+Maintain this Initiative's own `work/active/<ID>.ref.md` route; remove it on closure. An Initiative may become `done` only after a full membership check confirms its children are terminal and the overall acceptance and shared gates are resolved. Child status remains authoritative in each WORK.
 
 ## Coordination Checkpoint
 

@@ -11,6 +11,8 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
+from workflow_archive import ArchiveError, safe_path, write_artifact
+
 
 SAFE_SLUG_RE = re.compile(r"[^a-z0-9-]+")
 WORK_ID_RE = re.compile(r"^WORK-[0-9]{14}-[a-z0-9][a-z0-9-]*$")
@@ -88,14 +90,14 @@ def validate_initiative_id(initiative_id: str) -> str:
 
 
 def work_path(root: Path, work_id: str) -> Path:
-    path = root / "zettelkasten/work" / f"{validate_work_id(work_id)}.md"
+    path = safe_path(root, Path("zettelkasten/work") / f"{validate_work_id(work_id)}.md")
     if not path.parent.is_dir():
         raise WorkflowTaskError("zettelkasten/work is missing; initialize the template first")
     return path
 
 
 def initiative_path(root: Path, initiative_id: str) -> Path:
-    path = root / "zettelkasten/work" / f"{validate_initiative_id(initiative_id)}.md"
+    path = safe_path(root, Path("zettelkasten/work") / f"{validate_initiative_id(initiative_id)}.md")
     if not path.parent.is_dir():
         raise WorkflowTaskError("zettelkasten/work is missing; initialize the template first")
     return path
@@ -345,7 +347,7 @@ def command_initiative_new(args: argparse.Namespace) -> int:
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
-    destination.write_text(text, encoding="utf-8")
+    write_artifact(root, destination, text)
     write_result(
         {
             "initiative_id": initiative_id,
@@ -411,7 +413,7 @@ def command_new(args: argparse.Namespace) -> int:
     text = set_frontmatter_field(text, "external_parent", external_parent)
     text = set_frontmatter_field(text, "depends_on", dependencies)
     text = set_section_bullet(text, "Route Decision", "Selected route", args.route)
-    destination.write_text(text, encoding="utf-8")
+    write_artifact(root, destination, text)
     write_result(
         {
             "work_id": work_id,
@@ -431,6 +433,8 @@ def require_work(root: Path, work_id: str) -> Path:
     path = work_path(root, work_id)
     if not path.is_file():
         raise WorkflowTaskError(f"WORK does not exist: {path}")
+    if frontmatter_field(path.read_text(), "archive_ref"):
+        raise WorkflowTaskError("restore the archived WORK before updating it")
     return path
 
 
@@ -460,7 +464,7 @@ def command_checkpoint(args: argparse.Namespace) -> int:
     }
     for label, value in checkpoint_values.items():
         text = set_section_bullet(text, "Context Checkpoint", label, value)
-    path.write_text(text, encoding="utf-8")
+    write_artifact(root, path, text)
     write_result(
         {
             "work_id": args.work_id,
@@ -496,7 +500,7 @@ def command_learn_add(args: argparse.Namespace) -> int:
         destination,
         f"Evidence: {evidence}",
     )
-    path.write_text(replace_or_append_experience_row(text, row), encoding="utf-8")
+    write_artifact(root, path, replace_or_append_experience_row(text, row))
     write_result(
         {
             "work_id": args.work_id,
@@ -526,7 +530,7 @@ def command_learn_none(args: argparse.Namespace) -> int:
         "work item",
         f"Learning Check: {reason}",
     )
-    path.write_text(replace_or_append_experience_row(text, row), encoding="utf-8")
+    write_artifact(root, path, replace_or_append_experience_row(text, row))
     write_result(
         {
             "work_id": args.work_id,
@@ -583,7 +587,7 @@ def command_learn_decide(args: argparse.Namespace) -> int:
     lines = text.splitlines()
     lines[index] = experience_row(candidate, cells[1], args.decision, destination, outcome)
     updated = "\n".join(lines) + ("\n" if text.endswith("\n") else "")
-    path.write_text(updated, encoding="utf-8")
+    write_artifact(root, path, updated)
     write_result(
         {
             "work_id": args.work_id,
@@ -662,7 +666,7 @@ def command_close(args: argparse.Namespace) -> int:
     }
     for label, value in closure.items():
         text = set_section_bullet(text, "Closure", label, value)
-    path.write_text(text, encoding="utf-8")
+    write_artifact(root, path, text)
     write_result(
         {"work_id": args.work_id, "path": str(path.relative_to(root)), "status": "done"},
         args.json,
@@ -801,7 +805,7 @@ def main() -> int:
     args = parse_args()
     try:
         return args.handler(args)
-    except WorkflowTaskError as exc:
+    except (WorkflowTaskError, ArchiveError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 

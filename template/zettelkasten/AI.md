@@ -7,12 +7,12 @@ Template baseline: `v4.4.1` (`canonical-payload-v4`).
 ## Resume With Minimal Context
 
 1. Read `AGENTS.md`.
-2. Inspect the current Git branch and `work/` index.
+2. Inspect the current Git branch and the small routes under [[work/active/README]].
 3. Read the active `WORK-*` matching the branch or assigned task, when one exists.
 4. If that WORK declares `initiative_id`, read the Initiative only when a shared gate, dependency, or integration constraint affects the current slice; do not load siblings by default.
 5. Read only its linked architecture notes, runbooks, and matching entry from `project-skills/INDEX.md`.
 
-Do not load the whole vault by default. Workflow state lives in stable files under [[work/README]], not in chat history or a manually duplicated current-state note.
+Do not load the whole vault by default. Follow [[knowledge-lifecycle]]: ordinary searches exclude `archive/`, unselected historical WORK records, and unmatched Skills; missing routes need repair rather than a full-history fallback. Workflow state lives in stable files under [[work/README]], not in chat history or a manually duplicated current-state note.
 
 For parallel coordination, compare active WORK branch and owned-path fields with registered Git worktrees. Optional companion-Skill tools may automate this inspection.
 
@@ -44,7 +44,8 @@ Use [[workflow]] to choose Direct, Tracked, or Governed work. Route by scope, un
 | Decisions and rationale | [[decisions]] |
 | Known failure modes | [[gotchas]] |
 | Validation policy and flows | [[validation-policy]], [[validation-runbook]] |
-| Active or historical task state | [[work/README]] |
+| Open task routing | [[work/active/README]] |
+| Task lifecycle and explicit historical retrieval | [[work/README]], [[knowledge-lifecycle]] |
 | Large multi-deliverable coordination | the external Epic or the optional `INITIATIVE-*` linked by a child WORK |
 | On-demand project procedures | `project-skills/INDEX.md` |
 | Skill creation and maintenance | [[skill-lifecycle]] |

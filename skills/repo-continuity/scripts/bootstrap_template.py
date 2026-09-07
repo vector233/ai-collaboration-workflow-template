@@ -44,6 +44,9 @@ PAYLOAD_REQUIRED_FILES = (
     Path("zettelkasten/templates/work-item.md"),
     Path("zettelkasten/templates/workflow-observations.md"),
     Path("zettelkasten/work/README.md"),
+    Path("zettelkasten/knowledge-lifecycle.md"),
+    Path("zettelkasten/work/active/README.md"),
+    Path("zettelkasten/archive/README.md"),
     Path("project-skills/INDEX.md"),
 )
 

@@ -6,7 +6,7 @@ Read only the smallest context needed:
 
 1. `AGENTS.md`
 2. `zettelkasten/AI.md`
-3. the current Git branch and matching `zettelkasten/work/WORK-*.md`, when one exists
+3. the current Git branch, `zettelkasten/work/active/` routing hints, and the matching stable WORK, when one exists
 4. `project-skills/INDEX.md` for a matching procedure
 5. only the linked architecture note, runbook, or project Skill needed for the current slice
 
@@ -22,7 +22,9 @@ Before editing, choose the lightest safe route from `zettelkasten/workflow.md`:
 
 Route by scope, uncertainty, risk, reversibility, duration, and coordination. A small security, permission, billing, migration, production, or destructive change is governed even when its code diff is small.
 
-Do not move workflow files to represent state. Update frontmatter in place so links remain stable.
+Do not move canonical workflow files to represent state. Update frontmatter in place so links remain stable. Maintain each open record's own `work/active/<ID>.ref.md` route with its source; remove the route on closure.
+
+Follow `zettelkasten/knowledge-lifecycle.md`: keep entry points concise, promote current conclusions before archiving history, and preserve stable summaries and evidence links. Ordinary discovery and search must exclude `zettelkasten/archive/`, unselected historical WORK records, and unmatched Skills. Missing routing requires repair, never an automatic full-history scan. Use an explicit full audit for complete historical integrity and route coverage.
 
 Create and update WORK artifacts from `zettelkasten/templates/work-item.md`. Optional companion-Skill tools may automate the same Markdown updates, but repository files remain authoritative.
 

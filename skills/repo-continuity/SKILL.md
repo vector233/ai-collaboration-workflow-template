@@ -68,12 +68,12 @@ Preserve project facts and stricter local policy, run repository validation, rev
 For initialized projects:
 
 1. Read `AGENTS.md` and `zettelkasten/AI.md`.
-2. Inspect the current Git branch and `zettelkasten/work/`.
+2. Inspect the current Git branch and the small routes under `zettelkasten/work/active/`. Read the selected stable source; route branch fields are only hints.
 3. Read the active `WORK-*` matching the assigned task or current branch, when one exists.
 4. When that WORK declares a local `initiative_id`, read the Initiative only if a shared gate, dependency, or integration constraint affects the current slice. Do not load sibling WORK records by default.
 5. Read only linked knowledge, runbooks, and matching rows from `project-skills/INDEX.md`.
 
-Do not scan all workflow artifacts or project Skills by default.
+Do not scan all workflow artifacts or project Skills by default. Ordinary discovery and content searches exclude `zettelkasten/archive/`, unselected historical WORK records, and unmatched Skills. Follow `zettelkasten/knowledge-lifecycle.md`. Missing routing needs targeted repair or an explicit full rebuild, never an implicit scan of historical bodies.
 
 Repository Markdown and Git are sufficient. Do not require helper execution to understand or operate the workflow.
 
@@ -103,6 +103,10 @@ python3 "$SKILL_ROOT/scripts/workflow_task.py" learn-status <WORK-ID> \
 ```
 
 Use `learn-none <WORK-ID> --reason "<why no verified lesson exists>"` when a Tracked or Governed task has no reusable lesson. The helper records decisions; the agent still judges relevance, writes the selected destination, and validates the result.
+
+## Close And Archive
+
+After useful knowledge is promoted and all required gates and experience decisions are resolved, close the WORK and remove its individual open route. Archive substantial historical bodies while preserving the stable source, authoritative relationships, concise outcome and verified evidence. Short closed records already leave ordinary discovery and need no empty snapshot. Read [knowledge-lifecycle.md](references/knowledge-lifecycle.md) for manual operation, optional archive/restore helpers, full audits and existing-project migration. Age alone never retires current constraints or blocked work.
 
 ## Route The Task
 

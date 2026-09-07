@@ -22,6 +22,7 @@ class CheckFailure(RuntimeError):
 
 
 def load_doctor():
+    sys.path.insert(0, str(DOCTOR.parent))
     spec = importlib.util.spec_from_file_location("workflow_doctor", DOCTOR)
     if spec is None or spec.loader is None:
         raise CheckFailure(f"cannot import {DOCTOR}")

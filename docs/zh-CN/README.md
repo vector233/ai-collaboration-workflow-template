@@ -294,6 +294,16 @@ Router 不只看代码量，还判断影响范围、不确定性、风险与可�
 
 知识网络使用纯 Markdown 和 Wiki 链接，可以作为兼容 Obsidian 的 vault 打开；Obsidian 只是可选编辑器，不是 runtime 或插件依赖。
 
+## 让历史退出日常上下文
+
+Repo Continuity 将知识分为简短入口、按任务读取的当前有效知识、历史证据三层。未结束的 WORK 和 Initiative 各自在 `zettelkasten/work/active/` 保留一个轻量 Markdown 入口；状态和 checkpoint 仍由原文件负责，关闭时移除入口。日常发现和搜索跳过归档目录与未选中的历史 WORK 正文。
+
+任务关闭并完成经验提炼、验收和门禁后，可以归档较长的历史正文。原路径保留结论、关系和追溯链接，快照保存原文及其校验值。短小的已关闭记录无需再制造归档文件；仍然有效的约束不会因为时间久而退出当前知识。
+
+可选 Companion Skill 提供 `workflow_archive.py archive`、`restore` 和可预览的 `reindex`。Doctor 默认检查当前范围；完整历史、入口覆盖和校验值检查使用 `workflow_doctor.py --full --strict`。旧项目需显式建立未结束任务的入口后再使用精简发现流程；安装和升级不会自动归档项目内容。
+
+参见[生命周期规则](../../template/zettelkasten/knowledge-lifecycle.md)、[工具指南](../../skills/repo-continuity/references/knowledge-lifecycle.md)和[升级指南](../upgrading.zh-CN.md)。核心操作仍只需要 Markdown 与 Git。
+
 ## 仓库学习闭环
 
 每个任务在验证后检查用户纠正、可重复根因、缺失不变量、可复用命令序列或稳定流程。Direct 工作没有已验证候选时保持零产物；存在长期候选时，先升级为 Tracked 再写共享知识。每个 Tracked 或 Governed WORK 记录候选证据和最终的 `promoted`、`updated`、`no-op` 或 `not-promoted` 决策。
@@ -340,6 +350,9 @@ template/                          默认安装的核心模板
   zettelkasten/workflow.md         任务路由与经验写回
   zettelkasten/validation-runbook.md 项目验证流程
   zettelkasten/work/               路径稳定的 WORK
+  zettelkasten/work/active/        未结束任务的轻量入口
+  zettelkasten/knowledge-lifecycle.md 知识保留与归档规则
+  zettelkasten/archive/            默认不读取的历史证据
   project-skills/INDEX.md          项目 Skill 触发索引
 adapters/
   codex/.codex/                    Codex 显式启用的模型路由 overlay
